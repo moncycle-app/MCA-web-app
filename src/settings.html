@@ -49,8 +49,10 @@
 		<link rel="stylesheet" href="css/commun.css" />
 		<link rel="stylesheet" href="css/account.css" />
 		<link rel="stylesheet" href="css/settings.css" />
-		<script type="text/javascript" src="vendor/components/jquery/jquery.min.js" defer></script>
+		<script type="text/javascript" src="vendor/jquery.min.js" defer></script>
+		<script type="text/javascript" src="js/config.js" defer></script>
 		<script type="text/javascript" src="js/store.js" defer></script>
+		<script type="text/javascript" src="js/compat.js" defer></script>
 		<script type="text/javascript" src="js/news.js" defer></script>
 		<script type="text/javascript" src="js/captcha.js" defer></script>
 		<script type="text/javascript" src="js/settings.js" defer></script>
@@ -327,7 +329,7 @@
 
 				<h3>Toutes mes données brutes</h3>
 				<p class="label_info">Comme le demande le RGPD, vous pouvez exporter l'ensemble des données liées à votre compte, au format CSV.</p>
-				<a class="button" href="api/v2/all_of_my_data_plz">📦 Exporter les données brutes de mon compte</a>
+				<a class="button" id="a_raw_export" href="api/v2/all_of_my_data_plz">📦 Exporter les données brutes de mon compte</a>
 			</section>
 
 
@@ -542,7 +544,8 @@
 					<dt>Numéro de compte</dt><dd id="tech_info_no"></dd>
 					<dt>Identifiant</dt><dd id="tech_info_id"></dd>
 					<dt>Date d'inscription</dt><dd id="tech_info_insc"></dd>
-					<dt>Version de l'application</dt><dd id="tech_info_ver"></dd>
+					<dt>Version du serveur</dt><dd id="tech_info_ver"></dd>
+					<dt>Version de l'application web</dt><dd id="tech_info_webapp"></dd>
 				</dl>
 
 				<h3>Dépannage</h3>

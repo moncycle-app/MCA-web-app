@@ -1,0 +1,5 @@
+node_modules/
+src/vendor/
+.DS_Store
+CLAUDE.md
+gitignore/

@@ -857,9 +857,9 @@ moncycle_app = {
 		let id_buts = c_date_str.replace("-", "_").replace("-", "_");
 		let c_action = $(`<div class='cycle_options c_options_${c_date_str}' style='display:none'></div>`);
 		// the address carries the format, the period and the option; a click fetches the file and saves it (download_export)
-		c_action.append(`<a id='nfp_but_${id_buts}_${discri}' href='api/v2/export/nfp?from=${c_date_str}&to=${c_date_fin_str}&anonymous=false'><button>${moncycle_app_text.but_export_nfp}</button></a> `);
-		c_action.append(`<a href='api/v2/export/csv?from=${c_date_str}&to=${c_date_fin_str}'><button>${moncycle_app_text.but_export_csv}</button></a> `);
-		c_action.append(`<a id='pdf_but_${id_buts}_${discri}' href='api/v2/export/pdf?from=${c_date_str}&to=${c_date_fin_str}&anonymous=false'><button>${moncycle_app_text.but_export_pdf}</button></a> `);
+		c_action.append(`<a id='nfp_but_${id_buts}_${discri}' href='${moncycle_config.api_url("/export/nfp")}?from=${c_date_str}&to=${c_date_fin_str}&anonymous=false'><button>${moncycle_app_text.but_export_nfp}</button></a> `);
+		c_action.append(`<a href='${moncycle_config.api_url("/export/csv")}?from=${c_date_str}&to=${c_date_fin_str}'><button>${moncycle_app_text.but_export_csv}</button></a> `);
+		c_action.append(`<a id='pdf_but_${id_buts}_${discri}' href='${moncycle_config.api_url("/export/pdf")}?from=${c_date_str}&to=${c_date_fin_str}&anonymous=false'><button>${moncycle_app_text.but_export_pdf}</button></a> `);
 		// the checkbox applies to every export that can carry the user's identity: the PDF
 		// (name on the chart) and the NFP file (userInformation block). The CSV never does.
 		let anonymous_checkbox = $(`<input type='checkbox' value='1' id='anonymous_${id_buts}_${discri}' name="privacy" />`);
@@ -1470,4 +1470,4 @@ moncycle_app = {
 }
 
 // start once the page is loaded (no inline script: the CSP is script-src 'self')
-window.addEventListener("load", moncycle_app.letsgo);
+window.addEventListener("load", function () { moncycle_config.ready.then(moncycle_app.letsgo); });

@@ -1,0 +1,17 @@
+{
+  "name": "moncycle-webapp",
+  "version": "1.0.0-dev",
+  "description": "The moncycle.app web client: static HTML, CSS and JS that talk to the moncycle.app API",
+  "private": true,
+  "license": "CC-BY-NC-SA-4.0",
+  "scripts": {
+    "vendor": "node scripts/vendor.mjs",
+    "postinstall": "node scripts/vendor.mjs",
+    "serve": "node scripts/serve.mjs",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "chart.js": "4.5.1",
+    "jquery": "4.0.0"
+  }
+}

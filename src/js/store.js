@@ -62,6 +62,10 @@ const moncycle_store = {
 	syncing : null,     // the promise of the running sync
 	flushing : null,    // the promise of the running flush
 	checked_version : false,
+	compat : null,      // the promise of the check of the API's generation against the range of this web app (once per page load)
+	blocked : null,     // {webapp, api, range} when the API is out of that range: nothing is sent, the copy is not touched
+	webapp : null,      // the promise of version.json, the web app's own
+	webapp_version : null,  // what it said (null until read, or when unreadable)
 	expired : false,
 	storage_failed : false,
 	retry_timer : null,
@@ -161,12 +165,12 @@ const moncycle_store = {
 		try { localStorage.clear(); } catch (e) { }
 	},
 	// Empties what this browser holds, except the sign-in marker (`auth`: the pages need it to know a session exists; the session
-	// token itself is an HttpOnly cookie, out of reach of the script) and the unsent changes. The next sync downloads everything again.
+	// token itself is an HttpOnly cookie, out of reach of the script, or on another origin the token kept by config.js) and the unsent changes. The next sync downloads everything again.
 	reset_local : function () {
 		moncycle_store.wipe_data(true);
 		try {
 			Object.keys(localStorage).forEach(function (key) {
-				if (key !== "auth" && !key.startsWith("data_")) localStorage.removeItem(key);
+				if (key !== "auth" && key !== moncycle_config.token_key && !key.startsWith("data_")) localStorage.removeItem(key);
 			});
 		} catch (e) { }
 		// the version stamp was erased: check_version writes it again
@@ -304,7 +308,7 @@ const moncycle_store = {
 	// Rejects with {status, code, message, issues}: the API's error in its envelope (status 0: no answer). A 401 ends the session.
 	download : async function (url) {
 		let response;
-		try { response = await fetch(url, {credentials : "same-origin"}); }
+		try { response = await moncycle_config.fetch(url); }
 		catch (e) { throw {status : 0, code : null, message : "", issues : []}; }
 		if (!response.ok) {
 			let error = {};
@@ -576,6 +580,7 @@ const moncycle_store = {
 		return moncycle_store.flushing;
 	},
 	flush_queue : async function () {
+		if (!(await moncycle_store.check_compat())) return;
 		let failed = {};   // what the server could not take in this pass: a date, or "description:" and a name
 		let failure = null;
 		while (true) {
@@ -613,14 +618,14 @@ const moncycle_store = {
 		}
 	},
 	send : function (date, entry) {
-		let url = "api/v2/day/" + encodeURIComponent(date);
+		let url = moncycle_config.api_url("/day/" + encodeURIComponent(date));
 		if (entry.op == "delete") {
 			return moncycle_store.request("DELETE", url + (entry.lastWriteClientUtc ? "?lastWriteClientUtc=" + encodeURIComponent(entry.lastWriteClientUtc) : ""));
 		}
 		return moncycle_store.request("POST", url, entry.body);
 	},
 	send_description : function (entry) {
-		return moncycle_store.request("POST", "api/v2/description", {name : entry.name, type : entry.type, lastWriteClientUtc : entry.lastWriteClientUtc});
+		return moncycle_store.request("POST", moncycle_config.api_url("/description"), {name : entry.name, type : entry.type, lastWriteClientUtc : entry.lastWriteClientUtc});
 	},
 	// The server took a write. Unless the user wrote that day again meanwhile (then the queue holds a
 	// newer entry, and the copy is newer than this answer), the copy gets the day as the server holds it.
@@ -674,7 +679,7 @@ const moncycle_store = {
 		moncycle_store.emit_status();
 	},
 	reload_descriptions : async function () {
-		let answer = await moncycle_store.request("GET", "api/v2/description");
+		let answer = await moncycle_store.request("GET", moncycle_config.api_url("/description"));
 		moncycle_store.descriptions = answer.data || [];
 		moncycle_store.write(moncycle_store.keys.descriptions, moncycle_store.descriptions);
 	},
@@ -697,7 +702,7 @@ const moncycle_store = {
 		while (moncycle_store.stale.length) {
 			let date = moncycle_store.stale[0];
 			if (!moncycle_store.pending[date]) {
-				let answer = await moncycle_store.request("GET", "api/v2/day/" + encodeURIComponent(date));
+				let answer = await moncycle_store.request("GET", moncycle_config.api_url("/day/" + encodeURIComponent(date)));
 				let before = JSON.stringify(moncycle_store.days[date]);
 				moncycle_store.set_day(answer.data || moncycle_store.blank_day(date));
 				let followed = moncycle_store.follow_day(date);
@@ -729,11 +734,15 @@ const moncycle_store = {
 	sync : function () {
 		if (moncycle_store.expired) return Promise.reject();
 		if (!moncycle_store.syncing) {
-			moncycle_store.syncing = moncycle_store.flush()
-				.then(moncycle_store.reload_stale)
-				.then(moncycle_store.check_version)
-				.then(moncycle_store.pull_account)
-				.then(moncycle_store.pull)
+			moncycle_store.syncing = moncycle_store.check_compat()
+				.then(function (compatible) {
+					if (!compatible) return {days : [], descriptions : false, account : false};
+					return moncycle_store.flush()
+						.then(moncycle_store.reload_stale)
+						.then(moncycle_store.check_version)
+						.then(moncycle_store.pull_account)
+						.then(moncycle_store.pull);
+				})
 				.catch(function (jqXHR) {
 					if (jqXHR && jqXHR.status !== undefined && !moncycle_store.is_unauthorized(jqXHR)) moncycle_store.error = moncycle_store.error_of(jqXHR);
 					throw jqXHR;
@@ -751,11 +760,11 @@ const moncycle_store = {
 	// is loaded again, so that the new code reads a new copy. The first time there is nothing to compare.
 	check_version : function () {
 		if (moncycle_store.checked_version) return Promise.resolve();
-		return moncycle_store.request("GET", "api/v2/server_info").then(function (ret) {
+		return moncycle_store.request("GET", moncycle_config.api_url("/server_info")).then(function (ret) {
 			moncycle_store.checked_version = true;
 			let info = ret.data || {};
 			moncycle_store.set_news_url(info.newsUrl || null);
-			let stamp = [moncycle_store.schema, info.appVersion].join("/");
+			let stamp = [moncycle_store.schema, info.appVersion, (moncycle_store.webapp_version || {}).version].join("/");
 			let known = localStorage.getItem(moncycle_store.keys.version);
 			if (known === stamp) return;
 			if (known !== null) moncycle_store.wipe_data(true);
@@ -767,6 +776,42 @@ const moncycle_store = {
 			// no answer: the version is checked at the next sync
 			if (moncycle_store.is_unauthorized(jqXHR)) throw jqXHR;
 		});
+	},
+	// version.json, the web app's own file (never the API's): read once per page load; null when it cannot be read.
+	load_webapp : function () {
+		if (!moncycle_store.webapp) {
+			moncycle_store.webapp = fetch("version.json", {cache : "no-store", credentials : "omit"})
+				.then(function (response) { return response.ok ? response.json() : null; })
+				.catch(function () { return null; })
+				.then(function (webapp) { moncycle_store.webapp_version = webapp; return webapp; });
+		}
+		return moncycle_store.webapp;
+	},
+	// Is the API in the range of generations this web app declares (version.json, `api`)? Resolves true or false, never rejects. A
+	// generation that cannot be read, or an API that does not answer, is no reason to block: true, and the next sync asks again.
+	// Out of the range: nothing is sent, the queue and the copy are left as they are, and the page is told ("incompatible").
+	check_compat : function () {
+		if (moncycle_store.blocked) return Promise.resolve(false);
+		if (!moncycle_store.compat) {
+			moncycle_store.compat = Promise.all([
+				moncycle_store.load_webapp(),
+				moncycle_store.request("GET", moncycle_config.api_url("/server_info")).catch(function () { return null; }),
+			]).then(function (answers) {
+				let webapp = answers[0];
+				let api = answers[1] && answers[1].data ? answers[1].data.appVersion : null;
+				if (!webapp || api === null || api === undefined) {
+					moncycle_store.compat = null;
+					return true;
+				}
+				let verdict = moncycle_compat.check(webapp.api, String(api));
+				if (verdict === "unknown") console.warn("The generation of the API (" + api + ") or the range of this web app cannot be read: carrying on.");
+				if (verdict !== "incompatible") return true;
+				moncycle_store.blocked = {webapp : webapp.version, api : String(api), range : webapp.api};
+				moncycle_store.emit("incompatible", moncycle_store.blocked);
+				return false;
+			});
+		}
+		return moncycle_store.compat;
 	},
 	// Where the news come from (server_info): kept in the account of the copy, which the page draws from.
 	set_news_url : function (url) {
@@ -784,7 +829,7 @@ const moncycle_store = {
 			let known = moncycle_store.account && moncycle_store.account_etag;
 			$.ajax({
 				type : "GET",
-				url : "api/v2/account",
+				url : moncycle_config.api_url("/account"),
 				dataType : "json",
 				headers : known ? {"If-None-Match" : moncycle_store.account_etag} : {},
 				timeout : moncycle_store.request_timeout,
@@ -812,7 +857,7 @@ const moncycle_store = {
 		moncycle_store.created = [];
 		// the first sync has no cursor: the server then reads from the start
 		let query = moncycle_store.last_sync ? "?since=" + encodeURIComponent(moncycle_store.last_sync) : "";
-		let ret = await moncycle_store.request("GET", "api/v2/timeline_sync" + query);
+		let ret = await moncycle_store.request("GET", moncycle_config.api_url("/timeline_sync") + query);
 		let changes = moncycle_store.merge(ret.data);
 		moncycle_store.error = null;
 		moncycle_store.last_pull = Date.now();

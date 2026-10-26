@@ -69,7 +69,7 @@ var moncycle_captcha = (function () {
 			const mine = ++requested;
 			$.ajax({
 				type: "POST",
-				url: "api/v2/captcha",
+				url: moncycle_config.api_url("/captcha"),
 				contentType: "application/json",
 				data: JSON.stringify({purpose: options.purpose, email: email}),
 			}).done(function (ret) {

@@ -414,7 +414,7 @@ function settings_confirmed_change(form, build_payload, on_done, check) {
 		const problem = check ? check(form) : "";
 		if (problem) return settings_form_say(form, "error", problem);
 		button.prop("disabled", true);
-		settings_api("POST", "api/v2/account", build_payload(form)).done(function (ret) {
+		settings_api("POST", moncycle_config.api_url("/account"), build_payload(form)).done(function (ret) {
 			on_done(ret);
 		}).fail(function (jqXHR) {
 			console.error(jqXHR);
@@ -509,7 +509,7 @@ let settings_save_queue = Promise.resolve();
 function settings_save(payload, line) {
 	settings_say(line, "busy", "⏳");
 	settings_save_queue = settings_save_queue.then(function () {
-		return settings_api("POST", "api/v2/account", payload).then(function (ret) {
+		return settings_api("POST", moncycle_config.api_url("/account"), payload).then(function (ret) {
 			settings_say(line, "ok", settings_text.saved, true);
 			Object.assign(settings_account, ret.data || {});
 			if (ret.data && ret.data.nickname) $("#name").text(ret.data.nickname);
@@ -605,7 +605,7 @@ function settings_desc_exists(name, type, another_than) {
 }
 
 function settings_descriptions_load() {
-	return $.get("api/v2/description").done(function (ret) {
+	return $.get(moncycle_config.api_url("/description")).done(function (ret) {
 		settings_descriptions = ret.data.map(settings_desc_from_api);
 		settings_desc_draw();
 		settings_desc_unknown_update();
@@ -691,7 +691,7 @@ function settings_desc_save(row) {
 
 	settings_say(line, "busy", "⏳");
 	known.sent = {name: name, type: type};
-	settings_api("POST", "api/v2/description/" + encodeURIComponent(id), {name: name, type: settings_desc_type_to_api[type]}).done(function () {
+	settings_api("POST", moncycle_config.api_url("/description/" + encodeURIComponent(id)), {name: name, type: settings_desc_type_to_api[type]}).done(function () {
 		if (edit == settings_desc_last_edit) settings_say(line, "ok", settings_text.saved, true);
 		// what the page holds of the keyword follows what was saved (the duplicate check, the emoji)
 		known.name = name;
@@ -715,7 +715,7 @@ function settings_desc_delete(row) {
 	if (known.use_count > 1 && !confirm(settings_text.desc_confirm_delete_many(known.name, known.use_count))) return;
 	if (known.use_count == 1 && !confirm(settings_text.desc_confirm_delete_one(known.name))) return;
 	settings_say(row.find(".form_msg"), "busy", "⏳");
-	settings_api("DELETE", "api/v2/description/" + encodeURIComponent(id)).done(function () {
+	settings_api("DELETE", moncycle_config.api_url("/description/" + encodeURIComponent(id))).done(function () {
 		settings_descriptions = settings_descriptions.filter(function (other) { return other.id !== id; });
 		row.remove();
 		settings_desc_unknown_update();
@@ -776,7 +776,7 @@ async function settings_desc_move_to_comments(row) {
 		}
 
 		settings_say(line, "busy", settings_text.desc_comment_deleting);
-		try { await moncycle_store.request("DELETE", "api/v2/description/" + encodeURIComponent(id)); }
+		try { await moncycle_store.request("DELETE", moncycle_config.api_url("/description/" + encodeURIComponent(id))); }
 		catch (jqXHR) {
 			console.error(jqXHR);
 			settings_say(line, "error", settings_text.desc_comment_delete_failed);
@@ -839,7 +839,7 @@ async function settings_desc_merge(row, target_id) {
 		}
 
 		settings_say(line, "busy", settings_text.desc_comment_deleting);
-		try { await moncycle_store.request("DELETE", "api/v2/description/" + encodeURIComponent(id)); }
+		try { await moncycle_store.request("DELETE", moncycle_config.api_url("/description/" + encodeURIComponent(id))); }
 		catch (jqXHR) {
 			console.error(jqXHR);
 			settings_say(line, "error", settings_text.desc_comment_delete_failed);
@@ -906,7 +906,7 @@ function settings_setup_descriptions() {
 		const type = parseInt(settings_read(form, "type"));
 		if (settings_desc_exists(name, type)) return settings_form_say(form, "error", settings_text.desc_duplicate);
 		settings_form_say(form, "busy", "⏳");
-		settings_api("POST", "api/v2/description", {name: name, type: settings_desc_type_to_api[type]}).done(function () {
+		settings_api("POST", moncycle_config.api_url("/description"), {name: name, type: settings_desc_type_to_api[type]}).done(function () {
 			settings_form_say(form, "ok", settings_text.saved);
 			form[0].reset();
 			settings_descriptions_load();
@@ -967,6 +967,16 @@ function settings_setup_export() {
 	$("#but_export_all").on("click", function () {
 		form.find("[name=from]").val(form.find("[name=from]").attr("min"));
 		form.find("[name=to]").val(settings_today());
+	});
+
+	// On the API's own site the browser saves the file with its cookie; another origin has no cookie, so the file is fetched with the token.
+	$("#a_raw_export").on("click", function (event) {
+		if (!moncycle_config.remote) return;
+		event.preventDefault();
+		settings_say(error_line, "", "");
+		moncycle_store.download($(this).attr("href")).catch(function (failure) {
+			settings_say(error_line, "error", settings_text.common_errors[failure.code] || (failure.status === 0 ? settings_text.error_network : failure.message) || "export impossible.");
+		});
 	});
 
 	form.on("submit", function (event) {
@@ -1081,7 +1091,7 @@ function settings_import_run(dry_run) {
 	// try to encode the string.
 	file.text().then(function (body) {
 		const query = $.param({dryRun: dry_run, override: override, lastWriteClientUtc: (new Date()).toISOString()});
-		$.ajax({type: "POST", url: `api/v2/import?${query}`, contentType: "application/json", data: body, processData: false}).done(function (ret) {
+		$.ajax({type: "POST", url: moncycle_config.api_url(`/import?${query}`), contentType: "application/json", data: body, processData: false}).done(function (ret) {
 			finish();
 			$("#import_report").html(settings_import_report(ret.data || {}));
 			// A real import adds days and cycles: the local copy gets them with a sync.
@@ -1258,7 +1268,7 @@ function settings_token_card(token) {
 
 	// this connection is the one in use: it ends with the logout button, not here
 	if (!token.current && token.prefix) {
-		const revoke = $("<form>", {class: "f_token_revoke", action: "api/v2/token/" + encodeURIComponent(token.prefix), method: "delete"});
+		const revoke = $("<form>", {class: "f_token_revoke", action: moncycle_config.api_url("/token/" + encodeURIComponent(token.prefix)), method: "delete"});
 		revoke.append($("<button>", {type: "submit", class: "rouge"}).text("🗑️ " + settings_text.tokens_revoke));
 		card.append(revoke);
 	}
@@ -1266,7 +1276,7 @@ function settings_token_card(token) {
 }
 
 function settings_tokens_load() {
-	return $.get("api/v2/token").done(function (ret) {
+	return $.get(moncycle_config.api_url("/token")).done(function (ret) {
 		const container = $("#tokens_container").empty();
 		if (ret.data.length === 0) container.text(settings_text.tokens_none);
 		ret.data.forEach(function (token) { container.append(settings_token_card(token)); });
@@ -1330,7 +1340,7 @@ function settings_setup_tokens() {
 		settings_say($("#token_new_err"), "", "");
 		$("#token_new_result").prop("hidden", true);
 		button.prop("disabled", true).text("🔑 " + settings_text.token_creating);
-		settings_api("POST", "api/v2/token", payload).done(function (ret) {
+		settings_api("POST", moncycle_config.api_url("/token"), payload).done(function (ret) {
 			$("#i_token_new_value").val(ret.data.token);
 			$("#token_copy_ok").text("");
 			$("#token_new_result").prop("hidden", false);
@@ -1373,7 +1383,8 @@ function settings_fill_about(account) {
 // The version, and the terms of service: their page is a setting of the server (TERMS_OF_SERVICE_URL, told by server_info). None told: the
 // paragraph that sums them up is not shown.
 function settings_load_server_info() {
-	$.get("api/v2/server_info").done(function (ret) {
+	moncycle_store.load_webapp().then(function (webapp) { $("#tech_info_webapp").text(webapp ? webapp.version : "?"); });
+	$.get(moncycle_config.api_url("/server_info")).done(function (ret) {
 		const info = (ret || {}).data || {};
 		$("#tech_info_ver").text(info.appVersion ?? "?");
 		if (info.passwordPolicyRegex) $("#i_pw1, #i_pw2").attr("pattern", info.passwordPolicyRegex);
@@ -1435,7 +1446,7 @@ $(document).ready(function () {
 	$("#f_logout").on("submit", function (event) {
 		event.preventDefault();
 		$("#but_logout").prop("disabled", true);
-		settings_api("DELETE", "api/v2/token").done(function () {
+		settings_api("DELETE", moncycle_config.api_url("/token")).done(function () {
 			moncycle_store.clear_storage();
 			window.location.replace("/auth");
 		}).fail(function (jqXHR) {
@@ -1460,7 +1471,7 @@ $(document).ready(function () {
 	settings_show_panel();
 
 	settings_load_server_info();
-	$.get("api/v2/account").done(function (ret) {
+	$.get(moncycle_config.api_url("/account")).done(function (ret) {
 		settings_show_account(ret.data);
 	}).fail(function (jqXHR) {
 		settings_say($("#page_msg"), "error", settings_text.account_not_loaded + settings_error(jqXHR));

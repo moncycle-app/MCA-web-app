@@ -20,7 +20,7 @@
 
 $(document).ready(function(){
 	// the password policy is a setting of the server (PASSWORD_POLICY_REGEX, told by server_info); the server checks it again
-	$.get("api/v2/server_info").done(function(ret) {
+	$.get(moncycle_config.api_url("/server_info")).done(function(ret) {
 		const policy = ((ret || {}).data || {}).passwordPolicyRegex;
 		if (policy) $("#i_new_password, #i_new_password_conf").attr("pattern", policy);
 	});
@@ -78,7 +78,7 @@ $(document).ready(function(){
 		if (page.password) payload.newPassword = $("#i_new_password").val();
 		$.ajax({
 			type: "POST",
-			url: "api/v2/verify_email",
+			url: moncycle_config.api_url("/verify_email"),
 			contentType: "application/json",
 			data: JSON.stringify(payload),
 		}).done(function(ret) {

@@ -252,3 +252,14 @@ label {
 	font-size: .8em;
 	color: gray;
 }
+
+.compat_notice {
+	position: sticky;
+	top: 0;
+	z-index: 1000;
+	padding: .8em 1em;
+	background: #fff3cd;
+	color: #664d03;
+	border-bottom: 2px solid #997404;
+	font-weight: bold;
+}

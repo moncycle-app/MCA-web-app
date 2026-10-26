@@ -46,10 +46,12 @@ else {
 			error: moncycle_captcha.message_in($("#reset_error_msg")),
 		});
 		// the link to the terms of service is the server's (TERMS_OF_SERVICE_URL, told by server_info): none told, no link
-		$.ajax({type : "GET", url : "api/v2/server_info", dataType : "json"}).done(function(ret) {
+		$.ajax({type : "GET", url : moncycle_config.api_url("/server_info"), dataType : "json"}).done(function(ret) {
 			const url = ((ret || {}).data || {}).termsOfServiceUrl;
 			if (/^https:\/\//i.test(url || "")) $("#a_terms").attr("href", url).prop("hidden", false);
 		});
+		// another origin than the API's gets no cookie: the sign-in asks for the token alone and the script keeps it
+		if (moncycle_config.remote) $("#i_token_cookie").val("false");
 		// the session is named after the site it was opened on, as the browser knows it
 		$("#i_token_name").val("WEB-APP " + window.location.hostname);
 		$("#connexion_form").on("submit", function(event) {
@@ -69,11 +71,12 @@ else {
 			}
 			$.ajax({
 				type: "POST",
-				url: "api/v2/token",
+				url: moncycle_config.api_url("/token"),
 				contentType: "application/json",
 				data: JSON.stringify(payload),
 			}).done(function(ret){
 				console.log(ret);
+				if (moncycle_config.remote) moncycle_config.set_token(ret.data.token);
 				localStorage.auth = ret.data.userId;
 				window.location.replace('..');
 			}).fail(function(jqXHR){
@@ -111,7 +114,7 @@ else {
 			var email = $("#r_login_email").val();
 			$.ajax({
 				type: "POST",
-				url: "api/v2/recover_password",
+				url: moncycle_config.api_url("/recover_password"),
 				contentType: "application/json",
 				data: JSON.stringify({email: email, captcha: $("#rc_captcha").val(), captchaToken: $("#rc_captcha_token").val()}),
 			}).done(function(ret){
