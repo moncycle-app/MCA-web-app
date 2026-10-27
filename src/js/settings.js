@@ -13,9 +13,11 @@
 */
 
 import { moncycle_config } from "/js/config.js";
-import { moncycle_store } from "/js/store.js";
+import { moncycle_store } from "/js/model/store.js";
 import { moncycle_captcha } from "/js/captcha.js";
 import { moncycle_news } from "/js/news.js";
+import { description_from_api, type_from_int, exists } from "/js/model/descriptions.js";
+import * as dates from "/js/model/dates.js";
 
 const $ = globalThis.$;
 
@@ -397,9 +399,7 @@ function settings_sync_later() {
 
 // 2026-09-20 in the user's own time zone (toISOString would be UTC: the day before, late in the evening)
 function settings_today() {
-	const now = new Date();
-	const two = function (n) { return String(n).padStart(2, "0"); };
-	return `${now.getFullYear()}-${two(now.getMonth() + 1)}-${two(now.getDate())}`;
+	return dates.str(new Date());
 }
 
 function settings_french_date(ymd) {
@@ -588,8 +588,6 @@ function settings_fill_birth_years(select, birth_year) {
 ** ======================================================================== */
 
 // The API says "sensation"; the page keeps the integer of the old forms.
-const settings_desc_type_to_int = {"undefined": 0, "observation": 1, "sensation": 2};
-const settings_desc_type_to_api = {0: "undefined", 1: "observation", 2: "sensation"};
 // shown before a keyword's name, so that its type is known without opening it
 const settings_desc_type_icon = {0: "❓", 1: "👀", 2: "🧠"};
 
@@ -597,9 +595,6 @@ let settings_descriptions = [];   // {id, name, type, use_count, sent}; `sent` i
 let settings_desc_last_edit = 0;
 let settings_desc_move_run = null;   // while a move into the comments runs: {dates: {date: true}, done, refused: [dates]}
 
-function settings_desc_from_api(d) {
-	return {id: d.id, name: d.name, type: settings_desc_type_to_int[d.type] || 0, use_count: d.useCount};
-}
 
 function settings_desc_find(id) {
 	return settings_descriptions.find(function (known) { return known.id === id; });
@@ -608,12 +603,12 @@ function settings_desc_find(id) {
 // another_than: the keyword being edited, which is not a duplicate of itself (its saved name can be the one typed back while the answer
 // to the change that took it away is still on its way)
 function settings_desc_exists(name, type, another_than) {
-	return settings_descriptions.some(function (known) { return known.id !== another_than && known.name == name && known.type == type; });
+	return exists(settings_descriptions, name, type, another_than);
 }
 
 function settings_descriptions_load() {
 	return $.get(moncycle_config.api_url("/description")).done(function (ret) {
-		settings_descriptions = ret.data.map(settings_desc_from_api);
+		settings_descriptions = ret.data.map(description_from_api);
 		settings_desc_draw();
 		settings_desc_unknown_update();
 	}).fail(function (jqXHR) {
@@ -698,7 +693,7 @@ function settings_desc_save(row) {
 
 	settings_say(line, "busy", "⏳");
 	known.sent = {name: name, type: type};
-	settings_api("POST", moncycle_config.api_url("/description/" + encodeURIComponent(id)), {name: name, type: settings_desc_type_to_api[type]}).done(function () {
+	settings_api("POST", moncycle_config.api_url("/description/" + encodeURIComponent(id)), {name: name, type: type_from_int[type]}).done(function () {
 		if (edit == settings_desc_last_edit) settings_say(line, "ok", settings_text.saved, true);
 		// what the page holds of the keyword follows what was saved (the duplicate check, the emoji)
 		known.name = name;
@@ -913,7 +908,7 @@ function settings_setup_descriptions() {
 		const type = parseInt(settings_read(form, "type"));
 		if (settings_desc_exists(name, type)) return settings_form_say(form, "error", settings_text.desc_duplicate);
 		settings_form_say(form, "busy", "⏳");
-		settings_api("POST", moncycle_config.api_url("/description"), {name: name, type: settings_desc_type_to_api[type]}).done(function () {
+		settings_api("POST", moncycle_config.api_url("/description"), {name: name, type: type_from_int[type]}).done(function () {
 			settings_form_say(form, "ok", settings_text.saved);
 			form[0].reset();
 			settings_descriptions_load();

@@ -13,7 +13,12 @@
 */
 
 import { moncycle_config } from "/js/config.js";
-import { moncycle_store } from "/js/store.js";
+import { moncycle_store } from "/js/model/store.js";
+import * as dates from "/js/model/dates.js";
+import { fc_note_regex } from "/js/model/fc_notation.js";
+import { day_from_api, day_to_api, blank_day } from "/js/model/day.js";
+import { description_from_api, unsent_description, type_to_int, type_from_int } from "/js/model/descriptions.js";
+import { cycle_of, cycle_span, cycle_line_length, constante_from_api, structure_of, peak_follow_days, counter_days } from "/js/model/cycles.js";
 import { moncycle_news } from "/js/news.js";
 
 const $ = globalThis.$;
@@ -204,218 +209,6 @@ export const moncycle_app = {
 		""  : ""
 	},
 
-	/* -----------------------------------------------------------------------
-	** API ADAPTERS
-	**
-	** The backend speaks a structured JSON API (see api/moncycle_app_open_api.yaml):
-	** every response is {"data": ...}, and the per-day shape uses NFP-inspired field
-	** names (stampColor, isPeak, codifiedArrow, freeMucusSensation, ...) instead of
-	** the packed legacy codes (stamp, fc_score, fc_arrow, no_description ids...) the
-	** rest of this file is written against. These adapters are the only place that
-	** need to know about the new shape -- day_timeline2timeline, day_timeline2recap,
-	** open_menu, fc_note2form/fc_form2note/fc_test_note/fc_note2html etc. all keep
-	** working against the same legacy flat shape they always have.
-	** ====================================================================== */
-
-	fc_note_keys : ['10DL','10SL','10WL','RAP','LAP','X1','X2','X3','AD','AP','VL','VH','2W','10','H','M','L','B','0','2','4','6','8','C','G','K','P','Y','R'],
-
-	// mirrors data_parse_fc_note() in lib/data.php: a leading "L" (other than "LAP...") is
-	// the separate "Lsaignement" (spotting) flag, not the standalone "L" mucus-observation
-	// code checked for below.
-	parse_fc_note : function (str) {
-		let note = {Lsaignement: false};
-		moncycle_app.fc_note_keys.forEach(k => note[k] = false);
-		if (!str) return note;
-		str = str.trim();
-		if (str.length > 0) {
-			str = str.toUpperCase();
-			if (str.startsWith('L') && !str.startsWith('LAP')) {
-				note.Lsaignement = true;
-				str = str.slice(1);
-			}
-			moncycle_app.fc_note_keys.forEach(k => {
-				if (str.includes(k)) note[k] = true;
-				str = str.split(k).join('');
-			});
-		}
-		return note;
-	},
-
-	fc_groups : {
-		codifiedBleedingObservation : ['VH','H','M','VL','B'],
-		codifiedMucusSensation : ['0','2','2W','4','6','8','10','10DL','10SL','10WL'],
-		codifiedMucusObservation : ['C','G','K','P','Y','L'],
-		codifiedNumberObservations : ['X1','X2','X3','AD'],
-		codifiedPainObservations : ['AP','RAP','LAP'],
-	},
-
-	// fc_score string (from #form_fc) -> the API's 5 codifiedXxx fields
-	fc_score_to_codified : function (str) {
-		let note = moncycle_app.parse_fc_note(str);
-		let bleeding = '';
-		moncycle_app.fc_groups.codifiedBleedingObservation.forEach(c => { if (note[c]) bleeding += c; });
-		if (note.Lsaignement) bleeding += 'L';
-		let out = {codifiedBleedingObservation : bleeding || null};
-		for (const field in moncycle_app.fc_groups) {
-			if (field == 'codifiedBleedingObservation') continue;
-			let v = '';
-			moncycle_app.fc_groups[field].forEach(c => { if (note[c]) v += c; });
-			out[field] = v || null;
-		}
-		return out;
-	},
-
-	// the API's 5 codifiedXxx fields -> a single legacy-style fc_score string, for the
-	// #form_fc textarea and for the calendar-cell rendering that reads j.fc_score. Mirrors
-	// lib/day_format.php's day_format_fc_score_encode() on the server, including the same
-	// Lsaignement repositioning: decoding puts spotting at the *end* of
-	// codifiedBleedingObservation (e.g. "BL"), but the legacy notation only recognises it as
-	// a *leading* "L", so it has to move back to the front here or it reads back as the
-	// unrelated standalone "L" mucus-observation code instead.
-	fc_score_from_api : function (d) {
-		let bleeding = (d.codifiedBleedingObservation || '').trim();
-		let spotting = false;
-		const bleeding_codes = moncycle_app.fc_groups.codifiedBleedingObservation;
-		if (bleeding !== '' && !bleeding_codes.includes(bleeding) && bleeding.endsWith('L')) {
-			let candidate = bleeding.slice(0, -1);
-			if (candidate === '' || bleeding_codes.includes(candidate)) {
-				spotting = true;
-				bleeding = candidate;
-			}
-		}
-		let parts = [];
-		if (bleeding !== '') parts.push(bleeding);
-		['codifiedMucusSensation','codifiedMucusObservation','codifiedNumberObservations','codifiedPainObservations'].forEach(f => {
-			let v = (d[f] || '').trim();
-			if (v !== '') parts.push(v);
-		});
-		if (parts.length === 0 && !spotting) return '';
-		let joined = parts.join(' ');
-		if (spotting) return 'L' + (joined !== '' ? ' ' + joined : '');
-		if (joined.startsWith('L') && !joined.startsWith('LAP')) joined = ' ' + joined;
-		return joined;
-	},
-
-	stamp_from_api : function (d) {
-		let code = {"Red":"R","Green":"G","Yellow":"Y"}[d.stampColor] || "";
-		return code + (d.stampBaby ? "BB" : "");
-	},
-
-	arrow_from_api : {"Up":"↑","Down":"↓","Right":"→"},
-	arrow_to_api : {"↑":"Up","↓":"Down","→":"Right"},
-
-	desc_type_to_int : {"undefined":0, "observation":1, "sensation":2},
-	desc_type_from_int : {0:"undefined", 1:"observation", 2:"sensation"},
-
-	description_from_api : function (d) {
-		return {no_description: d.id, name: d.name, type: moncycle_app.desc_type_to_int[d.type] || 0, use_count: d.useCount};
-	},
-
-	// full Day object (GET/POST /api/v2/day/{date}, or one entry of GET /api/v2/day
-	// result) -> the legacy flat shape day_timeline2timeline/day_timeline2recap/open_menu
-	// expect. Description names are matched against the already-loaded picklist
-	// (moncycle_app.description) to recover the numeric ids open_menu checks against.
-	day_from_api : function (d) {
-		let description = [];
-		(d.freeMucusObservation || []).forEach(name => {
-			let match = moncycle_app.description.find(sd => sd.name == name && sd.type == 1);
-			description.push(match || {no_description: null, name: name, type: 1, use_count: 0});
-		});
-		(d.freeMucusSensation || []).forEach(name => {
-			let match = moncycle_app.description.find(sd => sd.name == name && sd.type == 2);
-			description.push(match || {no_description: null, name: name, type: 2, use_count: 0});
-		});
-		(d.freeOther || []).forEach(name => {
-			let match = moncycle_app.description.find(sd => sd.name == name && sd.type == 0);
-			description.push(match || {no_description: null, name: name, type: 0, use_count: 0});
-		});
-		return {
-			date_obs : d.date,
-			cycle : d.cycleStartDate,
-			pos : d.cycleDay,
-			cycle_1st_day : d.cycleFirstDay,
-			day_not_observed : d.dayNotObserved,
-			stamp : moncycle_app.stamp_from_api(d),
-			is_peak : d.isPeak,
-			counter_start : d.counterStart,
-			union_sex : d.sexUnion,
-			observation_paused : d.observationPaused,
-			temperature : d.temperature,
-			time_temp_taken : d.temperatureTime,
-			fc_score : moncycle_app.fc_score_from_api(d),
-			fc_arrow : moncycle_app.arrow_from_api[d.codifiedArrow] || "",
-			comment : d.comment,
-			description : description,
-			last_write : d.lastWriteClientUtc || d.lastWriteDb || null,
-		};
-	},
-
-	// the "nfp_method" 1-4 integer used throughout this file (and "nfp_method_name", its
-	// display-class variant) conflates the NFP method with whether temperature is tracked;
-	// the API exposes those as two separate fields instead.
-	nfp_method_from_api : function (method, temperatureTracking) {
-		const table = {"cervicalMucus": [2, 1], "fertilityCare": [3, 4]};
-		let pair = table[method] || table["cervicalMucus"];
-		return temperatureTracking ? pair[1] : pair[0];
-	},
-
-	// GET /api/v2/account's response (with the lists of the timeline, see js/store.js) -> the legacy flat shape moncycle_app.constante has
-	// always had.
-	constante_from_api : function (d) {
-		let nfp_method = moncycle_app.nfp_method_from_api(d.method, d.temperatureTracking);
-		return {
-			no_user_account : d.userId,
-			nickname : d.nickname,
-			sponsor : d.sponsor,
-			nfp_method : nfp_method,
-			nfp_method_name : {1:"mucus_temp", 2:"mucus", 3:"fc", 4:"fc_temp"}[nfp_method],
-			all_cycles_1st_day : d.allCyclesFirstDay,
-			all_observation_paused_dates : d.allObservationPausedDates,
-			timeline_asc : d.timelineAscending,
-		};
-	},
-
-	// the serializeArray() output of #form_data (legacy flat field names: date, stamp, baby,
-	// fc_score, fc_arrow, temp, time_temp_taken, counter_start, is_peak, union_sex,
-	// cycle_1st_day, day_not_observed, observation_paused, comment, description[], last_write_client_UTC
-	// -- everything else in that form, the individual fc_* checkboxes, is client-side scratch
-	// state for building fc_score and was never read server-side either way) -> the JSON body
-	// POST /api/v2/day expects.
-	day_to_api : function (fields) {
-		let get = (n) => fields.filter(f => f.name == n).map(f => f.value);
-		let get1 = (n) => { let v = get(n); return v.length ? v[0] : undefined; };
-		let codified = moncycle_app.fc_score_to_codified(get1('fc_score') || '');
-		let payload = Object.assign({
-			date : get1('date'),
-			stampColor : {"R":"Red","G":"Green","Y":"Yellow","":null}[get1('stamp') || ''],
-			stampBaby : get1('baby') == 'BB',
-			codifiedArrow : moncycle_app.arrow_to_api[get1('fc_arrow')] || null,
-			temperature : get1('temp') ? parseFloat(get1('temp')) : null,
-			temperatureTime : get1('time_temp_taken') || null,
-			counterStart : parseInt(get1('counter_start') || '0'),
-			isPeak : get1('is_peak') == '1',
-			sexUnion : get1('union_sex') == '1',
-			cycleFirstDay : get1('cycle_1st_day') == '1',
-			dayNotObserved : get1('day_not_observed') == '1',
-			observationPaused : get1('observation_paused') == '1',
-			comment : get1('comment') || '',
-			lastWriteClientUtc : get1('last_write_client_UTC') || null,
-		}, codified);
-		payload.freeMucusObservation = [];
-		payload.freeMucusSensation = [];
-		// a day is posted whole: the labels with no type yet are sent back, or they would be unlinked
-		payload.freeOther = [];
-		// a chip stands for a description by its name, which is what a day carries it by: a description made here has no id until the server has created it
-		get('description[]').forEach(name => {
-			let sdesc = moncycle_app.description.find(d => d.name == name);
-			if (!sdesc) return;
-			if (sdesc.type == 1) payload.freeMucusObservation.push(sdesc.name);
-			else if (sdesc.type == 2) payload.freeMucusSensation.push(sdesc.name);
-			else if (sdesc.type == 0) payload.freeOther.push(sdesc.name);
-		});
-		return payload;
-	},
-
 	sommets : [],
 	counter_starts : {},
 	page_a_recharger: false,
@@ -443,7 +236,7 @@ export const moncycle_app = {
 			window.location.replace('/auth');
 			return;
 		}
-		moncycle_app.date_loaded = moncycle_app.date.str(moncycle_app.date.now());
+		moncycle_app.date_loaded = dates.str(dates.now());
 		moncycle_store.init();
 		moncycle_store.on("status", moncycle_app.show_sync_status);
 		moncycle_store.on("changed", moncycle_app.store_changed);
@@ -483,7 +276,7 @@ export const moncycle_app = {
 			}
 		});
 		$(window).focus(function() {
-			if (moncycle_app.date.str(moncycle_app.date.now()) != moncycle_app.date_loaded) location.reload(false);
+			if (dates.str(dates.now()) != moncycle_app.date_loaded) location.reload(false);
 			return false;
 		})
 		// another tab wrote its copy: nothing to do. It logged out, or logged in as someone else: leave.
@@ -495,44 +288,19 @@ export const moncycle_app = {
 		moncycle_store.sync().catch(function () { });
 	},
 	// what decides how the cycles are laid out: when it changes in the copy, they have to be drawn again
-	structure_of : function (account) {
-		return JSON.stringify([account.allCyclesFirstDay, account.allObservationPausedDates, account.timelineAscending, account.method, account.temperatureTracking]);
-	},
 	// The copy holds the account: draw the page header and the cycles from it.
 	show_account : function () {
 		moncycle_app.show_header();
-		moncycle_app.structure = moncycle_app.structure_of(moncycle_store.account);
-		moncycle_app.cycle_columns = moncycle_app.cycle_line_length();
+		moncycle_app.structure = structure_of(moncycle_store.account);
+		moncycle_app.cycle_columns = cycle_line_length(moncycle_app.constante.all_cycles_1st_day, moncycle_app.constante.all_observation_paused_dates);
 		document.documentElement.style.setProperty("--cycle-cols", moncycle_app.cycle_columns);
 		if (moncycle_app.cycle_curseur == 0) moncycle_app.remplir_page_de_cycle();
 	},
-	// Days per line of the recap: wide enough for 80% of the recent complete cycles (and the median + 5), in steps of 5 so that the
-	// layout does not move with every new cycle. A cycle longer than that wraps; the bounds keep the days readable on a phone.
 	cycle_columns : 35,
-	cycle_line_length : function () {
-		const DEFAULT = 35, MIN = 30, MAX = 45, STEP = 5, MARGIN = 5, RECENT = 12, MIN_CYCLES = 3, QUANTILE = 0.8;
-		let starts = moncycle_app.constante.all_cycles_1st_day || [];
-		let pauses = moncycle_app.constante.all_observation_paused_dates || [];
-		let lengths = [];
-		// the starts come latest first: starts[c-1] is the day after the end of cycle c, which the latest cycle (still open) lacks
-		for (let c = 1; c < starts.length && lengths.length < RECENT; c++) {
-			let start = moncycle_app.date.parse(starts[c]);
-			let next = moncycle_app.date.parse(starts[c-1]);
-			// a cycle that ended with a pause of the observations is not a length
-			if (pauses.some(function (d) { return d >= starts[c] && d < starts[c-1]; })) continue;
-			lengths.push(Math.round((next - start) / (1000*60*60*24)));
-		}
-		if (lengths.length < MIN_CYCLES) return DEFAULT;
-		lengths.sort(function (x, y) { return x - y; });
-		let p80 = lengths[Math.ceil(QUANTILE * lengths.length) - 1];
-		let median = (lengths[Math.floor((lengths.length - 1) / 2)] + lengths[Math.ceil((lengths.length - 1) / 2)]) / 2;
-		let wanted = Math.ceil(Math.max(p80, median + MARGIN) / STEP) * STEP;
-		return Math.min(MAX, Math.max(MIN, wanted));
-	},
 	show_header : function () {
-		moncycle_app.constante = moncycle_app.constante_from_api(moncycle_store.account);
+		moncycle_app.constante = constante_from_api(moncycle_store.account);
 		moncycle_app.timeline_asc = moncycle_app.constante.timeline_asc;
-		moncycle_app.description = moncycle_store.all_descriptions().map(moncycle_app.description_from_api);
+		moncycle_app.description = moncycle_store.all_descriptions().map(description_from_api);
 		document.title = moncycle_app_text.page_title(moncycle_app.constante.nickname);
 		// the name is free text: text first, then the badge (markup of ours)
 		$("#name").text(moncycle_app.constante.nickname);
@@ -562,14 +330,14 @@ export const moncycle_app = {
 	// What happened to the copy: the days that changed are drawn again, and the cycles when their
 	// structure moved (at once, or when the day form is closed if it is open).
 	store_changed : function (change) {
-		if (change.descriptions) moncycle_app.description = moncycle_store.all_descriptions().map(moncycle_app.description_from_api);
+		if (change.descriptions) moncycle_app.description = moncycle_store.all_descriptions().map(description_from_api);
 		if (!moncycle_store.account) return;
 		if (moncycle_app.structure === null) {
 			moncycle_app.show_account();
 			return;
 		}
 		if (change.account || change.source == "sync") {
-			moncycle_app.page_a_recharger = moncycle_app.structure_of(moncycle_store.account) !== moncycle_app.structure;
+			moncycle_app.page_a_recharger = structure_of(moncycle_store.account) !== moncycle_app.structure;
 			if (moncycle_app.page_a_recharger && moncycle_app.menu_opened_date === null) {
 				moncycle_app.rebuild();
 				return;
@@ -679,27 +447,13 @@ export const moncycle_app = {
 		}
 		let c = moncycle_app.cycle_curseur;
 		moncycle_app.cycle_curseur += 1;
-		let date_cycle_str = moncycle_app.constante.all_cycles_1st_day[c];
-		let date_fin = moncycle_app.date.now();
-		let fin_auj = true;
-		if (c>0) {
-			date_fin = new Date(moncycle_app.date.parse(moncycle_app.constante.all_cycles_1st_day[c-1]) - (1000*60*60*24));
-			date_fin.setHours(9);
-			fin_auj = false;
-		}
-		let date_cycle = moncycle_app.date.parse(date_cycle_str);
-		date_cycle.setHours(9);
-		let form_nouv_cycle = false;
-		for (let i = 0; i < moncycle_app.constante.all_observation_paused_dates.length; i++) {
-			let pause = moncycle_app.date.parse(moncycle_app.constante.all_observation_paused_dates[i]);
-			pause.setHours(9);
-			if (pause>=date_cycle && pause<=date_fin) {
-				date_fin = pause;
-				if (fin_auj) form_nouv_cycle = true;
-			}
-		}
+		const span = cycle_span(moncycle_app.constante.all_cycles_1st_day, moncycle_app.constante.all_observation_paused_dates, c);
+		let date_cycle_str = span.start;
+		let date_fin = span.end_date;
+		let date_cycle = span.start_date;
+		let form_nouv_cycle = span.new_cycle_form;
 		if (form_nouv_cycle && moncycle_app.timeline_asc) moncycle_app.form_nouveau_cycle(false);
-		let nb_jours = parseInt(Math.round((date_fin-date_cycle)/(1000*60*60*24)+1));
+		let nb_jours = span.days;
 		if (moncycle_app.timeline_asc) {
 			$("#timeline").append(moncycle_app.cycle2timeline(date_cycle_str, nb_jours, date_fin));
 			$("#recap").append(moncycle_app.cycle2recap(date_cycle_str, nb_jours, date_fin));
@@ -712,7 +466,7 @@ export const moncycle_app = {
 		for (let pas = 0; pas < nb_jours; pas++) {
 			let date_obs = new Date(date_cycle);
 			date_obs.setDate(date_obs.getDate()+pas);
-			let date_obs_str = moncycle_app.date.str(date_obs);
+			let date_obs_str = dates.str(date_obs);
 			let data = moncycle_app.view_day(date_obs_str, date_cycle_str, pas+1);
 			dates_data_holder[date_obs_str] = data;
 			moncycle_app.day_timeline[date_obs_str] = data;
@@ -735,10 +489,10 @@ export const moncycle_app = {
 	view_day : function (date, cycle, pos) {
 		let day = moncycle_store.days[date];
 		if (!day) {
-			day = moncycle_store.blank_day(date);
-			Object.assign(day, cycle ? {cycleStartDate : cycle, cycleDay : pos} : moncycle_store.cycle_of(date));
+			day = blank_day(date);
+			Object.assign(day, cycle ? {cycleStartDate : cycle, cycleDay : pos} : cycle_of((moncycle_store.account || {}).allCyclesFirstDay, date));
 		}
-		return moncycle_app.day_from_api(day);
+		return day_from_api(day, moncycle_app.description);
 	},
 	// the peak days and the counters the "+1 +2 +3" marks of the other days come from
 	track_day : function (date, data) {
@@ -782,16 +536,16 @@ export const moncycle_app = {
 	form_nouveau_cycle: function (prepend=true) {
 		if (moncycle_app.form_nouveau_cycle_active) return;
 		moncycle_app.form_nouveau_cycle_active = true;
-		let max_date = moncycle_app.date.str(moncycle_app.date.now());
+		let max_date = dates.str(dates.now());
 		let min_date = "";
 		if (prepend && moncycle_app.cycle_curseur>0) {
 			max_date = moncycle_app.constante.all_cycles_1st_day[moncycle_app.cycle_curseur-1];
-			max_date = moncycle_app.date.str(new Date(moncycle_app.date.parse(max_date) - (1000*60*60*24)));
+			max_date = dates.str(new Date(dates.parse(max_date) - (1000*60*60*24)));
 		}
 		else if (!prepend) {
-			let min_calc = moncycle_app.date.parse(moncycle_app.constante.all_observation_paused_dates[0]);
+			let min_calc = dates.parse(moncycle_app.constante.all_observation_paused_dates[0]);
 			min_calc.setDate(min_calc.getDate()+1);
-			min_date = moncycle_app.date.str(min_calc);
+			min_date = dates.str(min_calc);
 		}
 		let instruction = moncycle_app_text.new_cycle_ask_1st_day;
 		if (!prepend) instruction = moncycle_app_text.new_cycle_ask_restart;
@@ -809,13 +563,13 @@ export const moncycle_app = {
 		}
 		$("#but_creer_cycle").click(function () {
 			let nouveau_cycle_date = $("#nouveau_cycle_date").val();
-			let max = moncycle_app.date.parse($("#nouveau_cycle_date").attr("max"));
-			let min = moncycle_app.date.parse($("#nouveau_cycle_date").attr("min"));
-			if (moncycle_app.date.parse(nouveau_cycle_date) > max || (!isNaN(min) && moncycle_app.date.parse(nouveau_cycle_date) < min)) {
+			let max = dates.parse($("#nouveau_cycle_date").attr("max"));
+			let min = dates.parse($("#nouveau_cycle_date").attr("min"));
+			if (dates.parse(nouveau_cycle_date) > max || (!isNaN(min) && dates.parse(nouveau_cycle_date) < min)) {
 				alert(moncycle_app_text.new_cycle_date_error);
 				return;
 			}
-			moncycle_store.queue_day({date: nouveau_cycle_date, cycleFirstDay: true, lastWriteClientUtc: moncycle_app.date.nowInUTC()});
+			moncycle_store.queue_day({date: nouveau_cycle_date, cycleFirstDay: true, lastWriteClientUtc: dates.now_in_utc()});
 		});
 	},
 	trois_jours : function() {
@@ -829,12 +583,9 @@ export const moncycle_app = {
 			let last = 3;
 			if (!moncycle_app.timeline_asc) last = $(`#o-${s}`).parent()[0].children.length - $(`#o-${s}`).index() - 1;
 			else last = $(`#o-${s}`).index();
-			[1, 2, 3, last].forEach(n => {
-				let s_date = moncycle_app.date.parse(s);
-				s_date.setDate(s_date.getDate()+n);
-				let s_id = moncycle_app.date.str(s_date);
-				$(`#o-${s_id} .s`).html(moncycle_app_text.peak_offset(n));
-				$(`#ro-${s_id} .s`).html(n);
+			peak_follow_days(s, last).forEach(({date, n}) => {
+				$(`#o-${date} .s`).html(moncycle_app_text.peak_offset(n));
+				$(`#ro-${date} .s`).html(n);
 			});
 			$(`#o-${s} .s`).html(txt_sommet);
 			$(`#ro-${s} .s`).html(txt_sommet);
@@ -846,17 +597,14 @@ export const moncycle_app = {
 		$(".obs .n").empty();
 		$(".obs .n").hide();
 		$.each(moncycle_app.counter_starts,function(d,c){
-			for (let i = 0; i < c; i++) {
-				let s_date = moncycle_app.date.parse(d);
-				s_date.setDate(s_date.getDate()+i);
-				let s_id = moncycle_app.date.str(s_date);
-				$(`#o-${s_id} .n`).html(moncycle_app_text.peak_offset(i+1));
-				if (($(`#ro-${s_id} .s`).text()).length==0) {
-					$(`#ro-${s_id} .n`).html(i+1);
-					$(`#ro-${s_id} .n`).show();
-					$(`#ro-${s_id} .s`).hide();
+			counter_days(d, c).forEach(({date, n}) => {
+				$(`#o-${date} .n`).html(moncycle_app_text.peak_offset(n));
+				if (($(`#ro-${date} .s`).text()).length==0) {
+					$(`#ro-${date} .n`).html(n);
+					$(`#ro-${date} .n`).show();
+					$(`#ro-${date} .s`).hide();
 				}
-			}
+			});
 		});
 	},
 	cycle_option : function (c_date_str, c_date_fin_str, discri) {
@@ -911,14 +659,14 @@ export const moncycle_app = {
 	cycle2timeline : function (c, nb, fin) {
 		let c_id = "c-" + c;
 		let cycle = $("<div>", {id: c_id, class: "cycle"});
-		let c_date = moncycle_app.date.parse(c);
+		let c_date = dates.parse(c);
 		let c_fin = new Date(fin);
 		let c_title = $(`<h2 class='title title_${c}' for='${c}'>${moncycle_app_text.cycle_title(c_date, c_fin, nb)}</h2>`);
 		let c_graph = $(`<div class='graph pas_mucus pas_fc' id='graph-${c_id}' style='display:none' ><canvas id='canvas-${c_id}'></canvas></div>`);
 		let c_content = $(`<div class='contenu' id='contenu-${c_id}'></div>`);
 		c_title.click(moncycle_app.cycle_title_click);
 		cycle.append(c_title);
-		cycle.append(moncycle_app.cycle_option(c, moncycle_app.date.str(fin), "timeline"));
+		cycle.append(moncycle_app.cycle_option(c, dates.str(fin), "timeline"));
 		cycle.append(c_graph);
 		cycle.append(c_content);
 		return cycle;
@@ -926,12 +674,12 @@ export const moncycle_app = {
 	cycle2recap : function (c, nb, fin) {
 		let c_id = "rc-" + c;
 		let cycle = $("<div>", {id: c_id, class: "cycle_recap"});
-		let c_date = moncycle_app.date.parse(c);
+		let c_date = dates.parse(c);
 		let c_fin = new Date(fin);
 		let c_title = $(`<h5 class='title title_${c}' for='${c}'>${moncycle_app_text.cycle_title_recap(c_date, c_fin, nb)}</h5>`);
 		c_title.click(moncycle_app.cycle_title_click);
 		cycle.append(c_title);
-		cycle.append(moncycle_app.cycle_option(c, moncycle_app.date.str(fin), "recap"));
+		cycle.append(moncycle_app.cycle_option(c, dates.str(fin), "recap"));
 		let c_ruler = $("<div>", {id: "ruler_" + c, class: "mini_ruler", style: "display:none"});
 		let odd = true;
 		for (let n=1; n<=moncycle_app.cycle_columns; n++) {
@@ -983,11 +731,11 @@ export const moncycle_app = {
 		}
 	},
 	day_timeline2recap : function(j) {
-		let o_date = moncycle_app.date.parse(j.date_obs);
-		let o_id = "ro-" + moncycle_app.date.str(o_date);
+		let o_date = dates.parse(j.date_obs);
+		let o_id = "ro-" + dates.str(o_date);
 		let o_class = "obs";
 		if (j.observation_paused) o_class += " o_paused";
-		let day_timeline = $("<div>", {id: o_id, class: o_class, date: moncycle_app.date.str(o_date)});
+		let day_timeline = $("<div>", {id: o_id, class: o_class, date: dates.str(o_date)});
 		day_timeline.click(moncycle_app.open_menu);
 		let color = "vide";
 		let index_couleur = j.stamp;
@@ -1065,13 +813,13 @@ export const moncycle_app = {
 		return cell;
 	},
 	day_timeline2timeline : function(j) {
-		let o_date = moncycle_app.date.parse(j.date_obs);
-		let o_id = "o-" + moncycle_app.date.str(o_date);
+		let o_date = dates.parse(j.date_obs);
+		let o_id = "o-" + dates.str(o_date);
 		let o_class = "day";
 		if (moncycle_app.constante.nfp_method==3 || moncycle_app.constante.nfp_method==4) o_class += " o_fc";
 		else o_class += " o_mucus";
 		if (j.observation_paused) o_class += " o_paused";
-		let day_timeline = $("<div>", {id: o_id, class: o_class, date : moncycle_app.date.str(o_date)});
+		let day_timeline = $("<div>", {id: o_id, class: o_class, date : dates.str(o_date)});
 		let d_bold = o_date.getDay()==0 ? "bold" : "";
 		day_timeline.append(`<span class='d ${d_bold}'>${moncycle_app_text.date_row(o_date)}</span>`);
 		let pos = $(`<span class='j'>${j.pos}</span>`);
@@ -1197,8 +945,8 @@ export const moncycle_app = {
 			return;
 		}
 		// kept here and sent when the server can be reached (js/store.js): the chip is there at once, offline too
-		moncycle_store.queue_description(name, moncycle_app.desc_type_from_int[desc_type], moncycle_app.date.nowInUTC());
-		let desc = moncycle_app.description.find(d => d.name == name) || {no_description : null, name : name, type : desc_type, use_count : 0};
+		moncycle_store.queue_description(name, type_from_int[desc_type], dates.now_in_utc());
+		let desc = moncycle_app.description.find(d => d.name == name) || unsent_description(name, desc_type);
 		let chip = moncycle_app.render_desc_chip(desc, false);
 		$(moncycle_app.desc_container_id[desc_type]).append(chip);
 		chip.find(".i_desc").on("change", moncycle_app.submit_menu);
@@ -1208,9 +956,9 @@ export const moncycle_app = {
 	menu_opened_date : null,
 	open_menu : function(e, date = null) {
 		let o_date;
-		if (date) o_date = moncycle_app.date.parse(date);
-		else o_date = moncycle_app.date.parse($(this).attr('date'));
-		date = moncycle_app.date.str(o_date);
+		if (date) o_date = dates.parse(date);
+		else o_date = dates.parse($(this).attr('date'));
+		date = dates.str(o_date);
 		moncycle_app.menu_opened_date = date;
 		let j = moncycle_app.day_timeline[moncycle_app.menu_opened_date];
 		let stamp = j.stamp? j.stamp : "";
@@ -1221,14 +969,14 @@ export const moncycle_app = {
 		$("#jour_form_next").text(moncycle_app_text.but_day_step(arrow["next"], j.pos+1));
 		let date_cursor = new Date(j.date_obs);
 		date_cursor.setDate(date_cursor.getDate()+1);
-		let str_date_cursor = moncycle_app.date.str(date_cursor);
+		let str_date_cursor = dates.str(date_cursor);
 		if (moncycle_app.day_timeline[str_date_cursor] && !moncycle_app.day_timeline[str_date_cursor].cycle_1st_day) {
 			$("#jour_form_next").attr("date", str_date_cursor);
 			$("#jour_form_next").show();
 		}
 		else $("#jour_form_next").hide();
 		date_cursor.setDate(date_cursor.getDate()-2);
-		str_date_cursor = moncycle_app.date.str(date_cursor);
+		str_date_cursor = dates.str(date_cursor);
 		if (j.pos-1 > 0 && moncycle_app.day_timeline[str_date_cursor]) {
 			$("#jour_form_prev").attr("date", str_date_cursor);
 			$("#jour_form_prev").show();
@@ -1313,7 +1061,7 @@ export const moncycle_app = {
 		$("#jour_form_saving").show();
 		$("#jour_form_saved").hide();
 		$("#jour_form_unsent").hide();
-		$("#form_save_time").val(moncycle_app.date.nowInUTC());
+		$("#form_save_time").val(dates.now_in_utc());
 		if (this.id == "form_fc") moncycle_app.fc_note2form();
 		else moncycle_app.fc_form2note();
 		moncycle_app.fc_test_note();
@@ -1326,7 +1074,7 @@ export const moncycle_app = {
 			if (j == d.length) d.push({"date" : moncycle_app.menu_opened_date});
 			else d[j]["value"] = moncycle_app.menu_opened_date;
 		}
-		moncycle_store.queue_day(moncycle_app.day_to_api(d));
+		moncycle_store.queue_day(day_to_api(d, moncycle_app.description));
 	},
 	bulk_submit_menu : function () {
 		let nb_of_days = $("#i_bulk_count").val();
@@ -1336,11 +1084,11 @@ export const moncycle_app = {
 		}
 		let menu_current_date = moncycle_app.menu_opened_date;
 		let menu_current_1st_day = $("#ev_cycle_1st_day").is(':checked');
-		let date_cursor = moncycle_app.date.parse(menu_current_date);
+		let date_cursor = dates.parse(menu_current_date);
 		let j = 1;
 		while (j <= nb_of_days && moncycle_app.menu_opened_date!=moncycle_app.day_timeline[menu_current_date]["cycle"]) {
 			date_cursor.setDate(date_cursor.getDate()-1);
-			moncycle_app.menu_opened_date = moncycle_app.date.str(date_cursor);
+			moncycle_app.menu_opened_date = dates.str(date_cursor);
 			if (moncycle_app.menu_opened_date==moncycle_app.day_timeline[menu_current_date]["cycle"]) $("#ev_cycle_1st_day").prop('checked', true);
 			else $("#ev_cycle_1st_day").prop('checked', false);
 			moncycle_app.submit_menu();
@@ -1350,28 +1098,27 @@ export const moncycle_app = {
 		if (menu_current_1st_day) $("#ev_cycle_1st_day").prop('checked', true);
 	},
 	suppr_day_timeline : function () {
-		let date = moncycle_app.date.parse($("#form_date").val());
+		let date = dates.parse($("#form_date").val());
 		date.setHours(9);
 		if (confirm(moncycle_app_text.confirm_delete_day(date))) {
-			moncycle_store.queue_delete(moncycle_app.date.str(date), moncycle_app.date.nowInUTC());
+			moncycle_store.queue_delete(dates.str(date), dates.now_in_utc());
 			moncycle_app.close_menu();
 		}
 	},
 	graph_preparation_data : function (data) {
 		$.each(data, function(o_date, o_data) {
 			if (moncycle_app.graph_data[o_data.cycle] == undefined) moncycle_app.graph_data[o_data.cycle] = {};
-			let date = moncycle_app.date.parse(o_date);
+			let date = dates.parse(o_date);
 			let label = moncycle_app_text.date_short(date);
 			moncycle_app.graph_data[o_data.cycle][label] = parseFloat(o_data.temperature);
 			if (moncycle_app.graphs[o_data.cycle]) moncycle_app.graph_update(o_data.cycle);
 		});
 	},
-	fc_note_regex : /^((h|m|l|vl|H|M|L|VL|VH)\s*(b|B)?\s*)?(2W|10KL|10SL|10DL|10WL|2w|10kl|10sl|10dl|10wl|[024]|(([68]|10)\s*[BCGKLPYRbcgklpyr]{1,8}))?\s*([xX][123]|AD|ad)?(\s*[RrLl]?(ap|AP))?$/,
 	fc_test_note : function() {
 		if (!$("#form_fc").val()) {
 			$("#fc_msg").empty();
 		}
-		else if (moncycle_app.fc_note_regex.test($("#form_fc").val().toUpperCase())) {
+		else if (fc_note_regex.test($("#form_fc").val().toUpperCase())) {
 			$("#fc_msg").html(moncycle_app_text.fc_syntax_valid);
 			$("#fc_msg").addClass("vert");
 			$("#fc_msg").removeClass("rouge");
@@ -1450,28 +1197,6 @@ export const moncycle_app = {
 			note = note.replace(c,'');
 		});
 		return note;
-	},
-	date : {
-		now : function () {
-			let d =  new Date();
-			d.setHours(9,0,0,0);
-			return d;
-		},
-		parse : function (str) {
-			let d = moncycle_app.date.now();
-			let b = str.split(/\D/);
-			d.setFullYear(b[0], b[1]-1, b[2]);
-			return d;
-		},
-		str : function (d) {
-			let m = d.getMonth()+1;
-			let j = d.getDate();
-			return [d.getFullYear(), m<10 ? "0"+m : m, j<10 ? "0"+j : j].join("-");
-		},
-		// the moment as the API wants it (RFC 3339, UTC): 2026-03-10T15:30:45Z
-		nowInUTC : function () {
-			return new Date().toISOString().replace(/\.\d+Z$/, "Z");
-		}
 	}
 }
 

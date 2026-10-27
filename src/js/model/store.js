@@ -14,6 +14,8 @@
 
 import { moncycle_config } from "/js/config.js";
 import { moncycle_compat } from "/js/compat.js";
+import { blank_day, is_blank, day_from_body, day_meta, codified_fields } from "/js/model/day.js";
+import { day_number, cycle_of, set_member, place_days } from "/js/model/cycles.js";
 
 const $ = globalThis.$;
 
@@ -84,8 +86,8 @@ export const moncycle_store = {
 	request_timeout : 30000,
 	retry_delays : [5000, 15000, 60000, 300000],
 	// the content a Day holds, as opposed to where it stands in its cycle and when it was written
-	day_meta : ["date", "cycleStartDate", "cycleDay", "lastWriteClientUtc", "lastWriteDb"],
-	codified_fields : ["codifiedBleedingObservation", "codifiedMucusSensation", "codifiedMucusObservation", "codifiedNumberObservations", "codifiedPainObservations"],
+	day_meta : day_meta,
+	codified_fields : codified_fields,
 
 	/* -----------------------------------------------------------------------
 	** EVENTS
@@ -335,22 +337,8 @@ export const moncycle_store = {
 	** A DAY IN THE COPY
 	** ====================================================================== */
 	// the empty day the API answers for a date that holds nothing
-	blank_day : function (date) {
-		let day = {
-			date : date, cycleStartDate : null, cycleDay : null, cycleFirstDay : false, dayNotObserved : false,
-			stampColor : null, stampBaby : false, isPeak : false, counterStart : null, sexUnion : false, observationPaused : false,
-			freeMucusSensation : [], freeMucusObservation : [], freeOther : [], temperature : null, temperatureTime : null, codifiedArrow : null,
-			comment : "", lastWriteClientUtc : null, lastWriteDb : null,
-		};
-		moncycle_store.codified_fields.forEach(function (field) { day[field] = null; });
-		return day;
-	},
-	is_blank : function (day) {
-		let blank = moncycle_store.blank_day(day.date);
-		return Object.keys(blank).every(function (key) {
-			return moncycle_store.day_meta.includes(key) || JSON.stringify(day[key]) === JSON.stringify(blank[key]);
-		});
-	},
+	blank_day : blank_day,
+	is_blank : is_blank,
 	// the day of a date, an empty one when it holds nothing; with its place in its cycle
 	get_day : function (date) {
 		return moncycle_store.days[date] || Object.assign(moncycle_store.blank_day(date), moncycle_store.cycle_of(date));
@@ -368,26 +356,12 @@ export const moncycle_store = {
 	},
 
 	// the number of days from a cycle's first day to a date, plus one
-	day_number : function (cycle, date) {
-		return Math.round((Date.parse(date + "T00:00:00Z") - Date.parse(cycle + "T00:00:00Z")) / 86400000) + 1;
-	},
-	// where a date stands in the cycles of the account: the closest first day at or before it
+	day_number : day_number,
+	// where a date stands in the cycles of the account
 	cycle_of : function (date) {
-		let cycle = null;
-		((moncycle_store.account || {}).allCyclesFirstDay || []).forEach(function (start) {
-			if (start <= date && (cycle === null || start > cycle)) cycle = start;
-		});
-		return {cycleStartDate : cycle, cycleDay : cycle ? moncycle_store.day_number(cycle, date) : null};
+		return cycle_of((moncycle_store.account || {}).allCyclesFirstDay, date);
 	},
-	// A list of dates, newest first, with a date in it or out of it.
-	set_member : function (list, date, member) {
-		let at = list.indexOf(date);
-		if (member && at < 0) {
-			list.push(date);
-			list.sort().reverse();
-		}
-		else if (!member && at >= 0) list.splice(at, 1);
-	},
+	set_member : set_member,
 	// The account lists the first days and the pauses, and every day shows its place in its cycle:
 	// after a day changed, make both agree with it. Returns the dates of the days that changed (the day
 	// itself first) and whether the account's lists did.
@@ -402,50 +376,14 @@ export const moncycle_store = {
 		return {days : [date].concat(moved), account : lists !== JSON.stringify([moncycle_store.account.allCyclesFirstDay, moncycle_store.account.allObservationPausedDates])};
 	},
 	recompute_cycles : function () {
-		let starts = moncycle_store.account.allCyclesFirstDay.slice().sort();
-		let moved = [];
-		let next = 0;
-		let cycle = null;
-		Object.keys(moncycle_store.days).sort().forEach(function (date) {
-			while (next < starts.length && starts[next] <= date) cycle = starts[next++];
-			let day = moncycle_store.days[date];
-			let place = cycle ? moncycle_store.day_number(cycle, date) : null;
-			if (day.cycleStartDate === cycle && day.cycleDay === place) return;
-			day.cycleStartDate = cycle;
-			day.cycleDay = place;
-			moncycle_store.write(moncycle_store.keys.day + date, day);
-			moved.push(date);
-		});
+		const moved = place_days(moncycle_store.account.allCyclesFirstDay, moncycle_store.days);
+		moved.forEach(function (date) { moncycle_store.write(moncycle_store.keys.day + date, moncycle_store.days[date]); });
 		return moved;
 	},
 
 	// The day the server will hold once it has taken a POST /api/v2/day/{date} body, as far as the page can tell.
 	// The server's own answer replaces it as soon as there is one.
-	day_from_body : function (body, previous) {
-		let baby = !!body.stampBaby;
-		let temperature = body.temperature > 0;
-		let day = Object.assign(moncycle_store.blank_day(body.date), {
-			cycleFirstDay : !!body.cycleFirstDay,
-			dayNotObserved : !!body.dayNotObserved,
-			stampColor : body.stampColor || (baby ? "White" : null),
-			stampBaby : baby,
-			isPeak : !!body.isPeak,
-			counterStart : body.counterStart > 0 ? body.counterStart : null,
-			sexUnion : !!body.sexUnion,
-			observationPaused : !!body.observationPaused,
-			freeMucusSensation : (body.freeMucusSensation || []).slice(),
-			freeMucusObservation : (body.freeMucusObservation || []).slice(),
-			freeOther : (body.freeOther || []).slice(),
-			temperature : temperature ? body.temperature : null,
-			temperatureTime : temperature && body.temperatureTime ? body.temperatureTime : null,
-			codifiedArrow : body.codifiedArrow || null,
-			comment : body.comment || "",
-			lastWriteClientUtc : body.lastWriteClientUtc ? body.lastWriteClientUtc.replace(" ", "T").replace(/Z?$/, "Z") : null,
-			lastWriteDb : previous ? previous.lastWriteDb : null,
-		});
-		moncycle_store.codified_fields.forEach(function (field) { day[field] = body[field] || null; });
-		return day;
-	},
+	day_from_body : day_from_body,
 
 	/* -----------------------------------------------------------------------
 	** WRITING: the copy first, then the server

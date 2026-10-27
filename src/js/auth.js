@@ -13,7 +13,7 @@
 */
 
 import { moncycle_config } from "/js/config.js";
-import { moncycle_store } from "/js/store.js";
+import { moncycle_store } from "/js/model/store.js";
 import { moncycle_captcha } from "/js/captcha.js";
 
 const $ = globalThis.$;
