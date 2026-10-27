@@ -12,6 +12,13 @@
 ** https://github.com/moncycle-app/backend-api-web-app
 */
 
+import { moncycle_config } from "/js/config.js";
+import { moncycle_store } from "/js/store.js";
+import { moncycle_captcha } from "/js/captcha.js";
+import { moncycle_news } from "/js/news.js";
+
+const $ = globalThis.$;
+
 // The settings page (settings.html). It is a menu and nine panels; the address says which one is open (settings#securite).
 // Reading order of this file:
 //   1. the text the user reads        5. the panels, one section each:

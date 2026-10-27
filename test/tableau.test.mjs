@@ -1,13 +1,9 @@
-// Characterisation of the pure parts of js/tableau.js (FertilityCare notation, day mapping), loaded as the browser loads it:
-// a classic script run in a context with no DOM. These tests must keep passing while the code moves into modules.
+// Characterisation of the pure parts of tableau.js (FertilityCare notation, day mapping), imported with no DOM.
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import vm from "node:vm";
-
-const sandbox = { window: { addEventListener() { } }, document: {}, console };
-vm.runInNewContext(readFileSync(new URL("../src/js/tableau.js", import.meta.url), "utf8"), sandbox);
-const app = sandbox.moncycle_app;
+import { install } from "./support/browser_stub.mjs";
+install();
+const { moncycle_app: app } = await import("/js/tableau.js");
 
 test("parse_fc_note", () => {
 	const note = app.parse_fc_note("VL 10KL X1");

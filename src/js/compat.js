@@ -16,7 +16,7 @@
 ** web app declares, in version.json, the range of generations it was tested with: api {min, max}. A plain script that needs nothing,
 ** so that the build and the tests can load it too.
 */
-const moncycle_compat = {
+export const moncycle_compat = {
 	// the generation as a number, or null when the text is not one (a git describe form, nothing)
 	parse : function (api_version) {
 		const found = /^v?(\d+)(dev)?$/.exec(typeof api_version === "string" ? api_version.trim() : "");
@@ -46,5 +46,3 @@ const moncycle_compat = {
 	},
 };
 
-if (typeof moncycle_store !== "undefined") moncycle_store.on("incompatible", moncycle_compat.show_notice);
-if (typeof module !== "undefined") module.exports = moncycle_compat;

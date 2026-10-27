@@ -12,6 +12,11 @@
 ** https://github.com/moncycle-app/backend-api-web-app
 */
 
+import { moncycle_config } from "/js/config.js";
+import { moncycle_store } from "/js/store.js";
+
+const $ = globalThis.$;
+
 // The captcha of a form (register, sign-in once an account asks for it, lost password). The server keeps nothing: POST
 // /api/v2/captcha gives a picture and a signed token for a purpose and an e-mail address, the visitor types what the picture
 // says, and the form posts the answer (`captcha`) with the token (`captchaToken`). The token is tied to the address
@@ -19,7 +24,7 @@
 // and after anything the server refused. The picture is set with .attr("src") and nothing from the server is ever
 // written into the page as HTML.
 
-var moncycle_captcha = (function () {
+export const moncycle_captcha = (function () {
 	const JPEG_DATA_URI = /^data:image\/jpeg;base64,[A-Za-z0-9+\/]+={0,2}$/;
 	const TOKEN = /^[0-9]{1,12}\.[0-9a-f]{64}$/;
 	const TYPING_PAUSE_MS = 500;

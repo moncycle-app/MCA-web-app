@@ -4,10 +4,8 @@
 import { readFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { createRequire } from "node:module";
+import { moncycle_compat as compat } from "../src/js/compat.js";
 
-const require = createRequire(import.meta.url);
-const compat = require("../src/js/compat.js");
 const here = dirname(fileURLToPath(import.meta.url));
 const range = JSON.parse(readFileSync(join(here, "..", "src", "version.json"), "utf8")).api;
 const source = process.argv[2];

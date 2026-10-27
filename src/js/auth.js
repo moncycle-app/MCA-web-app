@@ -12,6 +12,12 @@
 ** https://github.com/moncycle-app/backend-api-web-app
 */
 
+import { moncycle_config } from "/js/config.js";
+import { moncycle_store } from "/js/store.js";
+import { moncycle_captcha } from "/js/captcha.js";
+
+const $ = globalThis.$;
+
 // The sign-in page (auth.html), as a file of its own: the CSP is script-src 'self', so no inline script.
 
 window.addEventListener("storage", function () {

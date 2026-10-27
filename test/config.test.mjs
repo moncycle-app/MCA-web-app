@@ -1,9 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createRequire } from "node:module";
-const require = createRequire(import.meta.url);
-globalThis.window = { location: { href: "https://app.example/auth", origin: "https://app.example" } };
-const config = require("../src/js/config.js");
+import { install } from "./support/browser_stub.mjs";
+install();
+const { moncycle_config: config } = await import("/js/config.js");
 
 test("parse_api_url", () => {
 	assert.equal(config.parse_api_url("/api/v2"), "/api/v2");

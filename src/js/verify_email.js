@@ -12,6 +12,11 @@
 ** https://github.com/moncycle-app/backend-api-web-app
 */
 
+import { moncycle_config } from "/js/config.js";
+import { moncycle_store } from "/js/store.js";
+
+const $ = globalThis.$;
+
 // The page of the link in a mail (verify_email.html), as a file of its own: the CSP is script-src 'self', so no inline script.
 // The address holds the purpose and the token in its fragment ("#purpose=resetPassword&t=..."): a fragment is never sent to a server,
 // written in a log or given as a Referer, and a mail scanner that only fetches the link does not run this script, so it uses nothing

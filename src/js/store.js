@@ -12,6 +12,11 @@
 ** https://github.com/moncycle-app/backend-api-web-app
 */
 
+import { moncycle_config } from "/js/config.js";
+import { moncycle_compat } from "/js/compat.js";
+
+const $ = globalThis.$;
+
 /* ===========================================================================
 ** THE LOCAL COPY OF THE ACCOUNT
 **
@@ -33,7 +38,7 @@
 **
 ** This file holds no text for the user and draws nothing: a page listens to the events (see on()).
 ** ======================================================================== */
-const moncycle_store = {
+export const moncycle_store = {
 
 	// Bump it when what is kept in localStorage changes shape: the copy of the versions before is dropped.
 	schema : 7,
@@ -915,3 +920,5 @@ const moncycle_store = {
 		return changes;
 	},
 };
+
+moncycle_store.on("incompatible", moncycle_compat.show_notice);

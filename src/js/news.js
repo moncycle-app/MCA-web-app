@@ -3,7 +3,7 @@
 ** no referrer go out, the answer must be JSON and small, only the four strings of the French item are kept (length-capped; the pages draw
 ** them with .text()), and the link must be https. A missing item (null), an item a month old or older and any failure give no item, and
 ** the details go to the console. */
-const moncycle_news = {
+export const moncycle_news = {
 	max_age_days : 30,
 	max_chars : { title : 200, description : 600, url : 500 },
 	max_response_chars : 16384,

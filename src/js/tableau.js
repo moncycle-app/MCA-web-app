@@ -12,6 +12,12 @@
 ** https://github.com/moncycle-app/backend-api-web-app
 */
 
+import { moncycle_config } from "/js/config.js";
+import { moncycle_store } from "/js/store.js";
+import { moncycle_news } from "/js/news.js";
+
+const $ = globalThis.$;
+
 /* ===========================================================================
 ** USER-FACING TEXT
 **
@@ -27,7 +33,7 @@
 **  - FertilityCare / cervical mucus notation codes (VL, H, B, AD, RAP, 10KL, X1...),
 **    which belong to the method itself.
 ** ======================================================================== */
-const moncycle_app_text = {
+export const moncycle_app_text = {
 
 	/* --- calendar ------------------------------------------------------- */
 	months : ["jan", "fév", "mars", "avr", "mai", "juin", "juil", "août", "sep", "oct", "nov", "déc"],
@@ -183,7 +189,7 @@ const moncycle_app_text = {
 	desc_legacy_title : "Sans type : sensation ou observation ? Touchez le jour pour l’ouvrir",
 }
 
-moncycle_app = {
+export const moncycle_app = {
 	stamp_class : {
 		"R"  : "rouge",
 		"G"  : "vert",
