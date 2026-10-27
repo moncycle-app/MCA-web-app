@@ -3,3 +3,5 @@ src/vendor/
 .DS_Store
 CLAUDE.md
 gitignore/
+test-results/
+playwright-report/

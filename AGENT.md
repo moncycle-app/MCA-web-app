@@ -5,6 +5,18 @@ Working notes for coding agents (and for people) changing the moncycle.app web a
 are built with `moncycle_config.api_url(path)` from `src/config.json`; every path must be a path of that contract. Text a user reads
 stays French, code and comments English. The app is a **wellbeing** application: no "health" wording, no identity.
 
+## jQuery is deprecated
+
+jQuery (`src/vendor/jquery.min.js`) stays in the project only until the existing code is migrated; it is **deprecated**.
+
+- **Do not use jQuery in any new code**: no `$(...)`, no `$.ajax`/`$.get`, no jQuery plugin. Use plain JS: `document.querySelector`,
+  `addEventListener`, `classList`, `hidden`, `textContent`, `append()`, `fetch` (through `moncycle_config.fetch`), `Array.prototype.map`.
+- **When a change touches code that uses jQuery, migrate that code to plain JS in the same change**, within the scope of the task: the
+  function, handler or block you edit, not the whole file. Do not leave a mix of both in one function. Keep the behaviour the same
+  (the rules below still hold: user text through `textContent` or text nodes, never as HTML).
+- Do not start a repository-wide rewrite on your own, and do not add jQuery back to a page that no longer loads it. When the last
+  use is gone, the `jquery` dependency and its `<script>` tags can be removed.
+
 ## The web client
 
 `src/js/`. The Content-Security-Policy is `script-src 'self'`:
