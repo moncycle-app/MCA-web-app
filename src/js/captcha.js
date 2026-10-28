@@ -14,6 +14,7 @@
 
 import { moncycle_config } from "/js/config.js";
 import { moncycle_store } from "/js/model/store.js";
+import { t, t_map } from "/js/core/i18n.js";
 
 const $ = globalThis.$;
 
@@ -31,11 +32,6 @@ export const moncycle_captcha = (function () {
 	// An address worth asking a picture for: the browser's own check lets "marie@example" through, the server does not (a dot is
 	// needed in the domain), and asking for a picture of an address that is still being typed would only draw an error.
 	const COMPLETE_ADDRESS = /@[^@]*\.[^@.]+$/;
-
-	const load_errors = {
-		captcha_unavailable: "Le captcha est indisponible pour le moment, réessayez plus tard.",
-		maintenance: "Le service est en maintenance, réessayez plus tard.",
-	};
 
 	// attach(options) wires one captcha field set to its e-mail field. options:
 	//   purpose  "register", "recover" or "login"
@@ -82,7 +78,7 @@ export const moncycle_captcha = (function () {
 				const data = (ret || {}).data || {};
 				if (typeof data.image !== "string" || !JPEG_DATA_URI.test(data.image) || typeof data.token !== "string" || !TOKEN.test(data.token)) {
 					clear();
-					if (options.error) options.error("Le captcha n'a pas pu être chargé.");
+					if (options.error) options.error(t("captcha.load_failed"));
 					return;
 				}
 				if (options.error) options.error("");
@@ -95,7 +91,7 @@ export const moncycle_captcha = (function () {
 				clear();
 				const code = moncycle_store.error_code(jqXHR);
 				// an address the server finds incomplete is not a failure of the captcha: there is just no picture yet
-				if (options.error) options.error(code === "invalid_email" ? "" : load_errors[code] || "Le captcha n'a pas pu être chargé.");
+				if (options.error) options.error(code === "invalid_email" ? "" : t_map("captcha.load_errors")[code] || t("captcha.load_failed"));
 			});
 		};
 

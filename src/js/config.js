@@ -16,7 +16,8 @@
 ** the OpenAPI file ("/api/v2" for the API of the same site, "https://tableau.moncycle.app/api/v2" for another one). Every call of
 ** the web app is built with api_url("/token"), api_url("/day/2026-03-10")...: the paths of the contract.
 **
-** A page's own code waits for the file: jQuery's ready is held until it is read, and `ready` is the promise for the rest.
+** A page's own code waits for the file: `await moncycle_config.ready` at the top of the page's module (jQuery's ready does not wait: it fires
+** as soon as the deferred scripts have run, which can be before the modules are loaded).
 ** An API on another origin ("remote") gets no cookie: the token of the sign-in is kept here and sent as `Authorization: Bearer`.
 */
 export const moncycle_config = {
@@ -93,10 +94,8 @@ export const moncycle_config = {
 const $ = globalThis.$;   // jQuery is a classic script, loaded before the modules; the tests have none
 if ($) {
 	moncycle_config.ready = moncycle_config.load();
-	$.holdReady(true);
 	moncycle_config.ready.then(function () {
 		moncycle_config.point_pages();
-		$.holdReady(false);
 	});
 	$.ajaxPrefilter(function (options, original, jqXHR) {
 		if (moncycle_config.remote && moncycle_config.is_api_call(options.url)) {

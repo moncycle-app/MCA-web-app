@@ -16,10 +16,13 @@ import { moncycle_config } from "/js/config.js";
 import { moncycle_store } from "/js/model/store.js";
 import { moncycle_captcha } from "/js/captcha.js";
 import { moncycle_news } from "/js/news.js";
+import { t, t_map, locale, ready as i18n_ready } from "/js/core/i18n.js";
 import { description_from_api, type_from_int, exists } from "/js/model/descriptions.js";
 import * as dates from "/js/model/dates.js";
 
 const $ = globalThis.$;
+
+await Promise.all([moncycle_config.ready, i18n_ready]);
 
 // The settings page (settings.html). It is a menu and nine panels; the address says which one is open (settings#securite).
 // Reading order of this file:
@@ -33,280 +36,63 @@ const $ = globalThis.$;
 ** 1. THE TEXT THE USER READS
 ** ======================================================================== */
 
+/* The texts are in the catalog (src/i18n/fr.json, keys settings.*); what is here only chooses and assembles them: plurals, the parts of a sentence. */
 const settings_text = {
-
-	// "1 jour" / "6 jours": French agrees the noun from 2 on, so 0 and 1 stay singular
-	count : function (n, one, many) {
-		return `${n} ${n > 1 ? many : one}`;
-	},
-
-	saved : "✅ enregistré",
-
-	/* --- the keywords (descriptions) --------------------------------------- */
-	desc_none : "Vous n’avez aucune sensation ou observation renseignée dans l’application.",
-	desc_name_empty : "le nom ne peut pas être vide",
-	desc_duplicate : "ce mot clé existe déjà",
-	desc_deleted : "✅ supprimé",
-	desc_count_title : "Nombre de jours associés à ce mot clé",
-	desc_type_name : {0: "Type à définir", 1: "Observation", 2: "Sensation"},
-	desc_confirm_delete_many : function (name, count) {
-		return `Êtes-vous sûr de vouloir supprimer la description « ${name} » ?\n\nLes jours auxquels ${name} a été associé perdront cette information de manière irréversible. La description « ${name} » est actuellement associée à ${count} dates différentes.`;
-	},
-	desc_confirm_delete_one : function (name) {
-		return `Êtes-vous sûr de vouloir supprimer la description « ${name} » ?\n\nLes jours auxquels ${name} a été associé perdront cette information de manière irréversible. La description « ${name} » est actuellement associée à une date.`;
-	},
-
-	/* --- the local copy ------------------------------------------------------------ */
-	local_reset_confirm : "Vider les données gardées dans ce navigateur ?\n\nVous restez connecté et rien n’est supprimé de votre compte : tout est téléchargé de nouveau. Les changements pas encore envoyés sont conservés.",
-	local_reset_running : "⏳ nettoyage et téléchargement…",
-	local_reset_done : "✅ données locales vidées puis téléchargées de nouveau.",
-	local_sync_running : "⏳ synchronisation…",
-	local_sync_done : "✅ synchronisé.",
-	local_failed : "synchronisation impossible (connexion ?). Réessayez.",
-
-	/* --- a description merged into another ------------------------------------- */
-	desc_merge_placeholder : "🔀 Fusionner dans…",
-	desc_merge_title : "Remplacer cette description par une autre sur tous les jours associés, puis la supprimer (action définitive)",
+	desc_confirm_delete_many : function (name, count) { return t("settings.desc_confirm_delete_many", {name: name, count: count}); },
+	desc_confirm_delete_one : function (name) { return t("settings.desc_confirm_delete_one", {name: name}); },
 	desc_merge_confirm : function (name, target, count) {
-		return `Fusionner « ${name} » dans « ${target} » ?\n\n`
-			+ (count ? `Sur ${count > 1 ? `chacun des ${count} jours` : "le jour"} où « ${name} » figure, « ${target} » le remplacera.` : `Aucun jour n’utilise « ${name} ».`)
-			+ `\nEnsuite « ${name} » sera supprimée.\n\n⚠️ Action définitive, sans retour en arrière.`;
+		const body = count ? t("settings.desc_merge_confirm_days", {name: name, target: target, count: count}) : t("settings.desc_merge_confirm_none", {name: name});
+		return t("settings.desc_merge_confirm", {name: name, target: target, body: body});
 	},
-	desc_merge_done : function (name, target, count) { return `✅ « ${name} » a été fusionnée dans « ${target} » (${settings_text.count(count, "jour", "jours")}).`; },
-	desc_merge_gone : "Cette description ou la cible n’existe plus.",
-	// shown when a keyword has no type: the NFP export writes it into the comment of its days
-	desc_unknown_note : "⚠️ Les mots clés de type « à définir » ne sont pas reconnus comme sensation ou observation : dans un export NFP ils sont écrits dans le commentaire du jour, et une réimportation les y laissera (ce ne seront plus des mots clés). Choisissez leur type avant d’exporter.",
-
-	/* --- a description moved into the comments of its days ------------------ */
-	desc_comment_button_title : "Déplacer cette description dans le commentaire de tous les jours associés, puis la supprimer (action définitive)",
-	desc_delete_button_title : "Supprimer cette description sans rien copier",
-	desc_comment_syncing : "⏳ mise à jour de vos données…",
-	desc_comment_sync_failed : "action impossible : vos données n’ont pas pu être mises à jour (connexion ?).",
-	desc_comment_gone : "Cette description n’existe plus.",
-	desc_comment_unsaved : "Le nom affiché n’est pas (encore) enregistré : attendez « ✅ enregistré » ou corrigez-le, puis recommencez.",
-	desc_comment_nothing : function (name) {
-		return `Aucun jour n’est associé à « ${name} » : il n’y a rien à déplacer.\n\nPour supprimer cette description, utilisez le bouton ❌.`;
-	},
+	desc_merge_done : function (name, target, count) { return t("settings.desc_merge_done", {name: name, target: target, days: t("settings.n_days", {count: count})}); },
+	desc_comment_nothing : function (name) { return t("settings.desc_comment_nothing", {name: name}); },
 	// refused before anything is written: the description would be deleted, and these days would lose it
 	desc_comment_too_long : function (name, dates, max) {
 		let n = dates.length;
-		let shown = dates.slice(0, 5).map(function (date) { return date.split("-").reverse().join("/"); }).join(", ") + (n > 5 ? ", …" : "");
-		return `Rien n’a été modifié : la description « ${name} » reste en place.\n\n${n > 1 ? `${n} jours ont` : "1 jour a"} un commentaire trop long pour y ajouter « ${name} » (${max} caractères au plus) : ${shown}.\n\nRaccourcissez ${n > 1 ? "ces commentaires" : "ce commentaire"} dans le tableau, puis recommencez.`;
+		let shown = dates.slice(0, 5).map(settings_local_date).join(", ") + (n > 5 ? t("settings.desc_comment_too_long_more") : "");
+		return t("settings.desc_comment_too_long", {name: name, max: max, shown: shown, who: t("settings.desc_comment_too_long_who", {count: n}), which: t("settings.desc_comment_too_long_which", {count: n})});
 	},
 	// asked before the move: it cannot be taken back
 	desc_comment_confirm : function (name, plan) {
 		let n = plan.change.length;
 		let kept = plan.kept.length;
-		let text;
-		if (n > 0) {
-			text = `Déplacer « ${name} » dans le commentaire de ${settings_text.count(n, "jour", "jours")} ?\n\n`
-				+ `Sur ${n > 1 ? "chacun de ces jours" : "ce jour"}, « ${name} » sera ajouté à la fin du commentaire, après un « | » si le jour en a déjà un. Ensuite la description « ${name} » sera supprimée : elle ne sera plus associée à aucun jour.\n\n`
-				+ `⚠️ Action définitive, sans retour en arrière : le texte ajouté fait partie du commentaire et ne se distingue plus du vôtre, et la description ne pourra pas être rétablie.`;
-			if (kept == 1) text += `\n\n1 jour a déjà « ${name} » dans son commentaire : son commentaire ne sera pas modifié, il perdra seulement la description.`;
-			else if (kept > 1) text += `\n\n${kept} jours ont déjà « ${name} » dans leur commentaire : leurs commentaires ne seront pas modifiés, ils perdront seulement la description.`;
-		}
-		else {
-			text = `Supprimer la description « ${name} » ?\n\n`
-				+ `Elle figure déjà dans le commentaire de ${settings_text.count(kept, "jour", "jours")} auxquels elle est associée : les commentaires ne seront pas modifiés, la description sera seulement supprimée.\n\n`
-				+ `⚠️ Action définitive, sans retour en arrière.`;
-		}
+		if (n == 0) return t("settings.desc_comment_confirm_only", {name: name, days: t("settings.n_days", {count: kept})});
+		let text = t("settings.desc_comment_confirm_move", {name: name, days: t("settings.n_days", {count: n}), each: t("settings.desc_comment_confirm_each", {count: n})});
+		if (kept > 0) text += "\n\n" + t("settings.desc_comment_confirm_kept", {name: name, count: kept});
 		return text;
 	},
-	desc_comment_progress : function (done, total) {
-		return `⏳ ${done}/${total}`;
-	},
-	desc_comment_deleting : "⏳ suppression de la description…",
-	desc_comment_done : "✅ déplacée",
+	desc_comment_progress : function (done, total) { return t("settings.desc_comment_progress", {done: done, total: total}); },
 	// what the row says once the description is gone
 	desc_comment_moved : function (name, plan) {
-		if (plan.change.length == 0) return `✅ « ${name} » figurait déjà dans le commentaire de ${settings_text.count(plan.kept.length, "jour", "jours")} : la description a été supprimée.`;
-		return `✅ La description « ${name} » a été déplacée dans le commentaire de ${settings_text.count(plan.change.length, "jour", "jours")}, puis supprimée.`;
+		if (plan.change.length == 0) return t("settings.desc_comment_moved_already", {name: name, days: t("settings.n_days", {count: plan.kept.length})});
+		return t("settings.desc_comment_moved", {name: name, days: t("settings.n_days", {count: plan.change.length})});
 	},
-	desc_comment_offline : "envoi interrompu : les changements sont gardés sur cet appareil et partiront dès que la connexion revient. La description n’est pas supprimée : relancez l’action ensuite. Gardez cette page ouverte.",
 	desc_comment_refused : function (done, refused) {
-		return `${settings_text.count(done, "jour modifié", "jours modifiés")}, ${settings_text.count(refused, "refusé", "refusés")} par le serveur (modifié depuis un autre appareil ?). La description n’est pas supprimée : relancez l’action pour reprendre ${refused > 1 ? "ces jours" : "ce jour"}.`;
+		return t("settings.desc_comment_refused", {modified: t("settings.n_days_modified", {count: done}), refused: t("settings.n_refused", {count: refused}), those: t("settings.desc_comment_refused_those", {count: refused})});
 	},
-	desc_comment_delete_failed : "les commentaires sont écrits, mais la description n’a pas pu être supprimée. Relancez l’action pour la supprimer.",
-
-	/* --- export ----------------------------------------------------------- */
-	export_errors : {
-		no_data_in_period : "aucune observation sur cette période.",
-		invalid_range : "la 1ère date ne peut pas être après la 2ème.",
-		invalid_date : "dates non valides.",
-		invalid_value : "format non valide.",
-		missing_field : "dates vides.",
-	},
-
-	/* --- NFP import: the form ---------------------------------------------- */
-	import_pick_file : "choisissez un fichier.",
-	import_unreadable : "fichier illisible.",
-	import_checking : "⏳ vérification…",
-	import_writing : "⏳ import…",
-	import_but_check : "🔍 Vérifier le fichier",
-	import_but_check_busy : "🔍 Vérification…",
-	import_but_submit : "📥 Importer",
-	import_but_submit_busy : "📥 Import…",
 	// asked before a real import that is allowed to replace what is already there, since that is the only thing this form can destroy
-	import_confirm_override : function (filename) {
-		return `Importer « ${filename} » en écrasant les jours déjà renseignés ?\n\nLes journées de votre tableau dont la date figure dans le fichier seront entièrement remplacées, et leur contenu actuel sera définitivement perdu.\n\nPour savoir lesquelles sont concernées avant de vous décider, annulez et utilisez « Vérifier le fichier » : la simulation n’écrit rien.`;
-	},
-
-	/* --- NFP import: the report -------------------------------------------- */
-	import_head_check : "🔍 Simulation : rien n’a été écrit dans votre tableau.",
-	import_head_done : "✅ Import terminé.",
-	import_head_refused : "❌ Fichier refusé : rien n’a été écrit dans votre tableau.",
-	import_source : function (version, app) {
-		return app ? `Fichier NFP ${version}, écrit par ${app}.` : `Fichier NFP ${version}.`;
-	},
-	import_read : function (cycles, days) {
-		return `${settings_text.count(cycles, "cycle lu", "cycles lus")}, ${settings_text.count(days, "jour lu", "jours lus")}.`;
-	},
-	import_nothing_to_write : "Aucune journée renseignée dans ce fichier : il n’y a rien à importer.",
-	import_back_to_timeline : "👈 Revenez aux cycles pour voir vos données.",
-
-	// the per-day outcomes. Each heading is the summary line of a foldable list of dates.
-	import_days_created : function (n, dry) {
-		return dry
-			? `${settings_text.count(n, "jour sera créé", "jours seront créés")} dans votre tableau.`
-			: `${settings_text.count(n, "jour créé", "jours créés")}.`;
-	},
-	import_days_overwritten : function (n, dry) {
-		return dry
-			? `${settings_text.count(n, "jour déjà renseigné sera entièrement remplacé", "jours déjà renseignés seront entièrement remplacés")}.`
-			: `${settings_text.count(n, "jour remplacé", "jours remplacés")}.`;
-	},
-	import_days_skipped : function (n, dry) {
-		return dry
-			? `${settings_text.count(n, "jour déjà renseigné sera ignoré", "jours déjà renseignés seront ignorés")} : cochez « Écraser les jours déjà renseignés » pour les remplacer.`
-			: `${settings_text.count(n, "jour ignoré", "jours ignorés")} car déjà renseignés : cochez « Écraser les jours déjà renseignés » et relancez l’import pour les remplacer.`;
-	},
-	import_descriptions : function (n, dry) {
-		return dry
-			? `${settings_text.count(n, "nouvelle sensation/observation sera créée", "nouvelles sensations/observations seront créées")}.`
-			: `${settings_text.count(n, "sensation/observation créée", "sensations/observations créées")}.`;
-	},
-
+	import_confirm_override : function (filename) { return t("settings.import_confirm_override", {filename: filename}); },
+	import_source : function (version, app) { return app ? t("settings.import_source_app", {version: version, app: app}) : t("settings.import_source", {version: version}); },
+	import_read : function (cycles, days) { return t("settings.import_read", {cycles: t("settings.n_cycles_read", {count: cycles}), days: t("settings.n_days_read", {count: days})}); },
+	// the per-day outcomes. Each heading is the summary line of a foldable list of dates; `dry` is the simulation (what would be done).
+	import_days_created : function (n, dry) { return t(dry ? "settings.import_days_created_dry" : "settings.import_days_created", {count: n}); },
+	import_days_overwritten : function (n, dry) { return t(dry ? "settings.import_days_overwritten_dry" : "settings.import_days_overwritten", {count: n}); },
+	import_days_skipped : function (n, dry) { return t(dry ? "settings.import_days_skipped_dry" : "settings.import_days_skipped", {count: n}); },
+	import_descriptions : function (n, dry) { return t(dry ? "settings.import_descriptions_dry" : "settings.import_descriptions", {count: n}); },
 	// the three "nothing is dropped silently" lists the API answers with
-	import_warnings : function (n) {
-		return `⚠️ ${settings_text.count(n, "avertissement", "avertissements")} : les données sont importées, mais lisez ceci.`;
-	},
-	import_mapped : function (n) {
-		return `ℹ️ ${settings_text.count(n, "information importée de façon simplifiée", "informations importées de façon simplifiée")}.`;
-	},
-	import_ignored : function (n) {
-		return `ℹ️ ${settings_text.count(n, "information du fichier que cette application ne sait pas conserver", "informations du fichier que cette application ne sait pas conserver")}.`;
-	},
-
+	import_warnings : function (n) { return t("settings.import_warnings", {count: n}); },
+	import_mapped : function (n) { return t("settings.import_mapped", {count: n}); },
+	import_ignored : function (n) { return t("settings.import_ignored", {count: n}); },
 	// a refused file
-	import_issues : function (shown, total) {
-		return shown < total
-			? `❌ ${total} problèmes, dont les ${shown} premiers :`
-			: `❌ ${settings_text.count(total, "problème", "problèmes")} :`;
-	},
-	import_duplicates : function (n) {
-		return `❌ ${settings_text.count(n, "date est présente deux fois dans le fichier", "dates sont présentes deux fois dans le fichier")} : deux de ses cycles se chevauchent, et la journée appartiendrait aux deux. Le fichier doit être corrigé avant d’être importé.`;
-	},
-	import_duplicates_list : function (n) {
-		return settings_text.count(n, "date en double", "dates en double");
-	},
-	import_list_more : function (n) {
-		return `… et ${settings_text.count(n, "autre", "autres")}.`;
-	},
-
-	/* --- POST /api/v2/account: what the server refuses when the password is asked again (its own words are English); the keys are the
-	   codes of the problems (moncycle_store.error_pick), or "field:code" --- */
-	account_errors : {
-		invalid_password : "mot de passe incorrect",
-		password_required : "le mot de passe est nécessaire",
-		totp_required : "un code d’authentification multifacteur est nécessaire",
-		totp_invalid : "le code d’authentification multifacteur est incorrect",
-		invalid_email : "l’adresse e-mail n’est pas valide",
-		email_unchanged : "c’est déjà l’adresse de connexion de votre compte",
-		"notificationEmails" : "les adresses doivent être valides, séparées par « ; », 5 au plus",
-		password_too_weak : "le nouveau mot de passe ne respecte pas la règle des mots de passe (voir l'indication sous le champ)",
-		password_too_long : "le nouveau mot de passe est trop long (128 caractères au plus)",
-		password_invalid : "le nouveau mot de passe contient un caractère interdit",
-		password_unchanged : "le nouveau mot de passe est identique à l’ancien",
-		demo_account : "indisponible sur un compte de démo",
-		read_only_token : "cette connexion est en lecture seule",
-		account_locked : "compte temporairement bloqué après trop de tentatives échouées, réessayez plus tard",
-	},
-	// what any request can come back with, whatever the page was doing; the keys are error codes, then "field:code" / issue codes
-	common_errors : {
-		unauthorized : "votre session a pris fin, reconnectez-vous",
-		rate_limited : "trop de tentatives, réessayez dans quelques instants",
-		maintenance : "le service est en maintenance, réessayez plus tard",
-		database_unreachable : "le service est momentanément indisponible, réessayez plus tard",
-		schema_mismatch : "le service est en cours de mise à jour, réessayez plus tard",
-		unexpected_error : "le serveur a rencontré un problème, réessayez plus tard",
-		cross_origin_refused : "requête refusée : ouvrez l’application depuis son adresse habituelle",
-		demo_account : "indisponible sur un compte de démo",
-		read_only_token : "cette connexion est en lecture seule",
-		account_locked : "compte temporairement bloqué après trop de tentatives échouées, réessayez plus tard",
-		stale_write : "une version plus récente existe déjà, rechargez la page",
-		not_found : "élément introuvable : il a peut-être déjà été supprimé",
-		unsupported_media_type : "requête non comprise par le serveur",
-		invalid_json : "requête non comprise par le serveur",
-	},
-	error_network : "pas de connexion au serveur : vérifiez votre connexion et réessayez",
-	error_server : function (status) {
-		return `le serveur a répondu de façon inattendue (code ${status}), réessayez plus tard`;
-	},
-	// the keywords' own refusals
-	desc_errors : {
-		duplicate_name : "ce mot clé existe déjà avec ce type",
-	},
-	not_saved : "pas enregistré : ",
-	account_not_loaded : "vos réglages n’ont pas pu être chargés : ",
-	password_mismatch : "le nouveau mot de passe et sa confirmation ne sont pas identiques.",
-	email_link_sent : "✅ Lien envoyé à la nouvelle adresse. Le changement aura lieu quand vous l’aurez ouvert.",
-	email_link_not_sent : "le mail n’a pas pu être envoyé, réessayez plus tard.",
-	password_changed : "✅ Mot de passe changé.",
-	notification_emails_saved : "✅ Adresses enregistrées.",
-
-	/* --- connections and access tokens ---------------------------------------- */
-	tokens_current : "cet appareil",
-	tokens_scope : {readOnly : "lecture seule", readWrite : "lecture et écriture"},
-	tokens_created : "Créée le",
-	tokens_last_used : "Dernière utilisation le",
-	tokens_never_used : "Jamais utilisée",
-	tokens_expires : "Expire le",
-	tokens_revoke : "Déconnecter",
-	tokens_prefix_title : "Début du jeton: il permet de distinguer les connexions d'une même application.",
-	tokens_none : "Aucune connexion.",
-	tokens_confirm_revoke_all : "Déconnecter tous vos autres appareils et applications ?\n\nCet appareil reste connecté. Les autres devront se reconnecter.",
-	tokens_revoked : function (n) {
-		return `✅ ${settings_text.count(n, "connexion supprimée", "connexions supprimées")}`;
-	},
-	token_creating : "⏳ création…",
-	token_copy_failed : "Copie impossible: sélectionnez le jeton et copiez-le à la main.",
-	token_copied : "✅ copié",
-	token_errors : {
-		missing_field : "Mot de passe manquant.",
-		invalid_email : "L'adresse e-mail n'est pas valide.",
-		invalid_credentials : "Mot de passe incorrect.",
-		totp_required : "Un code d'authentification multifacteur est requis.",
-		totp_invalid : "Le code d'authentification multifacteur est incorrect.",
-		captcha_required : "Captcha manquant ou incorrect.",
-		captcha_expired : "Le captcha a expiré, recopiez le nouveau.",
-		captcha_unavailable : "Le captcha est indisponible pour le moment, réessayez plus tard.",
-		account_locked : "Compte temporairement bloqué après trop de tentatives échouées, réessayez plus tard.",
-		rate_limited : "Trop de tentatives depuis ce réseau, réessayez plus tard.",
-	},
-
-	/* --- double authentication ------------------------------------------------ */
-	totp_copy_failed : "Copie impossible: autorisez l’accès au presse-papiers, ou sélectionnez le secret à la main.",
-
-	/* --- account deletion ----------------------------------------------------- */
-	delete_confirm : function (nickname) {
-		return `${nickname}, êtes-vous sûr de vouloir supprimer votre compte ainsi que toutes vos données ? Cette action est irréversible. 😟`;
-	},
-	delete_done : function (nickname) {
-		return `${nickname}, votre compte a bien été supprimé. 😢💔`;
-	},
-	delete_failed : function (nickname, reason) {
-		return `${nickname}, votre compte n’a pas été supprimé : ${reason}`;
-	},
+	import_issues : function (shown, total) { return shown < total ? t("settings.import_issues_first", {shown: shown, total: total}) : t("settings.import_issues", {count: total}); },
+	import_duplicates : function (n) { return t("settings.import_duplicates", {count: n}); },
+	import_duplicates_list : function (n) { return t("settings.import_duplicates_list", {count: n}); },
+	import_list_more : function (n) { return t("settings.import_list_more", {more: t("settings.import_list_more_n", {count: n})}); },
+	error_server : function (status) { return t("settings.error_server", {status: status}); },
+	tokens_revoked : function (n) { return t("settings.tokens_revoked", {count: n}); },
+	delete_confirm : function (nickname) { return t("settings.delete_confirm", {nickname: nickname}); },
+	delete_done : function (nickname) { return t("settings.delete_done", {nickname: nickname}); },
+	delete_failed : function (nickname, reason) { return t("settings.delete_failed", {nickname: nickname, reason: reason}); },
 };
 
 
@@ -346,16 +132,16 @@ function settings_leave_if_signed_out(jqXHR) {
 // then the common ones, then no answer at all, then a server that did not speak the API's JSON, and at last the server's own message (English)
 // with every problem of a validation_failed. Never empty, and without a final full stop: the caller adds its own punctuation.
 function settings_error(jqXHR, own_map = {}) {
-	const known = moncycle_store.error_pick(jqXHR, own_map) || moncycle_store.error_pick(jqXHR, settings_text.common_errors);
+	const known = moncycle_store.error_pick(jqXHR, own_map) || moncycle_store.error_pick(jqXHR, t_map("settings.common_errors"));
 	if (known) return known.replace(/\.$/, "");
-	if (jqXHR.status === 0) return settings_text.error_network;
+	if (jqXHR.status === 0) return t("settings.error_network");
 	if (!(jqXHR.responseJSON || {}).error) return settings_text.error_server(jqXHR.status);
 	return moncycle_store.error_text(jqXHR).replace(/\.$/, "");
 }
 
 // The same for what a refusal of POST /api/v2/account says.
 function settings_account_error(jqXHR) {
-	return settings_error(jqXHR, settings_text.account_errors);
+	return settings_error(jqXHR, t_map("settings.account_errors"));
 }
 
 // A session that has ended answers 401 `unauthorized` to anything: back to the sign-in page, whichever request it was. (A 401 with another code
@@ -402,12 +188,13 @@ function settings_today() {
 	return dates.str(new Date());
 }
 
-function settings_french_date(ymd) {
-	return ymd.split("-").reverse().join("/");
+function settings_local_date(ymd) {
+	const parts = ymd.split("-");
+	return t("calendar.date_numeric", {day: parts[2], month: parts[1], year: parts[0]});
 }
 
-function settings_french_time(iso) {
-	return iso ? new Date(iso).toLocaleString("fr-FR", {dateStyle: "short", timeStyle: "short"}) : "";
+function settings_local_time(iso) {
+	return iso ? new Date(iso).toLocaleString(locale(), {dateStyle: "short", timeStyle: "short"}) : "";
 }
 
 // A form that changes the account with the password asked again (an address, the password): POST /api/v2/account, its answer under the
@@ -449,7 +236,7 @@ function settings_show_account(account) {
 	const demo = settings_is_demo();
 
 	$("#name").text(account.nickname);
-	document.title = "moncycle.app - réglages " + account.nickname;
+	document.title = t("settings.page_title", {nickname: account.nickname});
 	$("#warning_demo").prop("hidden", !demo);
 	// a demo account cannot change its sign-in, its connections, its mails, and cannot be deleted
 	["connexion", "appareils", "notifications", "suppression"].forEach(function (panel) { $("#menu_" + panel).prop("hidden", demo); });
@@ -517,14 +304,14 @@ function settings_save(payload, line) {
 	settings_say(line, "busy", "⏳");
 	settings_save_queue = settings_save_queue.then(function () {
 		return settings_api("POST", moncycle_config.api_url("/account"), payload).then(function (ret) {
-			settings_say(line, "ok", settings_text.saved, true);
+			settings_say(line, "ok", t("settings.saved"), true);
 			Object.assign(settings_account, ret.data || {});
 			if (ret.data && ret.data.nickname) $("#name").text(ret.data.nickname);
 			settings_show_method_entries();
 			settings_sync_later();
 		}, function (jqXHR) {
 			console.error(jqXHR);
-			settings_say(line, "error", settings_text.not_saved + settings_account_error(jqXHR));
+			settings_say(line, "error", t("settings.not_saved") + settings_account_error(jqXHR));
 			// the controls show what is saved, not what was refused
 			settings_fill_suivi(settings_account);
 			settings_fill_notifications(settings_account);
@@ -576,7 +363,7 @@ function settings_fill_birth_years(select, birth_year) {
 	blocks.sort(function (a, b) { return a - b; });
 
 	select.empty();
-	if (own_block === null) select.append(new Option("Choisir…", "", true, true)).find("option:first").prop("disabled", true);
+	if (own_block === null) select.append(new Option(t("settings.birth_year_choose"), "", true, true)).find("option:first").prop("disabled", true);
 	blocks.forEach(function (year) {
 		select.append(new Option(`entre ${year} et ${year + 4}`, year, false, year == own_block));
 	});
@@ -619,7 +406,7 @@ function settings_descriptions_load() {
 function settings_desc_draw() {
 	const container = $("#desc_froms_container").empty();
 	if (settings_descriptions.length == 0) {
-		container.append($("<i>", {class: "tech_info"}).text(settings_text.desc_none));
+		container.append($("<i>", {class: "tech_info"}).text(t("settings.desc_none")));
 		return;
 	}
 	settings_descriptions.forEach(function (description) { container.append(settings_desc_row(description)); });
@@ -635,7 +422,7 @@ function settings_desc_merge_options(row) {
 	const select = row.find(".desc_merge");
 	if (select.length == 0) return;
 	const id = row.data("id");
-	const wanted = [["", settings_text.desc_merge_placeholder]];
+	const wanted = [["", t("settings.desc_merge_placeholder")]];
 	settings_descriptions.forEach(function (known) {
 		if (known.id !== id) wanted.push([String(known.id), settings_desc_type_icon[known.type] + " " + known.name]);
 	});
@@ -650,18 +437,18 @@ function settings_desc_merge_options(row) {
 // Built with the DOM, never as HTML: a name is free text and would break out of value="...".
 function settings_desc_row(description) {
 	const type_select = $("<select>", {name: "type", class: "desc_type", "aria-label": "Type"}).append(
-		$("<option>", {value: "2", selected: description.type == 2}).text("🧠 Sensation"),
-		$("<option>", {value: "1", selected: description.type == 1}).text("👀 Observation"),
-		$("<option>", {value: "0", selected: description.type == 0, disabled: true}).text("❓ à définir"));
+		$("<option>", {value: "2", selected: description.type == 2}).text(t("settings.desc_type_sensation_option")),
+		$("<option>", {value: "1", selected: description.type == 1}).text(t("settings.desc_type_observation_option")),
+		$("<option>", {value: "0", selected: description.type == 0, disabled: true}).text(t("settings.desc_type_undefined_option")));
 	const line = $("<div>", {class: "desc_line"}).append(
-		$("<span>", {class: "desc_icon", title: settings_text.desc_type_name[description.type]}).text(settings_desc_type_icon[description.type]),
+		$("<span>", {class: "desc_icon", title: t_map("settings.desc_type_name")[description.type]}).text(settings_desc_type_icon[description.type]),
 		$("<input>", {class: "desc_name", type: "text", name: "name", maxlength: 256, title: description.name, "aria-label": "Nom"}).val(description.name),
-		$("<span>", {class: "desc_count", title: settings_text.desc_count_title}).text(description.use_count));
+		$("<span>", {class: "desc_count", title: t("settings.desc_count_title")}).text(description.use_count));
 	const actions = $("<div>", {class: "desc_actions"}).append(
 		type_select,
-		$("<select>", {class: "desc_merge", name: "merge", title: settings_text.desc_merge_title, "aria-label": settings_text.desc_merge_title}),
-		$("<button>", {type: "submit", name: "action", value: "comment", class: "desc_comment", title: settings_text.desc_comment_button_title, "aria-label": settings_text.desc_comment_button_title}).text("💬"),
-		$("<button>", {type: "submit", name: "action", value: "delete", class: "desc_delete", title: settings_text.desc_delete_button_title, "aria-label": settings_text.desc_delete_button_title}).text("❌"));
+		$("<select>", {class: "desc_merge", name: "merge", title: t("settings.desc_merge_title"), "aria-label": t("settings.desc_merge_title")}),
+		$("<button>", {type: "submit", name: "action", value: "comment", class: "desc_comment", title: t("settings.desc_comment_button_title"), "aria-label": t("settings.desc_comment_button_title")}).text("💬"),
+		$("<button>", {type: "submit", name: "action", value: "delete", class: "desc_delete", title: t("settings.desc_delete_button_title"), "aria-label": t("settings.desc_delete_button_title")}).text("❌"));
 	// the first submit button is the one Enter presses in the name field: it does nothing (the name is saved as it is typed)
 	const enter_button = $("<button>", {type: "submit", name: "action", value: "none", hidden: true});
 	const message = $("<p>", {class: "form_msg", role: "status"});
@@ -688,23 +475,23 @@ function settings_desc_save(row) {
 
 	const edit = ++settings_desc_last_edit;
 	const line = row.find(".form_msg");
-	if (name == "") return settings_say(line, "error", settings_text.desc_name_empty);
-	if (settings_desc_exists(name, type, id)) return settings_say(line, "error", settings_text.desc_duplicate);
+	if (name == "") return settings_say(line, "error", t("settings.desc_name_empty"));
+	if (settings_desc_exists(name, type, id)) return settings_say(line, "error", t("settings.desc_duplicate"));
 
 	settings_say(line, "busy", "⏳");
 	known.sent = {name: name, type: type};
 	settings_api("POST", moncycle_config.api_url("/description/" + encodeURIComponent(id)), {name: name, type: type_from_int[type]}).done(function () {
-		if (edit == settings_desc_last_edit) settings_say(line, "ok", settings_text.saved, true);
+		if (edit == settings_desc_last_edit) settings_say(line, "ok", t("settings.saved"), true);
 		// what the page holds of the keyword follows what was saved (the duplicate check, the emoji)
 		known.name = name;
 		known.type = type;
 		settings_desc_unknown_update();
-		row.find(".desc_icon").text(settings_desc_type_icon[type]).attr("title", settings_text.desc_type_name[type]);
+		row.find(".desc_icon").text(settings_desc_type_icon[type]).attr("title", t_map("settings.desc_type_name")[type]);
 		settings_sync_later();
 	}).fail(function (jqXHR) {
 		console.error(jqXHR);
 		if (edit == settings_desc_last_edit) {
-			settings_say(line, "error", settings_error(jqXHR, settings_text.desc_errors));
+			settings_say(line, "error", settings_error(jqXHR, t_map("settings.desc_errors")));
 			// refused or lost: the next key sends it again
 			known.sent = null;
 		}
@@ -722,11 +509,11 @@ function settings_desc_delete(row) {
 		row.remove();
 		settings_desc_unknown_update();
 		// the row is gone: the line of the list says it
-		settings_say($("#desc_msg"), "ok", settings_text.desc_deleted, true);
+		settings_say($("#desc_msg"), "ok", t("settings.desc_deleted"), true);
 		settings_sync_later();
 	}).fail(function (jqXHR) {
 		console.error(jqXHR);
-		settings_say(row.find(".form_msg"), "error", settings_error(jqXHR, settings_text.desc_errors));
+		settings_say(row.find(".form_msg"), "error", settings_error(jqXHR, t_map("settings.desc_errors")));
 	});
 }
 
@@ -742,19 +529,19 @@ async function settings_desc_move_to_comments(row) {
 	const button = row.find(".desc_comment");
 	let button_after = "💬";
 	button.prop("disabled", true).text("⏳");
-	settings_say(line, "busy", settings_text.desc_comment_syncing);
+	settings_say(line, "busy", t("settings.desc_comment_syncing"));
 	try {
 		// the days to change are the ones the server holds now
 		try { await moncycle_store.sync(); }
 		catch (e) {
-			settings_say(line, "error", settings_text.desc_comment_sync_failed);
+			settings_say(line, "error", t("settings.desc_comment_sync_failed"));
 			return;
 		}
 		settings_say(line, "", "");
 		const description = moncycle_store.descriptions.find(function (known) { return known.id === id; });
-		if (!description) return alert(settings_text.desc_comment_gone);
+		if (!description) return alert(t("settings.desc_comment_gone"));
 		// the name that will be written is the one saved, which must be the one the user sees
-		if (description.name !== settings_desc_row_name(row)) return alert(settings_text.desc_comment_unsaved);
+		if (description.name !== settings_desc_row_name(row)) return alert(t("settings.desc_comment_unsaved"));
 		const plan = moncycle_store.plan_description_to_comments(description);
 		// all or nothing: a day that cannot take the name would lose the description with the others
 		if (plan.too_long.length) return alert(settings_text.desc_comment_too_long(description.name, plan.too_long, moncycle_store.comment_max_chars));
@@ -771,17 +558,17 @@ async function settings_desc_move_to_comments(row) {
 			const waiting = plan.change.filter(function (one) { return moncycle_store.pending[one.date]; }).length;
 			const refused = run.refused.length;
 			if (waiting || refused) {
-				settings_say(line, "error", waiting ? settings_text.desc_comment_offline : settings_text.desc_comment_refused(plan.change.length - refused, refused));
+				settings_say(line, "error", waiting ? t("settings.desc_comment_offline") : settings_text.desc_comment_refused(plan.change.length - refused, refused));
 				button_after = "⚠️";
 				return;
 			}
 		}
 
-		settings_say(line, "busy", settings_text.desc_comment_deleting);
+		settings_say(line, "busy", t("settings.desc_comment_deleting"));
 		try { await moncycle_store.request("DELETE", moncycle_config.api_url("/description/" + encodeURIComponent(id))); }
 		catch (jqXHR) {
 			console.error(jqXHR);
-			settings_say(line, "error", settings_text.desc_comment_delete_failed);
+			settings_say(line, "error", t("settings.desc_comment_delete_failed"));
 			button_after = "⚠️";
 			return;
 		}
@@ -792,7 +579,7 @@ async function settings_desc_move_to_comments(row) {
 		settings_desc_unknown_update();
 		// the row is a message now: what it said is in the comments
 		row.attr("class", "desc_moved").removeAttr("id").removeData("id").empty().append(document.createTextNode(settings_text.desc_comment_moved(description.name, plan)));
-		settings_say($("#desc_msg"), "ok", settings_text.desc_comment_done, true);
+		settings_say($("#desc_msg"), "ok", t("settings.desc_comment_done"), true);
 	}
 	finally {
 		settings_desc_move_run = null;
@@ -811,18 +598,18 @@ async function settings_desc_merge(row, target_id) {
 	const id = row.data("id");
 	const select = row.find(".desc_merge");
 	select.prop("disabled", true);
-	settings_say(line, "busy", settings_text.desc_comment_syncing);
+	settings_say(line, "busy", t("settings.desc_comment_syncing"));
 	try {
 		try { await moncycle_store.sync(); }
 		catch (e) {
-			settings_say(line, "error", settings_text.desc_comment_sync_failed);
+			settings_say(line, "error", t("settings.desc_comment_sync_failed"));
 			return;
 		}
 		settings_say(line, "", "");
 		const source = moncycle_store.descriptions.find(function (known) { return known.id === id; });
 		const target = moncycle_store.descriptions.find(function (known) { return known.id === target_id; });
-		if (!source || !target) return alert(settings_text.desc_merge_gone);
-		if (source.name !== settings_desc_row_name(row)) return alert(settings_text.desc_comment_unsaved);
+		if (!source || !target) return alert(t("settings.desc_merge_gone"));
+		if (source.name !== settings_desc_row_name(row)) return alert(t("settings.desc_comment_unsaved"));
 		const change = moncycle_store.plan_description_merge(source, target);
 		if (!confirm(settings_text.desc_merge_confirm(source.name, target.name, change.length))) return;
 
@@ -835,16 +622,16 @@ async function settings_desc_merge(row, target_id) {
 			const waiting = change.filter(function (one) { return moncycle_store.pending[one.date]; }).length;
 			const refused = run.refused.length;
 			if (waiting || refused) {
-				settings_say(line, "error", waiting ? settings_text.desc_comment_offline : settings_text.desc_comment_refused(change.length - refused, refused));
+				settings_say(line, "error", waiting ? t("settings.desc_comment_offline") : settings_text.desc_comment_refused(change.length - refused, refused));
 				return;
 			}
 		}
 
-		settings_say(line, "busy", settings_text.desc_comment_deleting);
+		settings_say(line, "busy", t("settings.desc_comment_deleting"));
 		try { await moncycle_store.request("DELETE", moncycle_config.api_url("/description/" + encodeURIComponent(id))); }
 		catch (jqXHR) {
 			console.error(jqXHR);
-			settings_say(line, "error", settings_text.desc_comment_delete_failed);
+			settings_say(line, "error", t("settings.desc_comment_delete_failed"));
 			return;
 		}
 		try { await moncycle_store.sync(); }
@@ -852,7 +639,7 @@ async function settings_desc_merge(row, target_id) {
 		settings_descriptions = settings_descriptions.filter(function (other) { return other.id !== id; });
 		settings_desc_unknown_update();
 		row.attr("class", "desc_moved").removeAttr("id").removeData("id").empty().append(document.createTextNode(settings_text.desc_merge_done(source.name, target.name, change.length)));
-		settings_say($("#desc_msg"), "ok", settings_text.saved, true);
+		settings_say($("#desc_msg"), "ok", t("settings.saved"), true);
 		// the counts of the other rows are stale: the list is read again
 		settings_descriptions_load();
 	}
@@ -864,7 +651,7 @@ async function settings_desc_merge(row, target_id) {
 
 function settings_setup_descriptions() {
 	const container = $("#desc_froms_container");
-	$(".desc_unknown_note").text(settings_text.desc_unknown_note);
+	$(".desc_unknown_note").text(t("settings.desc_unknown_note"));
 
 	// What acts on a keyword shows under the one being edited, and stays while the focus or the pointer is in that row. Not :focus-within:
 	// a click on a button does not focus it in Safari and Firefox on macOS, and the row would close under the finger.
@@ -906,16 +693,16 @@ function settings_setup_descriptions() {
 		const form = $(this);
 		const name = settings_read(form, "name");
 		const type = parseInt(settings_read(form, "type"));
-		if (settings_desc_exists(name, type)) return settings_form_say(form, "error", settings_text.desc_duplicate);
+		if (settings_desc_exists(name, type)) return settings_form_say(form, "error", t("settings.desc_duplicate"));
 		settings_form_say(form, "busy", "⏳");
 		settings_api("POST", moncycle_config.api_url("/description"), {name: name, type: type_from_int[type]}).done(function () {
-			settings_form_say(form, "ok", settings_text.saved);
+			settings_form_say(form, "ok", t("settings.saved"));
 			form[0].reset();
 			settings_descriptions_load();
 			settings_sync_later();
 		}).fail(function (jqXHR) {
 			console.error(jqXHR);
-			settings_form_say(form, "error", settings_error(jqXHR, settings_text.desc_errors));
+			settings_form_say(form, "error", settings_error(jqXHR, t_map("settings.desc_errors")));
 		});
 	});
 }
@@ -937,7 +724,7 @@ function settings_setup_notifications() {
 		return {notificationEmails: settings_read(form, "notification_emails"), password: settings_read(form, "password")};
 	}, function () {
 		form.find("[name=password]").val("");
-		settings_form_say(form, "ok", settings_text.notification_emails_saved);
+		settings_form_say(form, "ok", t("settings.notification_emails_saved"));
 		settings_sync_later();
 	});
 }
@@ -954,7 +741,7 @@ function settings_fill_data(account) {
 	// nothing to export before the first day; with no day at all, nothing to export
 	if (account.oldestDay) {
 		form.find("[name=from], [name=to]").attr("min", account.oldestDay);
-		$("#export_oldest_day").text(settings_french_date(account.oldestDay));
+		$("#export_oldest_day").text(settings_local_date(account.oldestDay));
 		$("#export_oldest").prop("hidden", false);
 		// the whole history is what most exports want: ready to go
 		form.find("[name=from]").val(account.oldestDay);
@@ -977,7 +764,7 @@ function settings_setup_export() {
 		event.preventDefault();
 		settings_say(error_line, "", "");
 		moncycle_store.download($(this).attr("href")).catch(function (failure) {
-			settings_say(error_line, "error", settings_text.common_errors[failure.code] || (failure.status === 0 ? settings_text.error_network : failure.message) || "export impossible.");
+			settings_say(error_line, "error", t_map("settings.common_errors")[failure.code] || (failure.status === 0 ? t("settings.error_network") : failure.message) || t("settings.export_failed_default"));
 		});
 	});
 
@@ -988,12 +775,12 @@ function settings_setup_export() {
 		const format = settings_read(form, "format");
 		const show_error = function (reason) { settings_say(error_line, "error", reason); };
 		settings_say(error_line, "", "");
-		if (from == "" || to == "") return show_error(settings_text.export_errors.missing_field);
-		if (new Date(from) > new Date(to)) return show_error(settings_text.export_errors.invalid_range);
+		if (from == "" || to == "") return show_error(t_map("settings.export_errors").missing_field);
+		if (new Date(from) > new Date(to)) return show_error(t_map("settings.export_errors").invalid_range);
 		moncycle_store.download(`${form.attr("action")}/${encodeURIComponent(format)}?from=${from}&to=${to}`).catch(function (failure) {
-			const own = settings_text.export_errors[failure.issues.length ? failure.issues[0].code : failure.code];
-			const common = settings_text.common_errors[failure.code];
-			show_error(own || common || (failure.status === 0 ? settings_text.error_network : failure.message) || "export impossible.");
+			const own = t_map("settings.export_errors")[failure.issues.length ? failure.issues[0].code : failure.code];
+			const common = t_map("settings.common_errors")[failure.code];
+			show_error(own || common || (failure.status === 0 ? t("settings.error_network") : failure.message) || t("settings.export_failed_default"));
 		});
 	});
 }
@@ -1033,10 +820,10 @@ function settings_import_notes(source) {
 // An accepted file, dry run or real: the same report either way, with the verbs put in the future tense on a dry run.
 function settings_import_report(report) {
 	const dry = !!report.dryRun;
-	let html = settings_import_line(dry ? settings_text.import_head_check : settings_text.import_head_done, dry ? "import_head" : "import_head vert");
+	let html = settings_import_line(dry ? t("settings.import_head_check") : t("settings.import_head_done"), dry ? "import_head" : "import_head vert");
 	html += settings_import_line(settings_escape_html(settings_text.import_source(report.schemaVersion, report.sourceApp)), "label_info");
 	html += settings_import_line(settings_text.import_read(report.cyclesRead, report.daysRead), "label_info");
-	if (report.daysToWrite == 0) html += settings_import_line(settings_text.import_nothing_to_write);
+	if (report.daysToWrite == 0) html += settings_import_line(t("settings.import_nothing_to_write"));
 
 	// the three per-day outcomes, each a date list
 	html += settings_import_list(settings_text.import_days_created((report.daysCreated || []).length, dry), report.daysCreated, 40);
@@ -1045,14 +832,14 @@ function settings_import_report(report) {
 	if (report.descriptionsCreated > 0) html += settings_import_line(settings_text.import_descriptions(report.descriptionsCreated, dry), "label_info");
 
 	html += settings_import_notes(report);
-	if (!dry && report.daysWritten > 0) html += `<p class="import_line"><a href="/">${settings_text.import_back_to_timeline}</a></p>`;
+	if (!dry && report.daysWritten > 0) html += `<p class="import_line"><a href="/">${t("settings.import_back_to_timeline")}</a></p>`;
 	return html;
 }
 
 function settings_import_refusal(jqXHR) {
 	const error = (jqXHR.responseJSON || {}).error || {};
 	const details = error.details || {};
-	let html = settings_import_line(settings_text.import_head_refused, "import_head rouge");
+	let html = settings_import_line(t("settings.import_head_refused"), "import_head rouge");
 	// the API's own wording for the refusal, shown as it comes
 	html += settings_import_line(settings_escape_html(error.message || settings_error(jqXHR)), "label_info");
 
@@ -1073,20 +860,20 @@ function settings_import_run(dry_run) {
 	const form = $("#f_import");
 	const file = form.find("[name=file]")[0].files[0];
 	const line = form.find(".form_msg");
-	if (!file) return settings_say(line, "error", settings_text.import_pick_file);
+	if (!file) return settings_say(line, "error", t("settings.import_pick_file"));
 	const override = settings_is_checked(form, "override");
 	if (!dry_run && override && !confirm(settings_text.import_confirm_override(file.name))) return;
 
 	settings_import_running = true;
 	$("#import_report").empty();
-	settings_say(line, "busy", dry_run ? settings_text.import_checking : settings_text.import_writing);
-	$("#i_import_check").prop("disabled", true).text(dry_run ? settings_text.import_but_check_busy : settings_text.import_but_check);
-	$("#i_import_submit").prop("disabled", true).text(dry_run ? settings_text.import_but_submit : settings_text.import_but_submit_busy);
+	settings_say(line, "busy", dry_run ? t("settings.import_checking") : t("settings.import_writing"));
+	$("#i_import_check").prop("disabled", true).text(dry_run ? t("settings.import_but_check_busy") : t("settings.import_but_check"));
+	$("#i_import_submit").prop("disabled", true).text(dry_run ? t("settings.import_but_submit") : t("settings.import_but_submit_busy"));
 	const finish = function () {
 		settings_import_running = false;
 		settings_say(line, "", "");
-		$("#i_import_check").prop("disabled", false).text(settings_text.import_but_check);
-		$("#i_import_submit").prop("disabled", false).text(settings_text.import_but_submit);
+		$("#i_import_check").prop("disabled", false).text(t("settings.import_but_check"));
+		$("#i_import_submit").prop("disabled", false).text(t("settings.import_but_submit"));
 	};
 
 	// api/v2/import reads the file as the request body, so it goes up as it is -- no multipart form, and processData off so jQuery does not
@@ -1107,7 +894,7 @@ function settings_import_run(dry_run) {
 	}, function (err) {
 		finish();
 		console.error(err);
-		settings_say(line, "error", settings_text.import_unreadable);
+		settings_say(line, "error", t("settings.import_unreadable"));
 	});
 }
 
@@ -1144,10 +931,10 @@ function settings_setup_login_email() {
 		form.find("[type=password], [type=number]").val("");
 		if ((ret.meta || {}).loginEmailLinkSent) {
 			form.find("[name=new_login_email]").val("");
-			settings_form_say(form, "ok", settings_text.email_link_sent);
+			settings_form_say(form, "ok", t("settings.email_link_sent"));
 		}
 		else {
-			settings_form_say(form, "error", settings_text.email_link_not_sent);
+			settings_form_say(form, "error", t("settings.email_link_not_sent"));
 		}
 	});
 }
@@ -1159,10 +946,10 @@ function settings_setup_password() {
 	}, function () {
 		form.find("[type=password]").val("");
 		form.find("[name=logout_other_devices]").prop("checked", false);
-		settings_form_say(form, "ok", settings_text.password_changed);
+		settings_form_say(form, "ok", t("settings.password_changed"));
 	}, function () {
 		// the confirmation is checked here, before anything is sent
-		return settings_read(form, "pw1") == settings_read(form, "pw2") ? "" : settings_text.password_mismatch;
+		return settings_read(form, "pw1") == settings_read(form, "pw2") ? "" : t("settings.password_mismatch");
 	});
 }
 
@@ -1201,9 +988,9 @@ function settings_setup_totp() {
 
 	$("#totp_copy_secret").on("click", function () {
 		navigator.clipboard.writeText(secret).then(function () {
-			$("#totp_copy_secret_ok").text(settings_text.token_copied);
+			$("#totp_copy_secret_ok").text(t("settings.token_copied"));
 		}, function () {
-			$("#totp_copy_secret_ok").text(settings_text.totp_copy_failed);
+			$("#totp_copy_secret_ok").text(t("settings.totp_copy_failed"));
 		});
 	});
 
@@ -1250,9 +1037,9 @@ function settings_setup_totp() {
 function settings_token_card(token) {
 	const head = $("<div>", {class: "token_title"}).append($("<b>").text(token.name));
 	// the first characters of the token (null for an old one that started like another): what tells two connections of one app apart
-	if (token.prefix) head.append($("<code>", {class: "token_prefix", title: settings_text.tokens_prefix_title}).text(token.prefix + "…"));
-	head.append($("<span>", {class: "label_info"}).text(" — " + settings_text.tokens_scope[token.scope]));
-	if (token.current) head.append($("<b>", {class: "vert"}).text(" (" + settings_text.tokens_current + ")"));
+	if (token.prefix) head.append($("<code>", {class: "token_prefix", title: t("settings.tokens_prefix_title")}).text(token.prefix + "…"));
+	head.append($("<span>", {class: "label_info"}).text(" — " + t_map("settings.tokens_scope")[token.scope]));
+	if (token.current) head.append($("<b>", {class: "vert"}).text(" (" + t("settings.tokens_current") + ")"));
 
 	// key / value rows: the date in bold, then the address, and the device's own words under it in small
 	const facts = $("<dl>", {class: "kv"});
@@ -1262,16 +1049,16 @@ function settings_token_card(token) {
 		if (where) cell.append($("<small>").text(where));
 		facts.append($("<dt>").text(key), cell);
 	};
-	add_fact(settings_text.tokens_created, settings_french_time(token.createdAt), token.createdIp, token.createdUserAgent);
-	if (token.lastUsedAt) add_fact(settings_text.tokens_last_used, settings_french_time(token.lastUsedAt), token.lastUsedIp, token.lastUsedUserAgent);
-	else add_fact(settings_text.tokens_last_used, settings_text.tokens_never_used);
-	if (token.expiresAt) add_fact(settings_text.tokens_expires, settings_french_time(token.expiresAt));
+	add_fact(t("settings.tokens_created"), settings_local_time(token.createdAt), token.createdIp, token.createdUserAgent);
+	if (token.lastUsedAt) add_fact(t("settings.tokens_last_used"), settings_local_time(token.lastUsedAt), token.lastUsedIp, token.lastUsedUserAgent);
+	else add_fact(t("settings.tokens_last_used"), t("settings.tokens_never_used"));
+	if (token.expiresAt) add_fact(t("settings.tokens_expires"), settings_local_time(token.expiresAt));
 	const card = $("<div>", {class: "token_row"}).append(head, facts);
 
 	// this connection is the one in use: it ends with the logout button, not here
 	if (!token.current && token.prefix) {
 		const revoke = $("<form>", {class: "f_token_revoke", action: moncycle_config.api_url("/token/" + encodeURIComponent(token.prefix)), method: "delete"});
-		revoke.append($("<button>", {type: "submit", class: "rouge"}).text("🗑️ " + settings_text.tokens_revoke));
+		revoke.append($("<button>", {type: "submit", class: "rouge"}).text("🗑️ " + t("settings.tokens_revoke")));
 		card.append(revoke);
 	}
 	return card;
@@ -1280,7 +1067,7 @@ function settings_token_card(token) {
 function settings_tokens_load() {
 	return $.get(moncycle_config.api_url("/token")).done(function (ret) {
 		const container = $("#tokens_container").empty();
-		if (ret.data.length === 0) container.text(settings_text.tokens_none);
+		if (ret.data.length === 0) container.text(t("settings.tokens_none"));
 		ret.data.forEach(function (token) { container.append(settings_token_card(token)); });
 	}).fail(function (jqXHR) {
 		settings_leave_if_signed_out(jqXHR);
@@ -1306,7 +1093,7 @@ function settings_setup_tokens() {
 	});
 	$("#f_tokens_revoke_all").on("submit", function (event) {
 		event.preventDefault();
-		if (confirm(settings_text.tokens_confirm_revoke_all)) settings_tokens_revoke($(this));
+		if (confirm(t("settings.tokens_confirm_revoke_all"))) settings_tokens_revoke($(this));
 	});
 
 	// A token is made like a sign-in that sets no cookie: the password (and the code, and the captcha once the account asks for one) is
@@ -1341,7 +1128,7 @@ function settings_setup_tokens() {
 		}
 		settings_say($("#token_new_err"), "", "");
 		$("#token_new_result").prop("hidden", true);
-		button.prop("disabled", true).text("🔑 " + settings_text.token_creating);
+		button.prop("disabled", true).text("🔑 " + t("settings.token_creating"));
 		settings_api("POST", moncycle_config.api_url("/token"), payload).done(function (ret) {
 			$("#i_token_new_value").val(ret.data.token);
 			$("#token_copy_ok").text("");
@@ -1352,10 +1139,10 @@ function settings_setup_tokens() {
 			const error = (jqXHR.responseJSON || {}).error || {};
 			// the server asks for a captcha once the account has failed too often (a wrong password here counts like a wrong sign-in)
 			if ((error.details || {}).captchaRequired) captcha_field.prop("hidden", false);
-			const shown = settings_error(jqXHR, settings_text.token_errors);
+			const shown = settings_error(jqXHR, t_map("settings.token_errors"));
 			settings_say($("#token_new_err"), "error", shown);
 		}).always(function () {
-			button.prop("disabled", false).text("🔑 Créer le jeton");
+			button.prop("disabled", false).text(t("settings.token_create_button"));
 			// the captcha is tied to the account's counters, which this attempt may have moved: a new one whenever it is shown
 			captcha.reload(true);
 		});
@@ -1363,9 +1150,9 @@ function settings_setup_tokens() {
 
 	$("#but_token_copy").on("click", function () {
 		navigator.clipboard.writeText($("#i_token_new_value").val()).then(function () {
-			$("#token_copy_ok").text(settings_text.token_copied);
+			$("#token_copy_ok").text(t("settings.token_copied"));
 		}, function () {
-			$("#token_copy_ok").text(settings_text.token_copy_failed);
+			$("#token_copy_ok").text(t("settings.token_copy_failed"));
 		});
 	});
 }
@@ -1379,7 +1166,7 @@ function settings_fill_about(account) {
 	$("#tech_info_no").text(account.userId);
 	$("#tech_info_id").text(account.loginEmail);
 	const since = new Date(account.inscriptionDate);
-	$("#tech_info_insc").text(since.toLocaleDateString("fr-FR", {day: "2-digit", month: "2-digit", year: "numeric"}));
+	$("#tech_info_insc").text(since.toLocaleDateString(locale(), {day: "2-digit", month: "2-digit", year: "numeric"}));
 }
 
 // The version, and the terms of service: their page is a setting of the server (TERMS_OF_SERVICE_URL, told by server_info). None told: the
@@ -1453,7 +1240,7 @@ $(document).ready(function () {
 			window.location.replace("/auth");
 		}).fail(function (jqXHR) {
 			$("#but_logout").prop("disabled", false);
-			alert("Déconnexion impossible : " + settings_error(jqXHR));
+			alert(t("settings.logout_failed", {reason: settings_error(jqXHR)}));
 		});
 	});
 
@@ -1476,7 +1263,7 @@ $(document).ready(function () {
 	$.get(moncycle_config.api_url("/account")).done(function (ret) {
 		settings_show_account(ret.data);
 	}).fail(function (jqXHR) {
-		settings_say($("#page_msg"), "error", settings_text.account_not_loaded + settings_error(jqXHR));
+		settings_say($("#page_msg"), "error", t("settings.account_not_loaded") + settings_error(jqXHR));
 	});
 });
 
@@ -1497,12 +1284,12 @@ function settings_setup_local_copy() {
 		}, function (jqXHR) {
 			// a session that is over has already left the page
 			if (jqXHR && jqXHR.status !== undefined) console.error(jqXHR);
-			settings_say(line, "error", settings_text.local_failed);
+			settings_say(line, "error", t("settings.local_failed"));
 		}).finally(function () { buttons.prop("disabled", false); });
 	};
-	$("#but_local_sync").on("click", function () { run(settings_text.local_sync_running, settings_text.local_sync_done); });
+	$("#but_local_sync").on("click", function () { run(t("settings.local_sync_running"), t("settings.local_sync_done")); });
 	$("#but_local_reset").on("click", function () {
-		if (!confirm(settings_text.local_reset_confirm)) return;
-		run(settings_text.local_reset_running, settings_text.local_reset_done, moncycle_store.reset_local);
+		if (!confirm(t("settings.local_reset_confirm"))) return;
+		run(t("settings.local_reset_running"), t("settings.local_reset_done"), moncycle_store.reset_local);
 	});
 }

@@ -28,21 +28,5 @@ export const moncycle_compat = {
 		if (generation === null || !range || !Number.isInteger(range.min) || !Number.isInteger(range.max)) return "unknown";
 		return generation >= range.min && generation <= range.max ? "compatible" : "incompatible";
 	},
-	// The French notice that stops the app: what the web app and the server are, and nothing is sent, dropped or erased.
-	notice_text : function (detail) {
-		const range = detail.range.min === detail.range.max ? "la version " + detail.range.min : "les versions " + detail.range.min + " à " + detail.range.max;
-		return "Cette version de l'application (" + detail.webapp + ") fonctionne avec " + range + " du serveur, qui est en version " + detail.api + ". " +
-			"Par prudence, rien n'est envoyé au serveur et rien n'est effacé de cet appareil : vos modifications en attente sont conservées. " +
-			"Utilisez la version de l'application prévue pour ce serveur, ou mettez-la à jour.";
-	},
-	show_notice : function (detail) {
-		if (typeof document === "undefined" || document.getElementById("compat_notice")) return;
-		const notice = document.createElement("div");
-		notice.id = "compat_notice";
-		notice.className = "compat_notice";
-		notice.setAttribute("role", "alert");
-		notice.appendChild(document.createTextNode(moncycle_compat.notice_text(detail)));
-		document.body.insertBefore(notice, document.body.firstChild);
-	},
 };
 

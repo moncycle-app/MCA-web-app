@@ -15,8 +15,11 @@
 import { moncycle_config } from "/js/config.js";
 import { moncycle_store } from "/js/model/store.js";
 import { moncycle_captcha } from "/js/captcha.js";
+import { t, t_map, ready as i18n_ready } from "/js/core/i18n.js";
 
 const $ = globalThis.$;
+
+await Promise.all([moncycle_config.ready, i18n_ready]);
 
 // The sign-up page (register.html), as a file of its own: the CSP is script-src 'self', so no inline script.
 
@@ -32,9 +35,9 @@ else {
 		const year = new Date().getFullYear();
 		let bands = [];
 		for (let yy = year-23; yy >= year-100; yy-=5) {
-			bands.unshift(`<option value="${yy}">entre ${yy} et ${yy+4}</option>`);
+			bands.unshift($("<option>", {value: yy}).text(t("register.birth_band", {from: yy, to: yy+4}))[0]);
 		}
-		$("#i_anaissance").append(bands.join(""));
+		$("#i_anaissance").append(bands);
 		// the terms of service are a page of the server's choice (TERMS_OF_SERVICE_URL, told by server_info): shown here in a frame, and in a tab of
 		// their own from the link below it. None told: no frame and no link, the box stays.
 		$.ajax({type : "GET", url : moncycle_config.api_url("/server_info"), dataType : "json"}).done(function(ret) {
@@ -45,7 +48,7 @@ else {
 			$("#f_terms").attr("src", url).prop("hidden", false);
 			$("#a_terms").attr("href", url).prop("hidden", false);
 		}).fail(function() {
-			$("#terms_error_msg").text("Les conditions d'utilisation n'ont pas pu être chargées: rechargez la page.");
+			$("#terms_error_msg").text(t("register.terms_unavailable"));
 		});
 		// the picture and its token are asked for once the address is typed (a click on the picture asks for another)
 		const register_captcha = moncycle_captcha.attach({
@@ -60,18 +63,18 @@ else {
 			event.preventDefault();
 			$("#register_error_msg").text("");
 			if ($("#i_login_email").val() != $("#i_login_email_conf").val()) {
-				$("#register_error_msg").text("L'addresse email et sa confirmation ne sont pas identique.");
+				$("#register_error_msg").text(t("register.email_mismatch"));
 				return;
 			}
 			if ($("#i_password").val() != $("#i_password_conf").val()) {
-				$("#register_error_msg").text("Le mot de passe et sa confirmation ne sont pas identiques.");
+				$("#register_error_msg").text(t("register.password_mismatch"));
 				return;
 			}
 			$("#but_register").prop("disabled", true);
-			$("#but_register").val("Créer mon compte ⏳");
+			$("#but_register").val(t("register.but_submit_busy"));
 			let reactivate_form = function() {
 				$("#but_register").prop("disabled", false);
-				$("#but_register").val("Créer mon compte 🥳");
+				$("#but_register").val(t("register.but_submit"));
 			}
 			var payload = {
 				nickname: $("#i_nickname").val(),
@@ -94,29 +97,12 @@ else {
 				$("#register_form").hide();
 				$("#register_ok").show();
 				if (!ret.data.sent) {
-					$("#register_error_msg").text("Le mail n'a pas pu être envoyé. Utilisez « mot de passe perdu » sur la page de connexion pour recevoir un nouveau lien.");
+					$("#register_error_msg").text(t("register.mail_not_sent"));
 				}
 			}).fail(function(jqXHR) {
 				console.error(jqXHR);
 				var err = (jqXHR.responseJSON || {}).error || {};
-				const return_codes = {
-					already_authenticated: "Compte déjà connecté.",
-					registration_disabled: "La création de compte est désactivée.",
-					missing_field: "Données manquantes pour créer le compte.",
-					invalid_email: "L'adresse email renseignée n'est pas valide.",
-					captcha_invalid: "Erreur dans la saisie du captcha.",
-					captcha_expired: "Le captcha a expiré, recopiez le nouveau.",
-					captcha_unavailable: "Le captcha est indisponible pour le moment, réessayez plus tard.",
-					rate_limited: "Trop de tentatives depuis ce réseau, réessayez plus tard.",
-					password: "Le mot de passe est invalide.",
-					password_too_weak: "Le mot de passe ne respecte pas la règle des mots de passe.",
-					password_too_long: "Le mot de passe est trop long (128 caractères au plus).",
-					password_invalid: "Le mot de passe contient un caractère interdit.",
-					birthYear: "La date de naissance n'est pas réaliste.",
-					nickname: "Le pseudo est invalide ou trop long.",
-					discoveredComment: "Le commentaire est invalide ou trop long.",
-					termsAccepted: "Vous devez accepter les conditions d'utilisation pour créer un compte."
-				};
+				const return_codes = t_map("register.errors");
 				$("#register_error_msg").text(moncycle_store.error_pick(jqXHR, return_codes) || moncycle_store.error_text(jqXHR));
 				reactivate_form();
 				// a captcha that was refused is not asked again with the same answer

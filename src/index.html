@@ -17,6 +17,7 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+		<!-- The link preview (Open Graph, Twitter) is French and written here, not in src/i18n/: crawlers do not run script. -->
 		<meta property="og:type" content="website" />
 		<meta property="og:url" content="https://tableau.moncycle.app/" />
 		<meta property="og:title" content="MONCYCLE.APP" />
@@ -39,7 +40,7 @@
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
 		<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-		<title>moncycle.app</title>
+		<title data-i18n="timeline.moncycle_app"></title>
 		<meta name="mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-title" content="MONCYCLE.APP" />
 		<meta name="apple-mobile-web-app-capable" content="yes" />
@@ -55,35 +56,36 @@
 	<body>
 		<center>
 			<h1>mon<span class="gradiant_logo">cycle</span>.app</h1>
-			<div id="name">chargement<br /><br />&#x23F3;</div>
-			<button type="button" id="charger_cycle" class="nav_button main_button">☝️ Cycle précedent</button>
-			<button id="but_mini_maxi" class="nav_button main_button">&#x1F50D; Vue mini</button>
-			<a href="settings"><button type="button" class="nav_button main_button">⚙️ Réglages</button></a>
+			<div data-i18n="timeline.chargement" id="name"><br data-slot="br" /><br data-slot="br2" /></div>
+			<button data-i18n="timeline.cycle_precedent" type="button" id="charger_cycle" class="nav_button main_button"></button>
+			<button data-i18n="timeline.vue_mini" id="but_mini_maxi" class="nav_button main_button"></button>
+			<a href="settings"><button data-i18n="timeline.reglages" type="button" class="nav_button main_button"></button></a>
+			<!-- Not in src/i18n/: a browser without script cannot read the catalog. -->
 			<noscript><p class="rouge">Cette application a besoin de Javascript pour fonctionner.</p></noscript>
 		</center>
 		<div class="actu" id="actu" style="display:none">
-			<span class="tag">Tech 4 Fertility actualités</span>
+			<span data-i18n="timeline.tech_4_fertility_actualites" class="tag"></span>
 			<strong class="actu_title" id="actu_title"></strong>
 			<p class="actu_text" id="actu_text"></p>
-			<button type="button" id="lire_actu">Lire l&#x2019;article &#x1F517;</button>
-			<button type="button" id="fermer_actu">OK merci &#x1F44D;</button>
+			<button data-i18n="timeline.lire_larticle" type="button" id="lire_actu"></button>
+			<button data-i18n="timeline.ok_merci" type="button" id="fermer_actu"></button>
 		</div>
 		<div class="sync_status" id="sync_status" style="display:none"></div>
 		<div class="contennu macro" id="recap" style="display:none"></div>
 		<div class="contennu micro" id="timeline" style="display:none"></div>
 		<div id="jour_form" class="popup" style="display:none">
 			<div id="jour_form_header">
-				<button type="button" id="jour_form_prev" class="but_j_nav">J -1</button>
-				<button type="button" id="jour_form_next" class="but_j_nav">J +1</button>
-				<button type="button" id="jour_form_close">← retour</button>
-				<button type="button" id="jour_form_bulk_but">🗓️</button>
-				<button type="button" id="jour_form_submit">✏️</button>
-				<span class="popup_enregistratement_status" style="display: none;" id="jour_form_saving">&nbsp;⏳&nbsp;enregistrement...</span>
-				<span class="popup_enregistratement_status vert" style="display: none;" id="jour_form_saved">&nbsp;✅&nbsp;enregistré</span>
-				<span class="popup_enregistratement_status rouge" style="display: none;" id="jour_form_unsent">&nbsp;⚠️&nbsp;pas encore envoyé</span>
+				<button data-i18n="timeline.j_1" type="button" id="jour_form_prev" class="but_j_nav"></button>
+				<button data-i18n="timeline.j_1_2" type="button" id="jour_form_next" class="but_j_nav"></button>
+				<button data-i18n="timeline.retour" type="button" id="jour_form_close"></button>
+				<button data-i18n="timeline.icon" type="button" id="jour_form_bulk_but"></button>
+				<button data-i18n="timeline.icon_2" type="button" id="jour_form_submit"></button>
+				<span data-i18n="timeline.enregistrement" class="popup_enregistratement_status" style="display: none;" id="jour_form_saving"></span>
+				<span data-i18n="timeline.enregistre" class="popup_enregistratement_status vert" style="display: none;" id="jour_form_saved"></span>
+				<span data-i18n="timeline.pas_encore_envoye" class="popup_enregistratement_status rouge" style="display: none;" id="jour_form_unsent"></span>
 				<div id="bulk_form" style="display:none">
-					<span>Appliquer cette observation aux <input id="i_bulk_count" type="number" value="3" min="1" max="365" class="" /> jours precedents du même cycle.</span>
-					<button type="button" id="bulk_but_submit">↩️ Appliquer</button>
+					<span data-i18n="timeline.appliquer_cette_observation_aux_jours"><input data-slot="input" id="i_bulk_count" type="number" value="3" min="1" max="365" class="" /></span>
+					<button data-i18n="timeline.appliquer" type="button" id="bulk_but_submit"></button>
 				</div>
 				<div id="jour_form_titre" class="bold uppercase"></div>
 			</div>
@@ -93,124 +95,124 @@
 				<div>
 					<br />
 					<div>
-						<span class="categorie">Gommettes:</span><br />
-						<label for="go_rouge" class="go_color go_color_red"><input type="radio" name="stamp" id="go_rouge" value="R" />&nbsp;rouge</label>
-						<label for="go_vert" class="go_color go_color_green"><input type="radio" name="stamp" id="go_vert" value="G" />&nbsp;vert</label>
-						<label for="go_jaune" class="go_color go_color_yellow"><input type="radio" name="stamp" id="go_jaune" value="Y" />&nbsp;jaune</label>
-						<label for="go_vide" class="go_color go_color_empty"><input type="radio" name="stamp" id="go_vide" value="" checked />&nbsp;<span id="blank_or_empty">vide</span></label>
+						<span data-i18n="timeline.gommettes" class="categorie"></span><br />
+						<label data-i18n="timeline.rouge" for="go_rouge" class="go_color go_color_red"><input data-slot="input" type="radio" name="stamp" id="go_rouge" value="R" /></label>
+						<label data-i18n="timeline.vert" for="go_vert" class="go_color go_color_green"><input data-slot="input" type="radio" name="stamp" id="go_vert" value="G" /></label>
+						<label data-i18n="timeline.jaune" for="go_jaune" class="go_color go_color_yellow"><input data-slot="input" type="radio" name="stamp" id="go_jaune" value="Y" /></label>
+						<label for="go_vide" class="go_color go_color_empty"><input type="radio" name="stamp" id="go_vide" value="" checked />&nbsp;<span data-i18n="timeline.vide" id="blank_or_empty"></span></label>
 						<br />
-						<input type="checkbox" name="baby" id="go_baby" value="BB" /><label for="go_baby">avec bébé 👶</label><br />
+						<input type="checkbox" name="baby" id="go_baby" value="BB" /><label data-i18n="timeline.avec_bebe" for="go_baby"></label><br />
 						<br />
 					</div>
 					<div class="pas_mucus pas_mucus_temp">
 						<div id="fc_score_holder">
-							<span class="categorie pas_temp">Note FertilityCare:</span> <span id="fc_msg"></span><br />
-							<input type="text" autocapitalize="characters" name="fc_score" id="form_fc" style="width: 97%" placeholder="note FC" /><br />
+							<span data-i18n="timeline.note_fertilitycare" class="categorie pas_temp"></span> <span id="fc_msg"></span><br />
+							<input data-i18n-attr="placeholder:timeline.note_fc" type="text" autocapitalize="characters" name="fc_score" id="form_fc" style="width: 97%" /><br />
 						</div>
 						<br />
-						<span class="categorie pas_temp">Saignement:</span><br />
-						<input class="fc_form_note" type="checkbox" name="fc_regles" id="fc_h" value="H" /><label for="fc_h"><b>H</b> flux abondant</label><br />
-						<input class="fc_form_note" type="checkbox" name="fc_regles" id="fc_m" value="M" /><label for="fc_m"><b>M</b> flux modéré</label><br />
-						<input class="fc_form_note" type="checkbox" name="fc_regles" id="fc_rl" value="L" /><label for="fc_rl"><b>L</b> flux léger</label><br />
-						<input class="fc_form_note" type="checkbox" name="fc_regles" id="fc_vl" value="VL" /><label for="fc_vl"><b>VL</b> flux vraiment léger</label><br />
-						<input class="fc_form_note" type="checkbox" name="fc_regles" id="fc_vh" value="VH" /><label for="fc_vh"><b>VH</b> flux vraiment abondant</label><br />
-						<input class="fc_form_note" type="checkbox" name="fc_regles" id="fc_b" value="B" /><label for="fc_b"><b>B</b> saignement brun (ou noir)</label><br />
+						<span data-i18n="timeline.saignement" class="categorie pas_temp"></span><br />
+						<input class="fc_form_note" type="checkbox" name="fc_regles" id="fc_h" value="H" /><label data-i18n="timeline.flux_abondant" for="fc_h"><b data-slot="b">H</b></label><br />
+						<input class="fc_form_note" type="checkbox" name="fc_regles" id="fc_m" value="M" /><label data-i18n="timeline.flux_modere" for="fc_m"><b data-slot="b">M</b></label><br />
+						<input class="fc_form_note" type="checkbox" name="fc_regles" id="fc_rl" value="L" /><label data-i18n="timeline.flux_leger" for="fc_rl"><b data-slot="b">L</b></label><br />
+						<input class="fc_form_note" type="checkbox" name="fc_regles" id="fc_vl" value="VL" /><label data-i18n="timeline.flux_vraiment_leger" for="fc_vl"><b data-slot="b">VL</b></label><br />
+						<input class="fc_form_note" type="checkbox" name="fc_regles" id="fc_vh" value="VH" /><label data-i18n="timeline.flux_vraiment_abondant" for="fc_vh"><b data-slot="b">VH</b></label><br />
+						<input class="fc_form_note" type="checkbox" name="fc_regles" id="fc_b" value="B" /><label data-i18n="timeline.saignement_brun_ou_noir" for="fc_b"><b data-slot="b">B</b></label><br />
 						<br />
-						<span class="categorie pas_temp">Sensations & observations:</span><br />
-						<input class="fc_form_note fc_sens" type="checkbox" name="fc_sens" id="fc_0" value="0" /><label for="fc_0"><b>0</b> sec</label><br />
-						<input class="fc_form_note fc_sens" type="checkbox" name="fc_sens" id="fc_2" value="2" /><label for="fc_2"><b>2</b> humide sans lubrification</label><br />
-						<input class="fc_form_note fc_sens" type="checkbox" name="fc_sens" id="fc_2w" value="2W" /><label for="fc_2w"><b>2W</b> mouillé sans lubrification</label><br />
-						<input class="fc_form_note fc_sens" type="checkbox" name="fc_sens" id="fc_4" value="4" /><label for="fc_4"><b>4</b> brillant sans lubrification</label><br />
-						<input class="fc_form_note fc_sens" type="checkbox" name="fc_sens" id="fc_10dl" value="10DL" /><label for="fc_10dl"><b>10DL</b> humide avec lubrification</label><br />
-						<input class="fc_form_note fc_sens" type="checkbox" name="fc_sens" id="fc_10sl" value="10SL" /><label for="fc_10sl"><b>10SL</b> brillant avec lubrification</label><br />
-						<input class="fc_form_note fc_sens" type="checkbox" name="fc_sens" id="fc_10wl" value="10WL" /><label for="fc_10wl"><b>10WL</b> mouillé avec lubrification</label><br />
-						<input class="fc_form_note fc_sens_L" type="checkbox" name="fc_sens" id="fc_l" value="L" /><label for="fc_l"><b>L</b> lubrifiant</label><br />
+						<span data-i18n="timeline.sensations_observations" class="categorie pas_temp"></span><br />
+						<input class="fc_form_note fc_sens" type="checkbox" name="fc_sens" id="fc_0" value="0" /><label data-i18n="timeline.sec" for="fc_0"><b data-slot="b">0</b></label><br />
+						<input class="fc_form_note fc_sens" type="checkbox" name="fc_sens" id="fc_2" value="2" /><label data-i18n="timeline.humide_sans_lubrification" for="fc_2"><b data-slot="b">2</b></label><br />
+						<input class="fc_form_note fc_sens" type="checkbox" name="fc_sens" id="fc_2w" value="2W" /><label data-i18n="timeline.mouille_sans_lubrification" for="fc_2w"><b data-slot="b">2W</b></label><br />
+						<input class="fc_form_note fc_sens" type="checkbox" name="fc_sens" id="fc_4" value="4" /><label data-i18n="timeline.brillant_sans_lubrification" for="fc_4"><b data-slot="b">4</b></label><br />
+						<input class="fc_form_note fc_sens" type="checkbox" name="fc_sens" id="fc_10dl" value="10DL" /><label data-i18n="timeline.humide_avec_lubrification" for="fc_10dl"><b data-slot="b">10DL</b></label><br />
+						<input class="fc_form_note fc_sens" type="checkbox" name="fc_sens" id="fc_10sl" value="10SL" /><label data-i18n="timeline.brillant_avec_lubrification" for="fc_10sl"><b data-slot="b">10SL</b></label><br />
+						<input class="fc_form_note fc_sens" type="checkbox" name="fc_sens" id="fc_10wl" value="10WL" /><label data-i18n="timeline.mouille_avec_lubrification" for="fc_10wl"><b data-slot="b">10WL</b></label><br />
+						<input class="fc_form_note fc_sens_L" type="checkbox" name="fc_sens" id="fc_l" value="L" /><label data-i18n="timeline.lubrifiant" for="fc_l"><b data-slot="b">L</b></label><br />
 						<br />
-						<span class="categorie pas_temp">Test au doigt:</span><br />
-						<input class="fc_obs fc_form_note" type="checkbox" name="fc_c" id="fc_6" value="6" /><label for="fc_6"><b>6</b> peu élastique (0,5cm)</label><br />
-						<input class="fc_obs fc_form_note" type="checkbox" name="fc_c" id="fc_8" value="8" /><label for="fc_8"><b>8</b> moyennement élastique (1-2cm)</label><br />
-						<input class="fc_obs fc_form_note" type="checkbox" name="fc_c" id="fc_10" value="10" /><label for="fc_10"><b>10</b> très élastique (2,5cm ou +)</label><br />
-						<input class="fc_obs fc_form_note" type="checkbox" name="fc_c" id="fc_c" value="C" /><label for="fc_c"><b>C</b> opaque (blanc)</label><br />
-						<input class="fc_obs fc_form_note" type="checkbox" name="fc_g" id="fc_g" value="G" /><label for="fc_g"><b>G</b> gommeux (collant)</label><br />
-						<input class="fc_obs fc_form_note" type="checkbox" name="fc_k" id="fc_k" value="K" /><label for="fc_k"><b>K</b> transparent</label><br />
-						<input class="fc_obs fc_form_note" type="checkbox" name="fc_p" id="fc_p" value="P" /><label for="fc_p"><b>P</b> pâteux (crémeux)</label><br />
-						<input class="fc_obs fc_form_note" type="checkbox" name="fc_y" id="fc_y" value="Y" /><label for="fc_y"><b>Y</b> jaune (même jaune pâle)</label><br />
-						<input class="fc_obs fc_form_note" type="checkbox" name="fc_r" id="fc_r" value="R" /><label for="fc_r"><b>R</b> rouge</label><br />
+						<span data-i18n="timeline.test_au_doigt" class="categorie pas_temp"></span><br />
+						<input class="fc_obs fc_form_note" type="checkbox" name="fc_c" id="fc_6" value="6" /><label data-i18n="timeline.peu_elastique_0_5cm" for="fc_6"><b data-slot="b">6</b></label><br />
+						<input class="fc_obs fc_form_note" type="checkbox" name="fc_c" id="fc_8" value="8" /><label data-i18n="timeline.moyennement_elastique_1_2cm" for="fc_8"><b data-slot="b">8</b></label><br />
+						<input class="fc_obs fc_form_note" type="checkbox" name="fc_c" id="fc_10" value="10" /><label data-i18n="timeline.tres_elastique_2_5cm_ou" for="fc_10"><b data-slot="b">10</b></label><br />
+						<input class="fc_obs fc_form_note" type="checkbox" name="fc_c" id="fc_c" value="C" /><label data-i18n="timeline.opaque_blanc" for="fc_c"><b data-slot="b">C</b></label><br />
+						<input class="fc_obs fc_form_note" type="checkbox" name="fc_g" id="fc_g" value="G" /><label data-i18n="timeline.gommeux_collant" for="fc_g"><b data-slot="b">G</b></label><br />
+						<input class="fc_obs fc_form_note" type="checkbox" name="fc_k" id="fc_k" value="K" /><label data-i18n="timeline.transparent" for="fc_k"><b data-slot="b">K</b></label><br />
+						<input class="fc_obs fc_form_note" type="checkbox" name="fc_p" id="fc_p" value="P" /><label data-i18n="timeline.pateux_cremeux" for="fc_p"><b data-slot="b">P</b></label><br />
+						<input class="fc_obs fc_form_note" type="checkbox" name="fc_y" id="fc_y" value="Y" /><label data-i18n="timeline.jaune_meme_jaune_pale" for="fc_y"><b data-slot="b">Y</b></label><br />
+						<input class="fc_obs fc_form_note" type="checkbox" name="fc_r" id="fc_r" value="R" /><label data-i18n="timeline.rouge_2" for="fc_r"><b data-slot="b">R</b></label><br />
 						<br />
-						<span class="categorie pas_temp">Récurrence de l'observation:</span><br />
-						<input class="fc_form_note" type="checkbox" name="fc_rec" id="fc_x1" value="X1" /><label for="fc_x1"><b>X1</b> vue seulement une fois ce jour</label><br />
-						<input class="fc_form_note" type="checkbox" name="fc_rec" id="fc_x2" value="X2" /><label for="fc_x2"><b>X2</b> vue deux fois ce jour</label><br />
-						<input class="fc_form_note" type="checkbox" name="fc_rec" id="fc_x3" value="X3" /><label for="fc_x3"><b>X3</b> vue trois fois ce jour</label><br />
-						<input class="fc_form_note" type="checkbox" name="fc_rec" id="fc_ad" value="AD" /><label for="fc_ad"><b>AD</b> vue toute la journée</label><br />
+						<span data-i18n="timeline.recurrence_de_l_observation" class="categorie pas_temp"></span><br />
+						<input class="fc_form_note" type="checkbox" name="fc_rec" id="fc_x1" value="X1" /><label data-i18n="timeline.vue_seulement_une_fois_ce_jour" for="fc_x1"><b data-slot="b">X1</b></label><br />
+						<input class="fc_form_note" type="checkbox" name="fc_rec" id="fc_x2" value="X2" /><label data-i18n="timeline.vue_deux_fois_ce_jour" for="fc_x2"><b data-slot="b">X2</b></label><br />
+						<input class="fc_form_note" type="checkbox" name="fc_rec" id="fc_x3" value="X3" /><label data-i18n="timeline.vue_trois_fois_ce_jour" for="fc_x3"><b data-slot="b">X3</b></label><br />
+						<input class="fc_form_note" type="checkbox" name="fc_rec" id="fc_ad" value="AD" /><label data-i18n="timeline.vue_toute_la_journee" for="fc_ad"><b data-slot="b">AD</b></label><br />
 						<br />
-						<span class="categorie pas_temp">Douleur:</span><br />
-						<input class="fc_form_note" type="checkbox" name="fc_dou" id="fc_ap" value="AP" /><label for="fc_ap"><b>AP</b> douleur abdominale</label><br />
-						<input class="fc_form_note" type="checkbox" name="fc_dou" id="fc_rap" value="RAP" /><label for="fc_rap"><b>RAP</b> douleur abdominale à droite</label><br />
-						<input class="fc_form_note" type="checkbox" name="fc_dou" id="fc_lap" value="LAP" /><label for="fc_lap"><b>LAP</b> douleur abdominale à gauche</label><br />
+						<span data-i18n="timeline.douleur" class="categorie pas_temp"></span><br />
+						<input class="fc_form_note" type="checkbox" name="fc_dou" id="fc_ap" value="AP" /><label data-i18n="timeline.douleur_abdominale" for="fc_ap"><b data-slot="b">AP</b></label><br />
+						<input class="fc_form_note" type="checkbox" name="fc_dou" id="fc_rap" value="RAP" /><label data-i18n="timeline.douleur_abdominale_a_droite" for="fc_rap"><b data-slot="b">RAP</b></label><br />
+						<input class="fc_form_note" type="checkbox" name="fc_dou" id="fc_lap" value="LAP" /><label data-i18n="timeline.douleur_abdominale_a_gauche" for="fc_lap"><b data-slot="b">LAP</b></label><br />
 						<br />
-						<span class="categorie">Flèche:</span><br />
-						<input class="fc_form_note" type="radio" name="fc_arrow" id="fc_fh" value="↑" /><label for="fc_fh">&#x2B06;&#xFE0F;</label>
-						<input class="fc_form_note" type="radio" name="fc_arrow" id="fc_fb" value="↓" /><label for="fc_fb">&#x2B07;&#xFE0F;</label>
-						<input class="fc_form_note" type="radio" name="fc_arrow" id="fc_fd" value="→" /><label for="fc_fd">&#x27A1;&#xFE0F;</label>
-						<input class="fc_form_note" type="radio" name="fc_arrow" id="fc_fr" value="" checked /><label class="" for="fc_fr">aucune</label><br />
+						<span data-i18n="timeline.fleche" class="categorie"></span><br />
+						<input class="fc_form_note" type="radio" name="fc_arrow" id="fc_fh" value="↑" /><label data-i18n="timeline.icon_3" for="fc_fh"></label>
+						<input class="fc_form_note" type="radio" name="fc_arrow" id="fc_fb" value="↓" /><label data-i18n="timeline.icon_4" for="fc_fb"></label>
+						<input class="fc_form_note" type="radio" name="fc_arrow" id="fc_fd" value="→" /><label data-i18n="timeline.icon_5" for="fc_fd"></label>
+						<input class="fc_form_note" type="radio" name="fc_arrow" id="fc_fr" value="" checked /><label data-i18n="timeline.aucune" class="" for="fc_fr"></label><br />
 						<br />
 					</div>
 					<div class="pas_mucus pas_fc">
-						<span class="categorie">Température:</span><br />
-						<input type="number" step="0.1" min="0" max="99" name="temp" id="form_temp" style="width: 100px;" placeholder="ex: 36,5" /><span> °C 🌡️</span><br/>
-						<span>température prise à </span><input type="time" name="time_temp_taken" id="form_time_temp_taken" /><br/>
+						<span data-i18n="timeline.temperature" class="categorie"></span><br />
+						<input data-i18n-attr="placeholder:timeline.ex_36_5" type="number" step="0.1" min="0" max="99" name="temp" id="form_temp" style="width: 100px;" /><span data-i18n="timeline.c"></span><br/>
+						<span data-i18n="timeline.temperature_prise_a"></span><input type="time" name="time_temp_taken" id="form_time_temp_taken" /><br/>
 						<br />
 					</div>
 					<div class="pas_fc pas_fc_temp">
 						<div class="desc_picker">
 							<div class="desc_category">
-								<span class="categorie">🧠 Sensations:</span>
+								<span data-i18n="timeline.sensations" class="categorie"></span>
 								<div class="desc_chips" id="menu_sensation_container"></div>
-								<button type="button" class="desc_add_toggle" data-desc-type="2">➕ nouvelle sensation</button>
+								<button data-i18n="timeline.nouvelle_sensation" type="button" class="desc_add_toggle" data-desc-type="2"></button>
 								<div class="desc_add_form" id="desc_add_form_sensation" data-desc-type="2" style="display:none">
-									<input type="text" class="desc_add_input" maxlength="256" placeholder="nom de la sensation" autocomplete="off" />
-									<button type="button" class="desc_add_submit">✅</button>
-									<button type="button" class="desc_add_cancel">✖️</button>
+									<input data-i18n-attr="placeholder:timeline.nom_de_la_sensation" type="text" class="desc_add_input" maxlength="256" autocomplete="off" />
+									<button data-i18n="timeline.icon_6" type="button" class="desc_add_submit"></button>
+									<button data-i18n="timeline.icon_7" type="button" class="desc_add_cancel"></button>
 									<span class="desc_add_status"></span>
 								</div>
 							</div>
 							<div class="desc_category">
-								<span class="categorie">👀 Observations:</span>
+								<span data-i18n="timeline.observations" class="categorie"></span>
 								<div class="desc_chips" id="menu_observation_container"></div>
-								<button type="button" class="desc_add_toggle" data-desc-type="1">➕ nouvelle observation</button>
+								<button data-i18n="timeline.nouvelle_observation" type="button" class="desc_add_toggle" data-desc-type="1"></button>
 								<div class="desc_add_form" id="desc_add_form_observation" data-desc-type="1" style="display:none">
-									<input type="text" class="desc_add_input" maxlength="256" placeholder="nom de l'observation" autocomplete="off" />
-									<button type="button" class="desc_add_submit">✅</button>
-									<button type="button" class="desc_add_cancel">✖️</button>
+									<input data-i18n-attr="placeholder:timeline.nom_de_l_observation" type="text" class="desc_add_input" maxlength="256" autocomplete="off" />
+									<button data-i18n="timeline.icon_6" type="button" class="desc_add_submit"></button>
+									<button data-i18n="timeline.icon_7" type="button" class="desc_add_cancel"></button>
 									<span class="desc_add_status"></span>
 								</div>
 							</div>
 							<div class="desc_category" id="desc_category_other" style="display:none">
-								<span class="categorie">❓ Autre:</span>
+								<span data-i18n="timeline.autre" class="categorie"></span>
 								<div class="desc_chips" id="menu_autre_container"></div>
-								<p class="desc_hint">Ces mots n’ont pas encore de type. Classez-les en sensation ou en observation depuis <a href="settings#descriptions">vos réglages</a>.</p>
+								<p data-i18n="timeline.ces_mots_nont_pas_encore_de_type" class="desc_hint"><a data-i18n="timeline.vos_reglages" data-slot="a" href="settings#descriptions"></a></p>
 							</div>
 						</div>
 						<br />
 					</div>
 					<div>
-						<span class="categorie">Évènements:</span><br />
-						<input type="checkbox" name="cycle_1st_day" id="ev_cycle_1st_day" class="ev_reload" value="1" /><label for="ev_cycle_1st_day">📆 nouveau cycle à cette date</label><br />
-						<input type="checkbox" name="union_sex" id="ev_union" value="1" /><label for="ev_union">❤️ union</label><br />
-						<input type="checkbox" name="is_peak" id="ev_is_peak" value="1" /><label for="ev_is_peak">⛰️ <span class="pas_fc pas_fc_temp">jour sommet</span><span class="pas_mucus pas_mucus_temp">PIC</span></label><br />
-						<input type="checkbox" id="ev_counter_start_actif" value="1" class="pas_fc pas_fc_temp"/><label for="ev_counter_start_actif" class="pas_fc pas_fc_temp">⏰ compteur de </label><input id="ev_counter_start_nb" type="number" value="3" min="1" class="pas_fc pas_fc_temp" /><label for="counter_start_actif" class="pas_fc pas_fc_temp"> jours</label><br class="pas_fc pas_fc_temp" />
+						<span data-i18n="timeline.evenements" class="categorie"></span><br />
+						<input type="checkbox" name="cycle_1st_day" id="ev_cycle_1st_day" class="ev_reload" value="1" /><label data-i18n="timeline.nouveau_cycle_a_cette_date" for="ev_cycle_1st_day"></label><br />
+						<input type="checkbox" name="union_sex" id="ev_union" value="1" /><label data-i18n="timeline.union_h2" for="ev_union"></label><br />
+						<input type="checkbox" name="is_peak" id="ev_is_peak" value="1" /><label data-i18n="timeline.icon_8" for="ev_is_peak"><span data-i18n="timeline.jour_sommet" data-slot="span" class="pas_fc pas_fc_temp"></span><span data-i18n="timeline.pic" data-slot="span2" class="pas_mucus pas_mucus_temp"></span></label><br />
+						<input type="checkbox" id="ev_counter_start_actif" value="1" class="pas_fc pas_fc_temp"/><label data-i18n="timeline.compteur_de" for="ev_counter_start_actif" class="pas_fc pas_fc_temp"></label><input id="ev_counter_start_nb" type="number" value="3" min="1" class="pas_fc pas_fc_temp" /><label data-i18n="timeline.jours" for="counter_start_actif" class="pas_fc pas_fc_temp"></label><br class="pas_fc pas_fc_temp" />
 						<input type="hidden" id="ev_hidden_counter_start" name="counter_start" value="0" />
-						<input type="checkbox" name="day_not_observed" id="ev_jesaispas" value="1" /><label for="ev_jesaispas">🤷‍♀️ jour non observé <span class='note'>?</span></label><br />
-						<input type="checkbox" name="observation_paused" id="ev_observation_paused" class="ev_reload" value="1" /><label for="ev_observation_paused">⏸️ suivi en pause</label><br />
+						<input type="checkbox" name="day_not_observed" id="ev_jesaispas" value="1" /><label data-i18n="timeline.jour_non_observe" for="ev_jesaispas"><span data-slot="span" class='note'>?</span></label><br />
+						<input type="checkbox" name="observation_paused" id="ev_observation_paused" class="ev_reload" value="1" /><label data-i18n="timeline.suivi_en_pause" for="ev_observation_paused"></label><br />
 						<br />
-						<span class="categorie">Commentaire:</span><br />
+						<span data-i18n="timeline.commentaire" class="categorie"></span><br />
 						<textarea style="width: 95%" name="comment" id="from_com" autocapitalize="off" maxlength="255"></textarea><br />
-						<span class="label_info">Ne saisissez pas d'informations de santé (médicaments, maladies).</span><br />
+						<span data-i18n="timeline.ne_saisissez_pas_d_informations_de" class="label_info"></span><br />
 						<br />
 					</div>
 					<span id="jour_form_suppr_holder" class="rouge">
 						<span id="jour_form_last_write"></span>
-						<button id="jour_form_suppr" type="button" class="rouge">🗑️ Supprimer l'observation</button>
+						<button data-i18n="timeline.supprimer_l_observation" id="jour_form_suppr" type="button" class="rouge"></button>
 					</span>
 					<div id="form_err" class="err"></div>
 					<br />

@@ -14,6 +14,8 @@
 
 import { moncycle_config } from "/js/config.js";
 import { moncycle_compat } from "/js/compat.js";
+import { show_notice } from "/js/core/compat_notice.js";
+import { t } from "/js/core/i18n.js";
 import { blank_day, is_blank, day_from_body, day_meta, codified_fields } from "/js/model/day.js";
 import { day_number, cycle_of, set_member, place_days } from "/js/model/cycles.js";
 
@@ -291,7 +293,7 @@ export const moncycle_store = {
 		let issues = moncycle_store.issues_of(jqXHR);
 		let error = (jqXHR.responseJSON || {}).error || {};
 		if (error.code === "validation_failed" && issues.length) return issues.map(function (issue) { return issue.message; }).join(" ");
-		return error.message || "erreur inconnue";
+		return error.message || t("common.error_unknown");
 	},
 	// The French text a page keeps for a failure of the API. A validation_failed is described by its first issue: the first of
 	// map["field:code"], map["code"], map["field"] that exists (the code of the issue is specific: invalid_email,
@@ -859,4 +861,4 @@ export const moncycle_store = {
 	},
 };
 
-moncycle_store.on("incompatible", moncycle_compat.show_notice);
+moncycle_store.on("incompatible", show_notice);

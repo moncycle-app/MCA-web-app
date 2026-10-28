@@ -1,5 +1,7 @@
 // A jQuery stand-in for the store: $.ajax answers from a handler the test sets, with the shape of jQuery's promise (done/fail) and of
 // its jqXHR, and $(document).ajaxError() is called on a failure as jQuery does. Also fetch() for version.json, and window.location spies.
+import { readFileSync } from "node:fs";
+
 export const server = {
 	requests: [],
 	// (request: {method, url, body}) => {status, json?, headers?}; status 0 is "no answer"
@@ -47,5 +49,9 @@ export function install_fake_api() {
 	globalThis.window.location.reload = () => location_calls.push("reload");
 	globalThis.window.addEventListener = () => { };
 	globalThis.document = { addEventListener() { }, hidden: false, querySelectorAll: () => [] };
-	globalThis.fetch = async (url) => ({ ok: true, json: async () => (String(url).includes("config.json") ? { apiUrl: "/api/v2" } : { version: "1.0.0", api: { min: 16, max: 16 } }) });
+	globalThis.fetch = async (url) => {
+		const path = String(url);
+		if (path.startsWith("/i18n/")) return { ok: true, json: async () => JSON.parse(readFileSync(new URL("../../src" + path, import.meta.url), "utf8")) };
+		return { ok: true, json: async () => (path.includes("config.json") ? { apiUrl: "/api/v2" } : { version: "1.0.0", api: { min: 16, max: 16 } }) };
+	};
 }

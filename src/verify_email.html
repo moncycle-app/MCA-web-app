@@ -39,7 +39,7 @@
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
 		<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-		<title>moncycle.app - lien reçu par mail</title>
+		<title data-i18n="verify_email.moncycle_app_lien_recu_par_mail"></title>
 		<meta name="mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-title" content="moncycle.app" />
 		<meta name="apple-mobile-web-app-capable" content="yes" />
@@ -59,7 +59,7 @@
 	<body>
 		<center>
 			<h1>mon<span class="gradiant_logo">cycle</span>.app</h1>
-			<a href="auth"><button type="button" class="nav_button">Se connecter 🔑</button></a>
+			<a href="auth"><button data-i18n="verify_email.se_connecter" type="button" class="nav_button"></button></a>
 		</center>
 
 		<!-- The link of a mail (js/verify_email.js): the purpose and the token are in the fragment of the address. The form below carries them to the API. -->
@@ -71,12 +71,12 @@
 				<span id="et_text"></span><br />
 				<br />
 				<div id="et_password_block" style="display:none">
-					<label for="i_new_password">Nouveau mot de passe:</label><br />
-					<input name="new_password" id="i_new_password" type="password" autocomplete="new-password" placeholder="Choisir un mot de passe." /><br />
-					<span class="label_info">10 caractères au moins, avec une minuscule, une majuscule et un chiffre (72 caractères au plus).</span><br />
+					<label data-i18n="verify_email.nouveau_mot_de_passe" for="i_new_password"></label><br />
+					<input data-i18n-attr="placeholder:verify_email.choisir_un_mot_de_passe" name="new_password" id="i_new_password" type="password" autocomplete="new-password" /><br />
+					<span data-i18n="verify_email.10_caracteres_au_moins_avec_une" class="label_info"></span><br />
 					<br />
-					<label for="i_new_password_conf">Confirmer (re-saisir) le mot de passe:</label><br />
-					<input name="new_password_conf" id="i_new_password_conf" type="password" autocomplete="new-password" placeholder="Entrer une 2ème fois le mot de passe." /><br />
+					<label data-i18n="verify_email.confirmer_re_saisir_le_mot_de_passe" for="i_new_password_conf"></label><br />
+					<input data-i18n-attr="placeholder:verify_email.entrer_une_2eme_fois_le_mot_de_passe" name="new_password_conf" id="i_new_password_conf" type="password" autocomplete="new-password" /><br />
 					<br />
 				</div>
 				<span class="rouge" id="et_error_msg"></span><br />
@@ -88,16 +88,11 @@
 				<br /><br />
 				<b id="et_done_text"></b><br />
 				<br />
-				<a id="et_login_link" href="auth"><button type="button" class="nav_button">Se connecter 🔑</button></a>
+				<a id="et_login_link" href="auth"><button data-i18n="verify_email.se_connecter" type="button" class="nav_button"></button></a>
 			</center>
 		</div>
 		<div class="contennu" id="et_invalid" style="display:none">
-			<center>
-				<br /><br />
-				<span class="rouge">Ce lien n'est pas valide.</span><br />
-				<br />
-				Il a peut-être déjà servi, expiré, ou été remplacé par un lien plus récent. Pour un mot de passe perdu, demandez-en un nouveau depuis la page de connexion.
-			</center>
+			<center data-i18n="verify_email.il_a_peut_etre_deja_servi_expire_ou_ete"><br data-slot="br" /><br data-slot="br2" /><span data-i18n="verify_email.ce_lien_n_est_pas_valide" data-slot="span" class="rouge"></span><br data-slot="br3" /><br data-slot="br4" /></center>
 		</div>
 	</body>
 </html>

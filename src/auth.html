@@ -39,7 +39,7 @@
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
 		<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-		<title>moncycle.app - authentification</title>
+		<title data-i18n="auth.moncycle_app_authentification"></title>
 		<meta name="mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-title" content="moncycle.app" />
 		<meta name="apple-mobile-web-app-capable" content="yes" />
@@ -59,60 +59,58 @@
 	<body>
 		<center>
 			<h1>mon<span class="gradiant_logo">cycle</span>.app</h1>
-			<a href="register"><button type="button" class="nav_button">Créer un compte 🚀</button></a>
-			<a href="https://www.moncycle.app" target="_blank"><button type="button" class="nav_button">Découvrir MON<b>CYCLE</b>.APP 😍</button></a>
+			<a href="register"><button data-i18n="auth.creer_un_compte" type="button" class="nav_button"></button></a>
+			<a href="https://www.moncycle.app" target="_blank"><button data-i18n="auth.decouvrir_mon_app" type="button" class="nav_button"><b data-slot="b">CYCLE</b></button></a>
 		</center>
 		<div class="contennu" id="timeline">
-			<h2>Connexion à votre compte</h2>
+			<h2 data-i18n="auth.connexion_a_votre_compte"></h2>
 			<span class="rouge" id="message_err"></span>
 			<form method="post" action="api/v2/token" id="connexion_form"><br />
 				<!-- what the server is told about this sign-in: the name of the session (js/auth.js writes the domain in it) and that the browser keeps it in a cookie -->
 				<input type="hidden" name="name" id="i_token_name" value="WEB-APP" />
 				<input type="hidden" name="cookie" id="i_token_cookie" value="true" />
-			<label for="i_login_email">E-mail:</label><br />
-			<input name="login_email" id="i_login_email" type="email" required placeholder="adresse mail de connexion"  value="" /><br />
+			<label data-i18n="auth.e_mail" for="i_login_email"></label><br />
+			<input data-i18n-attr="placeholder:auth.adresse_mail_de_connexion" name="login_email" id="i_login_email" type="email" required  value="" /><br />
 			<br />
-			<label for="i_password">Mot de passe:</label><br />
-			<input name="password" id="i_password" type="password" required placeholder="mot de passe moncycle.app"  value="" /><br />
+			<label data-i18n="auth.mot_de_passe" for="i_password"></label><br />
+			<input data-i18n-attr="placeholder:auth.mot_de_passe_moncycle_app" name="password" id="i_password" type="password" required  value="" /><br />
 			<br />
-			<label for="i_code">Code:</label><br />
-			<input name="code" id="i_code" type="number" placeholder="authentification multifacteur (si activée)" value="" /><br />
+			<label data-i18n="auth.code" for="i_code"></label><br />
+			<input data-i18n-attr="placeholder:auth.authentification_multifacteur_si" name="code" id="i_code" type="number" value="" /><br />
 			<br />
 			<div id="captcha_wrapper" style="display:none">
-				<label for="i_captcha">Captcha:</label><br />
-				<input name="captcha" id="i_captcha" type="text" maxlength="6" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Entrer les lettres ou chiffres affichés ci-dessous." /><br />
-				<img class="captcha" id="l_captcha" hidden title="Cliquer pour obtenir une autre image" alt="captcha" />
+				<label data-i18n="auth.captcha" for="i_captcha"></label><br />
+				<input data-i18n-attr="placeholder:auth.entrer_les_lettres_ou_chiffres_affiches" name="captcha" id="i_captcha" type="text" maxlength="6" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" /><br />
+				<img data-i18n-attr="title:auth.cliquer_pour_obtenir_une_autre_image;alt:auth.captcha_2" class="captcha" id="l_captcha" hidden />
 				<input type="hidden" name="captchaToken" id="i_captcha_token" value="" /><br />
-				<span class="label_info">Majuscules ou minuscules, peu importe. Image difficile à lire ? Cliquez dessus pour en obtenir une autre.</span><br />
+				<span data-i18n="auth.majuscules_ou_minuscules_peu_importe" class="label_info"></span><br />
 				<br />
 			</div>
-			<input type="submit" value="Connexion 🔑" id="connexion_but"/></form>
+			<input data-i18n-attr="value:auth.but_connect" type="submit" id="connexion_but"/></form>
 			<br /><br /><br />
-			<center><a class="register_commente" id="but_demo_mucus" href="/auth">compte de démo <b>glaire cervicale</b> 🥸</a></center>
-			<center><a class="register_commente" id="but_demo_fc" href="/auth">compte de démo <b>FertilityCare</b> 🧐</a></center>
+			<center><a data-i18n="auth.compte_de_demo" class="register_commente" id="but_demo_mucus" href="/auth"><b data-i18n="auth.glaire_cervicale" data-slot="b"></b></a></center>
+			<center><a data-i18n="auth.compte_de_demo_2" class="register_commente" id="but_demo_fc" href="/auth"><b data-i18n="auth.fertilitycare" data-slot="b"></b></a></center>
 			<br /><br />
-			<h2>Mot de passe perdu</h2>
+			<h2 data-i18n="auth.mot_de_passe_perdu"></h2>
 			<span id="password_reseted_msg" class="vert"></span>
 			<form method="post" action="api/v2/recover_password" id="reset_form"><br />
-				<label for="r_login_email">E-mail:</label><br />
-				<input name="login_email" id="r_login_email" type="email" required placeholder="adresse mail de connexion"  value="" /><br />
+				<label data-i18n="auth.e_mail" for="r_login_email"></label><br />
+				<input data-i18n-attr="placeholder:auth.adresse_mail_de_connexion" name="login_email" id="r_login_email" type="email" required  value="" /><br />
 				<br />
-				<label for="rc_captcha">Captcha:</label><br />
-				<input name="captcha" id="rc_captcha" type="text" maxlength="6" required autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Entrer les lettres ou chiffres affichés ci-dessous." /><br />
-				<img class="captcha" id="rc_captcha_img" hidden title="Cliquer pour obtenir une autre image" alt="captcha" />
+				<label data-i18n="auth.captcha" for="rc_captcha"></label><br />
+				<input data-i18n-attr="placeholder:auth.entrer_les_lettres_ou_chiffres_affiches" name="captcha" id="rc_captcha" type="text" maxlength="6" required autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" /><br />
+				<img data-i18n-attr="title:auth.cliquer_pour_obtenir_une_autre_image;alt:auth.captcha_2" class="captcha" id="rc_captcha_img" hidden />
 				<input type="hidden" name="captchaToken" id="rc_captcha_token" value="" /><br />
-				<span class="label_info">L'image s'affiche une fois l'e-mail saisi. Majuscules ou minuscules, peu importe. Image difficile à lire ? Cliquez dessus pour en obtenir une autre.</span><br />
+				<span data-i18n="auth.l_image_s_affiche_une_fois_l_e_mail" class="label_info"></span><br />
 				<br />
 				<span class="rouge" id="reset_error_msg"></span><br />
-				<input type="submit" value="Rénitialiser 🤐" id="reset_but"/></form>
+				<input data-i18n-attr="value:auth.but_reset" type="submit" id="reset_but"/></form>
 				<br /><br /><br />
 			</form>
 			
 		</div>
 		<center>
-			<p class="label_info">Logiciel libre sous licence <a href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank" rel="noopener noreferrer">AGPL-3.0-or-later</a> ·
-			<a href="https://github.com/moncycle-app" target="_blank" rel="noopener noreferrer">code source</a> ·
-			<a id="a_terms" target="_blank" rel="noopener noreferrer" hidden>conditions d'utilisation</a></p>
+			<p data-i18n="auth.logiciel_libre_sous_licence" class="label_info"><a data-i18n="auth.agpl_3_0_or_later" data-slot="a" href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank" rel="noopener noreferrer"></a><a data-i18n="auth.code_source" data-slot="a2" href="https://github.com/moncycle-app" target="_blank" rel="noopener noreferrer"></a><a data-i18n="auth.conditions_d_utilisation" data-slot="a3" id="a_terms" target="_blank" rel="noopener noreferrer" hidden></a></p>
 		</center>
 
 	</body>

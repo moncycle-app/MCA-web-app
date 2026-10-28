@@ -14,8 +14,11 @@
 
 import { moncycle_config } from "/js/config.js";
 import { moncycle_store } from "/js/model/store.js";
+import { t, t_map, ready as i18n_ready } from "/js/core/i18n.js";
 
 const $ = globalThis.$;
+
+await Promise.all([moncycle_config.ready, i18n_ready]);
 
 // The page of the link in a mail (verify_email.html), as a file of its own: the CSP is script-src 'self', so no inline script.
 // The address holds the purpose and the token in its fragment ("#purpose=resetPassword&t=..."): a fragment is never sent to a server,
@@ -29,32 +32,14 @@ $(document).ready(function(){
 		const policy = ((ret || {}).data || {}).passwordPolicyRegex;
 		if (policy) $("#i_new_password, #i_new_password_conf").attr("pattern", policy);
 	});
-	const pages = {
-		accountCreation: {
-			title: "Confirmer votre adresse e-mail",
-			text: "Un compte a été créé avec cette adresse. Confirmez-la pour pouvoir vous connecter.",
-			button: "Confirmer mon adresse ✅",
-			done: "Adresse confirmée! Vous pouvez maintenant vous connecter. 🎉",
-		},
-		resetPassword: {
-			title: "Choisir un nouveau mot de passe",
-			text: "Choisissez le nouveau mot de passe de votre compte. L'ancien ne servira plus.",
-			button: "Enregistrer le mot de passe 💾",
-			done: "Mot de passe changé! Vous pouvez vous connecter avec. 🎉",
-			password: true,
-		},
-		changeEmail: {
-			title: "Confirmer votre nouvelle adresse e-mail",
-			text: "Cette adresse remplacera l'adresse de connexion du compte, et recevra ses cycles par mail.",
-			button: "Confirmer cette adresse ✅",
-			done: "Adresse changée! Elle est maintenant celle de connexion du compte. 🎉",
-		},
-	};
+	// the texts of each purpose are in the catalog: verify_email.page.<purpose>.title, text, button, done
+	const purposes = {accountCreation: {}, resetPassword: {password: true}, changeEmail: {}};
+	const text_of = (purpose, part) => t("verify_email.page." + purpose + "." + part);
 
 	const fragment = new URLSearchParams(window.location.hash.slice(1));
 	window.history.replaceState(null, "", window.location.pathname + window.location.search);
 	const purpose = fragment.get("purpose");
-	const page = Object.prototype.hasOwnProperty.call(pages, purpose) ? pages[purpose] : null;
+	const page = Object.prototype.hasOwnProperty.call(purposes, purpose) ? purposes[purpose] : null;
 	if (page === null || !fragment.get("t")) {
 		$("#et_invalid").show();
 		return;
@@ -62,9 +47,9 @@ $(document).ready(function(){
 
 	$("#i_purpose").val(purpose);
 	$("#i_token").val(fragment.get("t"));
-	$("#et_title").text(page.title);
-	$("#et_text").text(page.text);
-	$("#but_et").val(page.button);
+	$("#et_title").text(text_of(purpose, "title"));
+	$("#et_text").text(text_of(purpose, "text"));
+	$("#but_et").val(text_of(purpose, "button"));
 	if (page.password) {
 		$("#et_password_block").show();
 		$("#i_new_password, #i_new_password_conf").prop("required", true);
@@ -75,7 +60,7 @@ $(document).ready(function(){
 		event.preventDefault();
 		$("#et_error_msg").text("");
 		if (page.password && $("#i_new_password").val() != $("#i_new_password_conf").val()) {
-			$("#et_error_msg").text("Le mot de passe et sa confirmation ne sont pas identiques.");
+			$("#et_error_msg").text(t("verify_email.password_mismatch"));
 			return;
 		}
 		$("#but_et").prop("disabled", true);
@@ -90,7 +75,7 @@ $(document).ready(function(){
 			console.log(ret);
 			$("#i_new_password, #i_new_password_conf, #i_token").val("");
 			$("#et_form_box").hide();
-			$("#et_done_text").text(page.done);
+			$("#et_done_text").text(text_of(purpose, "done"));
 			// the address to sign in with, as the server knows it now
 			$("#et_login_link").attr("href", "auth?login_email=" + encodeURIComponent(ret.data.loginEmail));
 			$("#et_done").show();
@@ -98,16 +83,7 @@ $(document).ready(function(){
 			console.error(jqXHR);
 			$("#but_et").prop("disabled", false);
 			var err = (jqXHR.responseJSON || {}).error || {};
-			const return_codes = {
-				invalid_token: "Ce lien n'est plus valable: il a peut-être déjà servi, ou été remplacé par un plus récent.",
-				token_expired: "Ce lien a expiré. Demandez-en un nouveau.",
-				rate_limited: "Trop de tentatives depuis ce réseau, réessayez plus tard.",
-				email_taken: "Cette adresse est déjà utilisée par un autre compte.",
-				missing_field: "Données manquantes.",
-				password_too_weak: "Le mot de passe ne respecte pas la règle des mots de passe.",
-				password_too_long: "Le mot de passe est trop long (128 caractères au plus).",
-				password_invalid: "Le mot de passe contient un caractère interdit."
-			};
+			const return_codes = t_map("verify_email.errors");
 			$("#et_error_msg").text(moncycle_store.error_pick(jqXHR, return_codes) || moncycle_store.error_text(jqXHR));
 		});
 	});

@@ -15,8 +15,11 @@
 import { moncycle_config } from "/js/config.js";
 import { moncycle_store } from "/js/model/store.js";
 import { moncycle_captcha } from "/js/captcha.js";
+import { t, t_node, t_map, ready as i18n_ready } from "/js/core/i18n.js";
 
 const $ = globalThis.$;
+
+await Promise.all([moncycle_config.ready, i18n_ready]);
 
 // The sign-in page (auth.html), as a file of its own: the CSP is script-src 'self', so no inline script.
 
@@ -63,7 +66,7 @@ else {
 		$("#connexion_form").on("submit", function(event) {
 			event.preventDefault();
 			$("#connexion_but").prop("disabled", true);
-			$("#connexion_but").val("Connexion ⏳");
+			$("#connexion_but").val(t("auth.but_connect_busy"));
 			var payload = {
 				email: $("#i_login_email").val(),
 				password: $("#i_password").val(),
@@ -87,23 +90,9 @@ else {
 				window.location.replace('..');
 			}).fail(function(jqXHR){
 				$("#connexion_but").prop("disabled", false);
-				$("#connexion_but").val("Connexion 🔑");
+				$("#connexion_but").val(t("auth.but_connect"));
 				var err = (jqXHR.responseJSON || {}).error || {};
-				const return_codes = {
-					login_disabled : "La connexion est désactivée.",
-					missing_field : "E-mail et/ou mot de passe manquant.",
-					invalid_email : "L'adresse e-mail n'est pas valide.",
-					account_disabled : "Compte désactivé.",
-					email_not_verified : "Merci de vérifier votre adresse e-mail avant de vous connecter: cliquez sur le lien du mail reçu à l'inscription. Il a disparu? Utilisez « mot de passe perdu » ci-dessous pour en recevoir un nouveau.",
-					totp_required : "Bon mot de passe, mais un code TOTP est requis.",
-					totp_invalid : "Bon mot de passe, mais le code TOTP est incorrect.",
-					invalid_credentials : "Mauvais mot de passe ou compte inexistant.",
-					captcha_required : "Captcha manquant ou incorrect.",
-					captcha_expired : "Le captcha a expiré, recopiez le nouveau.",
-					captcha_unavailable : "Le captcha est indisponible pour le moment, réessayez plus tard.",
-					account_locked : "Compte temporairement bloqué après trop de tentatives échouées, réessayez plus tard.",
-					rate_limited : "Trop de tentatives depuis ce réseau, réessayez plus tard."
-				};
+				const return_codes = t_map("auth.signin_errors");
 				if ((err.details || {}).captchaRequired) $("#captcha_wrapper").show();
 				$("#message_err").empty().append(document.createTextNode(moncycle_store.error_pick(jqXHR, return_codes) || moncycle_store.error_text(jqXHR)), $("<br>"));
 
@@ -115,7 +104,7 @@ else {
 		$("#reset_form").on("submit", function(event) {
 			event.preventDefault();
 			$("#reset_but").prop("disabled", true);
-			$("#reset_but").val("Rénitialiser ⏳");
+			$("#reset_but").val(t("auth.but_reset_busy"));
 			$("#reset_error_msg").text("");
 			var email = $("#r_login_email").val();
 			$.ajax({
@@ -125,26 +114,19 @@ else {
 				data: JSON.stringify({email: email, captcha: $("#rc_captcha").val(), captchaToken: $("#rc_captcha_token").val()}),
 			}).done(function(ret){
 				console.log(ret);
-				$("#reset_but").val("Rénitialiser 🤐");
+				$("#reset_but").val(t("auth.but_reset"));
 				$("#reset_but").prop("disabled", false);
 				if (ret.data && ret.data.sent) {
 					$("#reset_form").hide();
 					// the address is what was typed: a text node, never HTML
-						$("#password_reseted_msg").empty().append(document.createTextNode("📧 Un lien pour choisir un nouveau mot de passe a été envoyé par mail à : "), $("<br>"), $("<b>").text(email), $("<br>"), $("<br>"), document.createTextNode("(si ce compte existe)"));
+						$("#password_reseted_msg").empty().append(t_node("auth.reset_sent", {br: document.createElement("br"), email: $("<b>").text(email)[0]}));
 				}
 			}).fail(function(jqXHR){
-				$("#reset_but").val("Rénitialiser 🤐");
+				$("#reset_but").val(t("auth.but_reset"));
 				$("#reset_but").prop("disabled", false);
 				console.error(jqXHR);
 				var err = (jqXHR.responseJSON || {}).error || {};
-				const return_codes = {
-					missing_field : "L'adresse e-mail est manquante.",
-					invalid_email : "L'adresse e-mail n'est pas valide.",
-					captcha_invalid : "Erreur dans la saisie du captcha.",
-					captcha_expired : "Le captcha a expiré, recopiez le nouveau.",
-					captcha_unavailable : "Le captcha est indisponible pour le moment, réessayez plus tard.",
-					rate_limited : "Trop de tentatives depuis ce réseau, réessayez plus tard."
-				};
+				const return_codes = t_map("auth.reset_errors");
 				$("#reset_error_msg").text(moncycle_store.error_pick(jqXHR, return_codes) || moncycle_store.error_text(jqXHR));
 				// a captcha that was refused is not asked again with the same answer
 				if (err.code === "captcha_invalid" || err.code === "captcha_expired") reset_captcha.reload(true);
