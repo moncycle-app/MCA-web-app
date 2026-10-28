@@ -6,7 +6,7 @@ without script reads (the link preview of `index.html` and its `<noscript>` mess
 
 ## The format
 
-A flat object, keys `screen.thing`: `timeline.cycle_title`, `settings.delete_confirm`, `common.error_unknown`, `calendar.months_short`.
+A flat object. Keys are English names, `screen.thing`, describing what the text is for (never a slice of its French wording): `timeline.cycle_title`, `settings.delete_confirm`, `common.error_unknown`, `calendar.months_short`.
 
 | value | meaning |
 |---|---|

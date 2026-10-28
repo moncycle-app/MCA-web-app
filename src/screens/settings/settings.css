@@ -37,7 +37,7 @@
 	color: #fbca0b;
 }
 
-[hidden] {
+:where([data-screen="settings"]) [hidden] {
 	display: none !important;
 }
 

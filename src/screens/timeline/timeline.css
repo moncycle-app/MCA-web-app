@@ -502,7 +502,7 @@
 	font-size: 1em;
 }
 
-h2 {
+:where([data-screen="timeline"]) h2 {
 	position: sticky;
 	top: 0px;
 	margin: 0;
@@ -1041,7 +1041,7 @@ h2 {
 		color: #e0b020;
 	}
 
-	h2 a {
+	:where([data-screen="timeline"]) h2 a {
 		background-color: white;
 		color: black;
 	}
@@ -1139,4 +1139,21 @@ h2 {
 .unknown_type_note {
 	margin: 6px 0 0;
 	font-size: .85em;
+}
+
+/* --- what starts hidden or sized, from the markup (the script shows and hides them) --------------------------------------------- */
+:where([data-screen="timeline"]) :is(#actu, #sync_status, #recap, #timeline, #jour_form, #jour_form_saving, #jour_form_saved, #jour_form_unsent, #bulk_form, #desc_add_form_sensation, #desc_add_form_observation, #desc_category_other) {
+	display: none;
+}
+
+:where([data-screen="timeline"]) #form_fc {
+	width: 97%;
+}
+
+:where([data-screen="timeline"]) #form_temp {
+	width: 100px;
+}
+
+:where([data-screen="timeline"]) #from_com {
+	width: 95%;
 }

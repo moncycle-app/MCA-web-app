@@ -1,0 +1,533 @@
+<center>
+	<h1>mon<span class="gradiant_logo">cycle</span>.app</h1>
+	<div data-i18n="settings.settings" id="name"></div>
+	<a href="/"><button data-i18n="settings.back_to_cycles" type="button" class="nav_button"></button></a>
+	<form id="f_logout" action="api/v2/token" method="delete"><button data-i18n="settings.logout" type="submit" id="but_logout" class="nav_button rouge"></button></form>
+	<p data-i18n="settings.demo_notice" id="warning_demo" hidden><br data-slot="br" /><br data-slot="br2" /><a data-slot="a" href="/register"><button data-i18n="settings.create_account" type="button"></button></a></p>
+</center>
+
+<div class="contennu settings">
+	<p class="form_msg" id="page_msg" role="status"></p>
+	<br />
+
+	<!-- ===== The menu: one entry per panel below. A panel opens with the address #name (settings#securite). ===== -->
+	<nav id="menu">
+		<h2 data-i18n="settings.settings"></h2>
+		<a class="menu_item" id="menu_suivi" href="#suivi">
+			<span data-i18n="settings.menu_icon_follow" class="menu_icon"></span>
+			<span class="menu_text"><b data-i18n="settings.menu_follow"></b><small data-i18n="settings.menu_follow_hint"></small></span>
+		</a>
+		<a class="menu_item" id="menu_descriptions" href="#descriptions">
+			<span data-i18n="settings.menu_icon_descriptions" class="menu_icon"></span>
+			<span class="menu_text"><b data-i18n="settings.menu_descriptions"></b><small data-i18n="settings.menu_descriptions_hint"></small></span>
+		</a>
+		<a class="menu_item" id="menu_notifications" href="#notifications">
+			<span data-i18n="settings.menu_icon_notifications" class="menu_icon"></span>
+			<span class="menu_text"><b data-i18n="settings.menu_notifications"></b><small data-i18n="settings.menu_notifications_hint"></small></span>
+		</a>
+		<a class="menu_item" id="menu_donnees" href="#donnees">
+			<span data-i18n="settings.menu_icon_data" class="menu_icon"></span>
+			<span class="menu_text"><b data-i18n="settings.menu_data"></b><small data-i18n="settings.menu_data_hint"></small></span>
+		</a>
+		<a class="menu_item" id="menu_connexion" href="#connexion">
+			<span data-i18n="settings.menu_icon_login" class="menu_icon"></span>
+			<span class="menu_text"><b data-i18n="settings.menu_login"></b><small data-i18n="settings.menu_login_hint"></small></span>
+		</a>
+		<a class="menu_item" id="menu_appareils" href="#appareils">
+			<span data-i18n="settings.menu_icon_devices" class="menu_icon"></span>
+			<span class="menu_text"><b data-i18n="settings.menu_devices"></b><small data-i18n="settings.menu_devices_hint"></small></span>
+		</a>
+		<a class="menu_item" id="menu_apropos" href="#apropos">
+			<span data-i18n="settings.menu_icon_about" class="menu_icon"></span>
+			<span class="menu_text"><b data-i18n="settings.menu_about"></b><small data-i18n="settings.menu_about_hint"></small></span>
+		</a>
+		<a class="menu_item" id="menu_actualites" href="#actualites" hidden>
+			<span data-i18n="settings.menu_icon_news" class="menu_icon"></span>
+			<span class="menu_text"><b data-i18n="settings.menu_news"></b><small data-i18n="settings.menu_news_hint"></small></span>
+		</a>
+		<a class="menu_item menu_danger" id="menu_suppression" href="#suppression">
+			<span data-i18n="settings.menu_icon_deletion" class="menu_icon"></span>
+			<span class="menu_text"><b data-i18n="settings.menu_deletion"></b><small data-i18n="settings.menu_deletion_hint"></small></span>
+		</a>
+	</nav>
+
+
+	<!-- ===== Mon suivi: every control saves by itself ===== -->
+	<section class="panel" id="panel_suivi" hidden>
+		<a data-i18n="settings.back_to_menu" class="back" href="#"></a>
+		<h2 data-i18n="settings.follow_title"></h2>
+		<p data-i18n="settings.autosave_hint" class="label_info"></p>
+
+		<form id="f_suivi">
+			<div class="field">
+				<label data-i18n="settings.nickname_label" for="i_nickname"></label>
+				<input type="text" id="i_nickname" name="nickname" required maxlength="255" autocomplete="off" />
+				<span data-i18n="settings.nickname_hint" class="label_info"></span>
+				<p class="form_msg" role="status"></p>
+			</div>
+
+			<fieldset class="choice_group">
+				<legend data-i18n="settings.method_label"></legend>
+				<span data-i18n="settings.method_hint" class="label_info"></span>
+				<div class="choice">
+					<input type="radio" name="method" value="cervicalMucus" id="m_cervical_mucus" required />
+					<label for="m_cervical_mucus">
+						<span data-i18n="settings.method_mucus" class="choice_title"></span>
+						<span data-i18n="settings.method_mucus_text" class="choice_text"></span>
+						<span data-i18n="settings.method_mucus_source" class="choice_note"></span>
+					</label>
+				</div>
+				<div class="choice">
+					<input type="radio" name="method" value="fertilityCare" id="m_fertility_care" />
+					<label for="m_fertility_care">
+						<span data-i18n="settings.method_fc" class="choice_title"></span>
+						<span data-i18n="settings.method_fc_text" class="choice_text"></span>
+					</label>
+				</div>
+				<p class="form_msg" role="status"></p>
+			</fieldset>
+
+			<fieldset class="choice_group">
+				<legend data-i18n="settings.option_legend"></legend>
+				<div class="choice choice_check">
+					<input type="checkbox" name="temperature_tracking" value="1" id="m_temp" />
+					<label for="m_temp">
+						<span data-i18n="settings.temperature_label" class="choice_title"></span>
+						<span data-i18n="settings.temperature_text" class="choice_text"></span>
+					</label>
+				</div>
+				<span data-i18n="settings.temperature_symptothermal" class="label_info choice_hint"></span>
+				<p class="form_msg" role="status"></p>
+			</fieldset>
+
+			<fieldset class="choice_group">
+				<legend data-i18n="settings.display_title"></legend>
+				<div class="choice choice_check">
+					<input type="checkbox" name="timeline_asc" value="1" id="i_timeline_asc" />
+					<label for="i_timeline_asc">
+						<span data-i18n="settings.ascending_label" class="choice_title"></span>
+						<span data-i18n="settings.ascending_hint" class="choice_text"></span>
+					</label>
+				</div>
+				<p class="form_msg" role="status"></p>
+			</fieldset>
+
+			<fieldset class="choice_group">
+				<legend data-i18n="settings.about_you_title"></legend>
+				<div class="field">
+					<label data-i18n="settings.birth_year_label" for="i_anaissance"></label>
+					<select id="i_anaissance" name="age" required></select>
+					<p class="form_msg" role="status"></p>
+				</div>
+				<div class="choice choice_check">
+					<input type="checkbox" name="research" value="1" id="i_research" />
+					<label for="i_research">
+						<span data-i18n="settings.research_label" class="choice_title"></span>
+						<span data-i18n="settings.research_hint" class="choice_text"></span>
+					</label>
+				</div>
+				<p class="form_msg" role="status"></p>
+			</fieldset>
+		</form>
+	</section>
+
+
+	<!-- ===== Sensations & observations ===== -->
+	<section class="panel" id="panel_descriptions" hidden>
+		<a data-i18n="settings.back_to_menu" class="back" href="#"></a>
+		<h2 data-i18n="settings.descriptions_title"></h2>
+		<p data-i18n="settings.descriptions_intro"></p>
+
+		<p class="desc_unknown_note label_info" hidden></p>
+		<div id="desc_froms_container"><center data-i18n="settings.icon_loading"></center></div>
+		<p class="form_msg" id="desc_msg" role="status"></p>
+
+		<h3 data-i18n="settings.new_description_title"></h3>
+		<form method="post" action="api/v2/description" id="f_new_description" class="inline_row">
+			<input data-i18n-attr="placeholder:settings.new_description_placeholder;aria-label:settings.new_description_name_label" id="i_desc_name_new" type="text" name="name" maxlength="256" required />
+			<select data-i18n-attr="aria-label:settings.type_label" id="i_desc_type_new" name="type">
+				<option data-i18n="settings.type_sensation" value="2"></option>
+				<option data-i18n="settings.type_observation" value="1"></option>
+			</select>
+			<button data-i18n="settings.add" type="submit" id="i_desc_validate_new"></button>
+			<p class="form_msg" role="status"></p>
+		</form>
+
+		<details class="help">
+			<summary data-i18n="settings.buttons_help_title"></summary>
+			<p data-i18n="settings.buttons_help_text"><b data-i18n="settings.icon_comment" data-slot="b"></b><b data-i18n="settings.icon_delete" data-slot="b2"></b><b data-i18n="settings.icon_merge" data-slot="b3"></b></p>
+		</details>
+	</section>
+
+
+	<!-- ===== Cycles par e-mail ===== -->
+	<section class="panel" id="panel_notifications" hidden>
+		<a data-i18n="settings.back_to_menu" class="back" href="#"></a>
+		<h2 data-i18n="settings.notifications_title"></h2>
+
+		<form id="f_auto_mail">
+			<div class="choice choice_check">
+				<input type="checkbox" name="auto_mail_export" value="1" id="i_auto_mail_export" />
+				<label for="i_auto_mail_export">
+					<span data-i18n="settings.auto_mail_label" class="choice_title"></span>
+					<span data-i18n="settings.auto_mail_text" class="choice_text"></span>
+				</label>
+			</div>
+			<p class="form_msg" role="status"></p>
+		</form>
+
+		<h3 data-i18n="settings.recipients_title"></h3>
+		<p data-i18n="settings.recipients_text" class="label_info"></p>
+		<form id="form_notification_emails" action="api/v2/account" method="post">
+			<div class="field">
+				<label data-i18n="settings.other_addresses_label" for="i_notification_emails"></label>
+				<input data-i18n-attr="placeholder:settings.other_addresses_placeholder" type="text" id="i_notification_emails" name="notification_emails" maxlength="1024" autocomplete="off" />
+				<span data-i18n="settings.other_addresses_hint" class="label_info"></span>
+			</div>
+			<div class="field">
+				<label data-i18n="settings.password_to_confirm" for="i_notification_emails_password"></label>
+				<input type="password" id="i_notification_emails_password" name="password" autocomplete="current-password" required />
+				<span data-i18n="settings.notice_mail_hint" class="label_info"></span>
+			</div>
+			<button data-i18n="settings.save" type="submit" id="but_notification_emails"></button>
+			<p class="form_msg" role="status"></p>
+		</form>
+	</section>
+
+
+	<!-- ===== Mes données: export, import ===== -->
+	<section class="panel" id="panel_donnees" hidden>
+		<a data-i18n="settings.back_to_menu" class="back" href="#"></a>
+		<h2 data-i18n="settings.data_title"></h2>
+
+		<h3 data-i18n="settings.export_title"></h3>
+		<p data-i18n="settings.export_text" class="label_info"></p>
+		<p class="desc_unknown_note label_info" hidden></p>
+		<form method="get" action="api/v2/export" id="f_export_complexe">
+			<div class="field_row">
+				<div class="field">
+					<label data-i18n="settings.export_from" for="i_start_date"></label>
+					<input id="i_start_date" name="from" type="date" />
+				</div>
+				<div class="field">
+					<label data-i18n="settings.export_to" for="i_end_date"></label>
+					<input id="i_end_date" name="to" type="date" />
+				</div>
+			</div>
+			<p data-i18n="settings.export_oldest" id="export_oldest" class="label_info" hidden><b data-slot="b" id="export_oldest_day"></b><button data-i18n="settings.export_select_all" data-slot="button" type="button" id="but_export_all" class="link_button"></button></p>
+
+			<fieldset class="choice_group">
+				<legend data-i18n="settings.format_label"></legend>
+				<div class="choice">
+					<input type="radio" name="format" value="pdf" id="f_pdf" checked />
+					<label for="f_pdf">
+						<span data-i18n="settings.format_pdf" class="choice_title"></span>
+						<span data-i18n="settings.format_pdf_text" class="choice_text"></span>
+					</label>
+				</div>
+				<div class="choice">
+					<input type="radio" name="format" value="csv" id="f_csv" />
+					<label for="f_csv">
+						<span data-i18n="settings.format_csv" class="choice_title"></span>
+						<span data-i18n="settings.format_csv_text" class="choice_text"></span>
+					</label>
+				</div>
+				<div class="choice">
+					<input type="radio" name="format" value="nfp" id="f_nfp" />
+					<label for="f_nfp">
+						<span data-i18n="settings.format_nfp" class="choice_title"></span>
+						<span data-i18n="settings.format_nfp_text" class="choice_text"></span>
+					</label>
+				</div>
+			</fieldset>
+
+			<button data-i18n="settings.export_button" type="submit"></button>
+			<p class="form_msg" id="export_err" role="status"></p>
+		</form>
+
+		<h3 data-i18n="settings.import_title"></h3>
+		<p data-i18n="settings.import_text" class="label_info"></p>
+		<form method="post" action="api/v2/import" id="f_import">
+			<div class="field">
+				<input data-i18n-attr="aria-label:settings.import_file_label" type="file" id="i_import_file" name="file" />
+			</div>
+			<div class="choice choice_check">
+				<input type="checkbox" id="i_import_override" name="override" value="1" />
+				<label for="i_import_override">
+					<span data-i18n="settings.import_overwrite_label" class="choice_title"></span>
+					<span data-i18n="settings.import_overwrite_hint" class="choice_text"></span>
+				</label>
+			</div>
+			<div class="buttons">
+				<button data-i18n="settings.import_check_button" type="button" id="i_import_check"></button>
+				<button data-i18n="settings.import_button" type="submit" id="i_import_submit"></button>
+			</div>
+			<p class="form_msg" role="status"></p>
+			<p data-i18n="settings.import_check_help" class="label_info"><b data-i18n="settings.import_check_name" data-slot="b"></b></p>
+		</form>
+		<div id="import_report"></div>
+
+		<h3 data-i18n="settings.raw_title"></h3>
+		<p data-i18n="settings.raw_text" class="label_info"></p>
+		<a data-i18n="settings.raw_button" class="button" id="a_raw_export" href="api/v2/all_of_my_data_plz"></a>
+	</section>
+
+
+	<!-- ===== Connexion et sécurité ===== -->
+	<section class="panel" id="panel_connexion" hidden>
+		<a data-i18n="settings.back_to_menu" class="back" href="#"></a>
+		<h2 data-i18n="settings.login_title"></h2>
+
+		<div class="card">
+			<h3 data-i18n="settings.login_address_title"></h3>
+			<p data-i18n="settings.login_address_current"><b data-slot="b" id="login_email_shown"></b></p>
+			<details>
+				<summary data-i18n="settings.login_address_change"></summary>
+				<form id="form_login_email" action="api/v2/account" method="post">
+					<p data-i18n="settings.login_address_text" class="label_info"><b data-i18n="settings.new_word" data-slot="b"></b></p>
+					<div class="field">
+						<label data-i18n="settings.new_address_label" for="i_login_email_new"></label>
+						<input type="email" id="i_login_email_new" name="new_login_email" maxlength="255" required />
+						<span data-i18n="settings.new_address_hint" class="label_info"></span>
+					</div>
+					<div class="field">
+						<label data-i18n="settings.password_label" for="i_login_email_password"></label>
+						<input type="password" id="i_login_email_password" name="password" autocomplete="current-password" required />
+					</div>
+					<div class="field" id="login_email_code_field" hidden>
+						<label data-i18n="settings.totp_code_label" for="i_login_email_code"></label>
+						<input type="number" id="i_login_email_code" name="code" inputmode="numeric" autocomplete="one-time-code" />
+					</div>
+					<button data-i18n="settings.send_link" type="submit" id="but_login_email"></button>
+					<p class="form_msg" role="status"></p>
+				</form>
+			</details>
+		</div>
+
+		<div class="card">
+			<h3 data-i18n="settings.password_label"></h3>
+			<details>
+				<summary data-i18n="settings.password_change"></summary>
+				<form id="form_mdp_change" action="api/v2/account" method="post">
+					<div class="field">
+						<label data-i18n="settings.current_password_label" for="i_old_pw"></label>
+						<input type="password" id="i_old_pw" name="old_pw" autocomplete="current-password" required />
+					</div>
+					<div class="field">
+						<label data-i18n="settings.new_password_label" for="i_pw1"></label>
+						<input type="password" id="i_pw1" name="pw1" autocomplete="new-password" required />
+						<span data-i18n="settings.new_password_hint" class="label_info"></span>
+					</div>
+					<div class="field">
+						<label data-i18n="settings.new_password_confirm_label" for="i_pw2"></label>
+						<input type="password" id="i_pw2" name="pw2" autocomplete="new-password" required />
+					</div>
+					<div class="choice choice_check">
+						<input type="checkbox" id="i_logout_other_devices" name="logout_other_devices" value="1" />
+						<label for="i_logout_other_devices">
+							<span data-i18n="settings.logout_others_label" class="choice_title"></span>
+							<span data-i18n="settings.logout_others_hint" class="choice_text"></span>
+						</label>
+					</div>
+					<button data-i18n="settings.save" type="submit" id="but_mdp_change"></button>
+					<p class="form_msg" role="status"></p>
+				</form>
+			</details>
+		</div>
+
+		<div class="card">
+			<h3 data-i18n="settings.totp_title"></h3>
+
+			<div id="totp_explications" hidden>
+				<p data-i18n="settings.totp_text"></p>
+				<form id="f_totp_start" action="api/v2/totp" method="post">
+					<button data-i18n="settings.totp_enable_start" type="submit" id="i_activate_otp"></button>
+				</form>
+			</div>
+
+			<div id="totp_miseenpalce" hidden>
+				<form id="f_totp_validation" action="api/v2/totp/confirm" method="post">
+					<p data-i18n="settings.totp_step_add"><b data-slot="b">1.</b><a data-i18n="settings.totp_app_name" data-slot="a" target="_blank" rel="noopener" href="https://freeotp.github.io/"></a></p>
+					<ul class="totp_ways">
+						<li><b data-i18n="settings.totp_on_phone"></b> <a data-i18n="settings.totp_auto_setup" id="totp_auto_conf" class="button"></a></li>
+						<li><b data-i18n="settings.totp_on_computer"></b> <span data-i18n="settings.totp_qr_alt"></span><div id="totp_qrcode"></div></li>
+						<li data-i18n="settings.totp_step_copy"><b data-i18n="settings.totp_otherwise" data-slot="b"></b><button data-i18n="settings.totp_copy" data-slot="button" id="totp_copy_secret" type="button"></button><span data-slot="span" class="vert" id="totp_copy_secret_ok"></span></li>
+					</ul>
+					<p data-i18n="settings.totp_step_confirm"><b data-slot="b">2.</b></p>
+					<div class="field">
+						<label data-i18n="settings.password_label" for="i_totp_password"></label>
+						<input type="password" id="i_totp_password" name="password" autocomplete="current-password" required />
+					</div>
+					<div class="field">
+						<label data-i18n="settings.code_label" for="i_totp_code"></label>
+						<input type="number" id="i_totp_code" name="tmp_code" class="input_user_account_totp" inputmode="numeric" autocomplete="one-time-code" required />
+					</div>
+					<button data-i18n="settings.totp_enable" type="submit" id="i_submit_otp"></button>
+				</form>
+			</div>
+
+			<div id="totp_state" hidden>
+				<p data-i18n="settings.totp_active" class="vert"></p>
+				<details>
+					<summary data-i18n="settings.totp_disable_title"></summary>
+					<form id="f_totp_desac" action="api/v2/totp/disable" method="post">
+						<div class="field">
+							<label data-i18n="settings.totp_disable_code_label" for="i_totp_off_code"></label>
+							<input type="number" id="i_totp_off_code" name="tmp_code" class="input_user_account_totp" inputmode="numeric" autocomplete="one-time-code" required />
+						</div>
+						<button data-i18n="settings.totp_disable" type="submit" class="rouge"></button>
+					</form>
+				</details>
+			</div>
+			<p class="form_msg" id="totp_err_msg" role="status"></p>
+		</div>
+	</section>
+
+
+	<!-- ===== Appareils et accès: connections, access tokens ===== -->
+	<section class="panel" id="panel_appareils" hidden>
+		<a data-i18n="settings.back_to_menu" class="back" href="#"></a>
+		<h2 data-i18n="settings.devices_title"></h2>
+
+		<h3 data-i18n="settings.connections_title"></h3>
+		<p data-i18n="settings.connections_text" class="label_info"></p>
+		<div id="tokens_container"><center data-i18n="settings.icon_loading"></center></div>
+		<p class="form_msg" id="tokens_msg" role="status"></p>
+		<form id="f_tokens_revoke_all" action="api/v2/token?others=true" method="delete">
+			<button data-i18n="settings.revoke_all_button" type="submit" class="rouge" id="but_tokens_revoke_all"></button>
+		</form>
+
+		<h3 data-i18n="settings.tokens_title"></h3>
+		<p data-i18n="settings.tokens_text" class="label_info"><code data-i18n="settings.tokens_header_name" data-slot="code"></code><b data-i18n="settings.tokens_once" data-slot="b"></b></p>
+		<details id="token_create_details">
+			<summary data-i18n="settings.token_new_title"></summary>
+			<form id="f_token_create" action="api/v2/token" method="post">
+				<input type="hidden" name="email" id="i_token_new_email" value="" />
+				<input type="hidden" name="cookie" value="false" />
+				<div class="field">
+					<label data-i18n="settings.token_name_label" for="i_token_new_name"></label>
+					<input data-i18n-attr="placeholder:settings.token_name_placeholder" type="text" id="i_token_new_name" name="name" maxlength="256" required />
+				</div>
+				<div class="field_row">
+					<div class="field">
+						<label data-i18n="settings.token_scope_label" for="i_token_new_scope"></label>
+						<select id="i_token_new_scope" name="scope">
+							<option data-i18n="settings.token_scope_read_only" value="readOnly"></option>
+							<option data-i18n="settings.token_scope_read_write" value="readWrite"></option>
+						</select>
+					</div>
+					<div class="field">
+						<label data-i18n="settings.token_expires_label" for="i_token_new_days"></label>
+						<select id="i_token_new_days" name="expiresInDays">
+							<option data-i18n="settings.token_expires_30" value="30"></option>
+							<option data-i18n="settings.token_expires_90" value="90"></option>
+							<option data-i18n="settings.token_expires_365" value="365"></option>
+						</select>
+					</div>
+				</div>
+				<div class="field">
+					<label data-i18n="settings.password_to_confirm" for="i_token_new_password"></label>
+					<input type="password" id="i_token_new_password" name="password" autocomplete="current-password" required />
+				</div>
+				<div class="field" id="token_new_code_wrapper" hidden>
+					<label data-i18n="settings.totp_code_label" for="i_token_new_code"></label>
+					<input type="number" id="i_token_new_code" name="code" inputmode="numeric" autocomplete="one-time-code" />
+				</div>
+				<div class="field" id="token_new_captcha_wrapper" hidden>
+					<label data-i18n="settings.captcha_label" for="i_token_new_captcha"></label>
+					<input data-i18n-attr="placeholder:settings.captcha_placeholder" name="captcha" id="i_token_new_captcha" type="text" maxlength="6" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
+					<img data-i18n-attr="title:settings.captcha_image_title;alt:settings.captcha_image_alt" class="captcha" id="i_token_new_captcha_img" hidden />
+					<input type="hidden" name="captchaToken" id="i_token_new_captcha_token" value="" />
+				</div>
+				<button data-i18n="settings.token_create_submit" type="submit" id="but_token_create"></button>
+				<p class="form_msg" id="token_new_err" role="status"></p>
+			</form>
+			<div id="token_new_result" hidden>
+				<p data-i18n="settings.token_created_notice" class="vert"></p>
+				<div class="token_copy">
+					<input data-i18n-attr="aria-label:settings.token_label" type="text" id="i_token_new_value" readonly />
+					<button data-i18n="settings.totp_copy" type="button" id="but_token_copy"></button>
+				</div>
+				<p class="vert" id="token_copy_ok"></p>
+			</div>
+		</details>
+	</section>
+
+
+	<!-- ===== À propos et contact ===== -->
+	<section class="panel" id="panel_apropos" hidden>
+		<a data-i18n="settings.back_to_menu" class="back" href="#"></a>
+		<h2 data-i18n="settings.about_title"></h2>
+		<p data-i18n="settings.about_free"></p>
+		<p data-i18n="settings.about_open_source"><a data-i18n="settings.about_licence_name" data-slot="a" href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank" rel="noopener"></a><a data-i18n="settings.about_repository" data-slot="a2" href="https://github.com/moncycle-app/backend-api-web-app" target="_blank" rel="noopener"></a></p>
+		<p data-i18n="settings.about_more_info"><a data-i18n="settings.about_website" data-slot="a" href="https://www.moncycle.app" target="_blank" rel="noopener"></a></p>
+		<p data-i18n="settings.about_help"><a data-i18n="settings.about_help_teacher" data-slot="a" href="https://www.methode-billings.com/trouver-un-formateur" target="_blank" rel="noopener"></a><a data-i18n="settings.about_help_association" data-slot="a2" href="https://www.fertilitycare.fr/instructrices-et-medecins" target="_blank" rel="noopener"></a></p>
+
+		<div id="terms_about" hidden>
+			<h3 data-i18n="settings.terms_title"></h3>
+			<p data-i18n="settings.terms_intro"><a data-i18n="settings.terms_link" data-slot="a" id="a_terms" target="_blank" rel="noopener noreferrer"></a></p>
+			<ul>
+				<li data-i18n="settings.terms_point_notebook"></li>
+				<li data-i18n="settings.terms_point_age"></li>
+				<li data-i18n="settings.terms_point_no_guarantee"></li>
+				<li data-i18n="settings.terms_point_no_identity"></li>
+				<li data-i18n="settings.terms_point_hosting"></li>
+				<li data-i18n="settings.terms_point_control"></li>
+				<li data-i18n="settings.terms_point_inactive"></li>
+			</ul>
+		</div>
+
+		<h3 data-i18n="settings.contact_title"></h3>
+		<p data-i18n="settings.contact_text"><br data-slot="br" /><a data-i18n="settings.contact_address" data-slot="a" href="mailto:hello@tech4fertility.org"></a></p>
+
+		<dl class="kv tech_info">
+			<dt data-i18n="settings.info_account_number"></dt><dd id="tech_info_no"></dd>
+			<dt data-i18n="settings.info_identifier"></dt><dd id="tech_info_id"></dd>
+			<dt data-i18n="settings.info_signup_date"></dt><dd id="tech_info_insc"></dd>
+			<dt data-i18n="settings.info_server_version"></dt><dd id="tech_info_ver"></dd>
+			<dt data-i18n="settings.info_web_version"></dt><dd id="tech_info_webapp"></dd>
+		</dl>
+
+		<h3 data-i18n="settings.repair_title"></h3>
+		<p data-i18n="settings.repair_text" class="label_info"></p>
+		<div class="buttons">
+			<button data-i18n="settings.repair_sync_button" type="button" id="but_local_sync"></button>
+			<button data-i18n="settings.repair_reset_button" type="button" id="but_local_reset"></button>
+		</div>
+		<p class="form_msg" id="local_msg" role="status"></p>
+	</section>
+
+
+	<!-- ===== Tech 4 Fertility actualités: the latest news, from the news file (js/news.js); the entry shows only when there is one ===== -->
+	<section class="panel" id="panel_actualites" hidden>
+		<a data-i18n="settings.back_to_menu" class="back" href="#"></a>
+		<h2 data-i18n="settings.news_title"></h2>
+		<h3 id="news_title"></h3>
+		<p id="news_text"></p>
+		<div class="buttons">
+			<button data-i18n="settings.news_read" type="button" id="but_news_read"></button>
+		</div>
+	</section>
+
+
+	<!-- ===== Supprimer mon compte ===== -->
+	<section class="panel" id="panel_suppression" hidden>
+		<a data-i18n="settings.back_to_menu" class="back" href="#"></a>
+		<h2 data-i18n="settings.deletion_title" class="rouge"></h2>
+		<p data-i18n="settings.deletion_text" class="rouge"></p>
+		<form method="post" action="api/v2/account/deletion" id="f_suppr_user_account">
+			<div class="field">
+				<label data-i18n="settings.password_to_confirm" class="rouge" for="pw_before_deletion"></label>
+				<input class="rouge" id="pw_before_deletion" name="pw_before_deletion" type="password" autocomplete="current-password" required />
+			</div>
+			<div class="field" id="deletion_code_field" hidden>
+				<label data-i18n="settings.totp_code_label" class="rouge" for="i_deletion_code"></label>
+				<input class="rouge" type="number" id="i_deletion_code" name="code" inputmode="numeric" autocomplete="one-time-code" />
+			</div>
+			<button data-i18n="settings.deletion_button" type="submit" class="rouge"></button>
+		</form>
+	</section>
+
+</div>
+
+

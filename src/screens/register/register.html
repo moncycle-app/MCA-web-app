@@ -1,0 +1,92 @@
+<center>
+	<h1>mon<span class="gradiant_logo">cycle</span>.app</h1>
+	<a href="/auth"><button data-i18n="register.sign_in" type="button" class="nav_button"></button></a>
+	<a class="register_commente" href="https://www.moncycle.app" target="_blank"><button data-i18n="register.discover_app" type="button" class="nav_button"></button></a>
+	<span class="vert"></span>
+	<span class="rouge"></span>
+</center>
+
+<div class="contennu vert" id="register_ok" hidden>
+	<center data-i18n="register.sent_text"><br data-slot="br" /><br data-slot="br2" /><b data-i18n="register.almost_done" data-slot="b"></b><br data-slot="br3" /><b data-slot="b2"><span id="success_email"></span></b><br data-slot="br4" /><br data-slot="br5" /><br data-slot="br6" /><span data-i18n="register.no_message_hint" data-slot="span" class="label_info"></span></center>
+</div>
+<div class="contennu" id="register_form">
+	<h2 data-i18n="register.form_title"></h2>
+	<form action="api/v2/register" method="post" id="f_registration"><br />
+	<label data-i18n="register.nickname_label" for="i_nickname"></label><br />
+	<input data-i18n-attr="placeholder:register.nickname_placeholder" name="nickname" type="text" maxlength="255" id="i_nickname" required /><br />
+	<span data-i18n="register.nickname_hint" class="label_info"></span><br />
+	<br />
+	<fieldset class="choice_group">
+		<legend data-i18n="register.method_label"></legend>
+		<span data-i18n="register.method_hint" class="label_info"></span>
+		<div class="choice">
+			<input type="radio" name="method" value="cervicalMucus" id="m_cervical_mucus" required />
+			<label for="m_cervical_mucus">
+				<span data-i18n="register.method_mucus" class="choice_title"></span>
+				<span data-i18n="register.method_mucus_text" class="choice_text"></span>
+				<span data-i18n="register.method_mucus_source" class="choice_note"></span>
+			</label>
+		</div>
+		<div class="choice">
+			<input type="radio" name="method" value="fertilityCare" id="m_fertility_care" />
+			<label for="m_fertility_care">
+				<span data-i18n="register.method_fc" class="choice_title"></span>
+				<span data-i18n="register.method_fc_text" class="choice_text"></span>
+			</label>
+		</div>
+	</fieldset>
+	<fieldset class="choice_group">
+		<legend data-i18n="register.option_legend"></legend>
+		<div class="choice choice_check">
+			<input type="checkbox" name="temperature_tracking" value="1" id="m_temp" />
+			<label for="m_temp">
+				<span data-i18n="register.temperature_label" class="choice_title"></span>
+				<span data-i18n="register.temperature_text" class="choice_text"></span>
+			</label>
+		</div>
+		<span data-i18n="register.temperature_symptothermal" class="label_info choice_hint"></span>
+	</fieldset>
+	<br />
+	<label data-i18n="register.email_label" for="i_login_email"></label><br />
+	<input data-i18n-attr="placeholder:register.email_placeholder" name="login_email" id="i_login_email" type="email" maxlength="255" required /><br />
+	<span data-i18n="register.email_hint" class="label_info"></span><br />
+	<br />
+	<label data-i18n="register.email_confirm_label" for="i_login_email_conf"></label><br />
+	<input data-i18n-attr="placeholder:register.email_confirm_placeholder" name="login_email_conf" id="i_login_email_conf" type="email" maxlength="255" required /><br />
+	<br />
+	<label data-i18n="register.password_label" for="i_password"></label><br />
+	<input data-i18n-attr="placeholder:register.password_placeholder" name="password" id="i_password" type="password" autocomplete="new-password" required /><br />
+	<span data-i18n="register.password_hint" class="label_info"></span><br />
+	<br />
+	<label data-i18n="register.password_confirm_label" for="i_password_conf"></label><br />
+	<input data-i18n-attr="placeholder:register.password_confirm_placeholder" name="password_conf" id="i_password_conf" type="password" autocomplete="new-password" required /><br />
+	<br />
+	<label data-i18n="register.birth_year_label" for="i_anaissance"></label><br />
+	<select name="birth_year" id="i_anaissance" required>
+		<option data-i18n="register.birth_year_title" disabled selected class="placeholder"></option>
+	</select><br />
+	<br />
+	<label data-i18n="register.captcha_label" for="i_captcha"></label><br />
+	<input data-i18n-attr="placeholder:register.captcha_placeholder" name="captcha" id="i_captcha" type="text" maxlength="6" required autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" /><br />
+	<img data-i18n-attr="title:register.captcha_image_title;alt:register.captcha_image_alt" class="captcha" id="r_captcha" hidden />
+	<input type="hidden" name="language" id="i_language" value="FR" />
+	<input type="hidden" name="captchaToken" id="i_captcha_token" value="" /><br />
+	<span data-i18n="register.captcha_hint" class="label_info"></span><br />
+	<br />
+	<label data-i18n="register.discovered_label" for="i_comment"></label><br />
+	<textarea data-i18n-attr="placeholder:register.discovered_placeholder" required id="i_comment" name="discovered_comment" maxlength="255"></textarea><br />
+	<span data-i18n="register.discovered_hint" class="label_info"></span>
+	<br />
+	<br />
+	<span data-i18n="register.terms_label"></span><br />
+	<iframe data-i18n-attr="title:register.terms_frame_title" id="f_terms" class="terms_frame" sandbox="allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer" loading="lazy" hidden></iframe>
+	<a data-i18n="register.terms_open_link" id="a_terms" target="_blank" rel="noopener noreferrer" hidden></a>
+	<span class="rouge" id="terms_error_msg"></span>
+	<p><input type="checkbox" required id="i_terms" name="terms_accepted" value="1" /> <label data-i18n="register.terms_accept" for="i_terms"></label></p>
+	<br />
+	<input data-i18n-attr="value:register.but_submit" type="submit" id="but_register" /></form>
+	<br /><br />
+	<span class="rouge" id="register_error_msg" ></span>
+	<br /><br /><br /><br />
+</div>
+

@@ -12,8 +12,8 @@
 ** https://github.com/moncycle-app/backend-api-web-app
 */
 
-import { moncycle_config } from "/js/config.js";
-import { moncycle_compat } from "/js/compat.js";
+import { moncycle_config } from "/js/core/config.js";
+import { moncycle_compat } from "/js/core/compat.js";
 import { show_notice } from "/js/core/compat_notice.js";
 import { t } from "/js/core/i18n.js";
 import { blank_day, is_blank, day_from_body, day_meta, codified_fields } from "/js/model/day.js";
@@ -99,8 +99,14 @@ export const moncycle_store = {
 	**   sent    {date}                      the server has taken the write of that day
 	**   failed  {date, message, issues}     the server refused a write for good: the change is dropped
 	** ====================================================================== */
+	// returns the function that stops listening
 	on : function (name, fn) {
 		(moncycle_store.listeners[name] = moncycle_store.listeners[name] || []).push(fn);
+		return function () {
+			const list = moncycle_store.listeners[name] || [];
+			const at = list.indexOf(fn);
+			if (at >= 0) list.splice(at, 1);
+		};
 	},
 	emit : function (name, detail) {
 		(moncycle_store.listeners[name] || []).forEach(function (fn) {
@@ -725,7 +731,7 @@ export const moncycle_store = {
 	// version.json, the web app's own file (never the API's): read once per page load; null when it cannot be read.
 	load_webapp : function () {
 		if (!moncycle_store.webapp) {
-			moncycle_store.webapp = fetch("version.json", {cache : "no-store", credentials : "omit"})
+			moncycle_store.webapp = fetch("/version.json", {cache : "no-store", credentials : "omit"})
 				.then(function (response) { return response.ok ? response.json() : null; })
 				.catch(function () { return null; })
 				.then(function (webapp) { moncycle_store.webapp_version = webapp; return webapp; });

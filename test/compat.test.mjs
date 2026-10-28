@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { moncycle_compat as compat } from "/js/compat.js";
+import { moncycle_compat as compat } from "/js/core/compat.js";
 
 test("parse", () => {
 	assert.equal(compat.parse("16dev"), 16);

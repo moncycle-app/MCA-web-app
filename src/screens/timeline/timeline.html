@@ -1,0 +1,167 @@
+<center>
+	<h1>mon<span class="gradiant_logo">cycle</span>.app</h1>
+	<div data-i18n="timeline.loading" id="name"><br data-slot="br" /><br data-slot="br2" /></div>
+	<button data-i18n="timeline.previous_cycle" type="button" id="charger_cycle" class="nav_button main_button"></button>
+	<button data-i18n="timeline.view_mini_button" id="but_mini_maxi" class="nav_button main_button"></button>
+	<a href="/settings"><button data-i18n="timeline.settings_button" type="button" class="nav_button main_button"></button></a>
+	<!-- Not in src/i18n/: a browser without script cannot read the catalog. -->
+	<noscript><p class="rouge">Cette application a besoin de Javascript pour fonctionner.</p></noscript>
+</center>
+<div class="actu" id="actu">
+	<span data-i18n="timeline.news_tag" class="tag"></span>
+	<strong class="actu_title" id="actu_title"></strong>
+	<p class="actu_text" id="actu_text"></p>
+	<button data-i18n="timeline.news_read" type="button" id="lire_actu"></button>
+	<button data-i18n="timeline.news_close" type="button" id="fermer_actu"></button>
+</div>
+<div class="sync_status" id="sync_status"></div>
+<div class="contennu macro" id="recap"></div>
+<div class="contennu micro" id="timeline"></div>
+<div id="jour_form" class="popup">
+	<div id="jour_form_header">
+		<button data-i18n="timeline.day_previous" type="button" id="jour_form_prev" class="but_j_nav"></button>
+		<button data-i18n="timeline.day_next" type="button" id="jour_form_next" class="but_j_nav"></button>
+		<button data-i18n="timeline.form_close" type="button" id="jour_form_close"></button>
+		<button data-i18n="timeline.form_bulk_icon" type="button" id="jour_form_bulk_but"></button>
+		<button data-i18n="timeline.form_submit_icon" type="button" id="jour_form_submit"></button>
+		<span data-i18n="timeline.form_saving" class="popup_enregistratement_status" id="jour_form_saving"></span>
+		<span data-i18n="timeline.form_saved" class="popup_enregistratement_status vert" id="jour_form_saved"></span>
+		<span data-i18n="timeline.form_unsent" class="popup_enregistratement_status rouge" id="jour_form_unsent"></span>
+		<div id="bulk_form">
+			<span data-i18n="timeline.bulk_text"><input data-slot="input" id="i_bulk_count" type="number" value="3" min="1" max="365" class="" /></span>
+			<button data-i18n="timeline.bulk_apply" type="button" id="bulk_but_submit"></button>
+		</div>
+		<div id="jour_form_titre" class="bold uppercase"></div>
+	</div>
+	<form id="form_data">
+		<input type="hidden" id="form_date" name="date" value="" />
+		<input type="hidden" id="form_save_time" name="last_write_client_UTC" value="" />
+		<div>
+			<br />
+			<div>
+				<span data-i18n="timeline.stamps_title" class="categorie"></span><br />
+				<label data-i18n="timeline.stamp_red" for="go_rouge" class="go_color go_color_red"><input data-slot="input" type="radio" name="stamp" id="go_rouge" value="R" /></label>
+				<label data-i18n="timeline.stamp_green" for="go_vert" class="go_color go_color_green"><input data-slot="input" type="radio" name="stamp" id="go_vert" value="G" /></label>
+				<label data-i18n="timeline.stamp_yellow" for="go_jaune" class="go_color go_color_yellow"><input data-slot="input" type="radio" name="stamp" id="go_jaune" value="Y" /></label>
+				<label for="go_vide" class="go_color go_color_empty"><input type="radio" name="stamp" id="go_vide" value="" checked />&nbsp;<span data-i18n="timeline.stamp_empty" id="blank_or_empty"></span></label>
+				<br />
+				<input type="checkbox" name="baby" id="go_baby" value="BB" /><label data-i18n="timeline.stamp_baby" for="go_baby"></label><br />
+				<br />
+			</div>
+			<div class="pas_mucus pas_mucus_temp">
+				<div id="fc_score_holder">
+					<span data-i18n="timeline.fc_note_label" class="categorie pas_temp"></span> <span id="fc_msg"></span><br />
+					<input data-i18n-attr="placeholder:timeline.fc_note_placeholder" type="text" autocapitalize="characters" name="fc_score" id="form_fc" /><br />
+				</div>
+				<br />
+				<span data-i18n="timeline.bleeding_title" class="categorie pas_temp"></span><br />
+				<input class="fc_form_note" type="checkbox" name="fc_regles" id="fc_h" value="H" /><label data-i18n="timeline.bleeding_h" for="fc_h"><b data-slot="b">H</b></label><br />
+				<input class="fc_form_note" type="checkbox" name="fc_regles" id="fc_m" value="M" /><label data-i18n="timeline.bleeding_m" for="fc_m"><b data-slot="b">M</b></label><br />
+				<input class="fc_form_note" type="checkbox" name="fc_regles" id="fc_rl" value="L" /><label data-i18n="timeline.bleeding_l" for="fc_rl"><b data-slot="b">L</b></label><br />
+				<input class="fc_form_note" type="checkbox" name="fc_regles" id="fc_vl" value="VL" /><label data-i18n="timeline.bleeding_vl" for="fc_vl"><b data-slot="b">VL</b></label><br />
+				<input class="fc_form_note" type="checkbox" name="fc_regles" id="fc_vh" value="VH" /><label data-i18n="timeline.bleeding_vh" for="fc_vh"><b data-slot="b">VH</b></label><br />
+				<input class="fc_form_note" type="checkbox" name="fc_regles" id="fc_b" value="B" /><label data-i18n="timeline.bleeding_b" for="fc_b"><b data-slot="b">B</b></label><br />
+				<br />
+				<span data-i18n="timeline.sensations_title" class="categorie pas_temp"></span><br />
+				<input class="fc_form_note fc_sens" type="checkbox" name="fc_sens" id="fc_0" value="0" /><label data-i18n="timeline.sensation_0" for="fc_0"><b data-slot="b">0</b></label><br />
+				<input class="fc_form_note fc_sens" type="checkbox" name="fc_sens" id="fc_2" value="2" /><label data-i18n="timeline.sensation_2" for="fc_2"><b data-slot="b">2</b></label><br />
+				<input class="fc_form_note fc_sens" type="checkbox" name="fc_sens" id="fc_2w" value="2W" /><label data-i18n="timeline.sensation_2w" for="fc_2w"><b data-slot="b">2W</b></label><br />
+				<input class="fc_form_note fc_sens" type="checkbox" name="fc_sens" id="fc_4" value="4" /><label data-i18n="timeline.sensation_4" for="fc_4"><b data-slot="b">4</b></label><br />
+				<input class="fc_form_note fc_sens" type="checkbox" name="fc_sens" id="fc_10dl" value="10DL" /><label data-i18n="timeline.sensation_10dl" for="fc_10dl"><b data-slot="b">10DL</b></label><br />
+				<input class="fc_form_note fc_sens" type="checkbox" name="fc_sens" id="fc_10sl" value="10SL" /><label data-i18n="timeline.sensation_10sl" for="fc_10sl"><b data-slot="b">10SL</b></label><br />
+				<input class="fc_form_note fc_sens" type="checkbox" name="fc_sens" id="fc_10wl" value="10WL" /><label data-i18n="timeline.sensation_10wl" for="fc_10wl"><b data-slot="b">10WL</b></label><br />
+				<input class="fc_form_note fc_sens_L" type="checkbox" name="fc_sens" id="fc_l" value="L" /><label data-i18n="timeline.sensation_l" for="fc_l"><b data-slot="b">L</b></label><br />
+				<br />
+				<span data-i18n="timeline.finger_test_title" class="categorie pas_temp"></span><br />
+				<input class="fc_obs fc_form_note" type="checkbox" name="fc_c" id="fc_6" value="6" /><label data-i18n="timeline.finger_6" for="fc_6"><b data-slot="b">6</b></label><br />
+				<input class="fc_obs fc_form_note" type="checkbox" name="fc_c" id="fc_8" value="8" /><label data-i18n="timeline.finger_8" for="fc_8"><b data-slot="b">8</b></label><br />
+				<input class="fc_obs fc_form_note" type="checkbox" name="fc_c" id="fc_10" value="10" /><label data-i18n="timeline.finger_10" for="fc_10"><b data-slot="b">10</b></label><br />
+				<input class="fc_obs fc_form_note" type="checkbox" name="fc_c" id="fc_c" value="C" /><label data-i18n="timeline.finger_c" for="fc_c"><b data-slot="b">C</b></label><br />
+				<input class="fc_obs fc_form_note" type="checkbox" name="fc_g" id="fc_g" value="G" /><label data-i18n="timeline.finger_g" for="fc_g"><b data-slot="b">G</b></label><br />
+				<input class="fc_obs fc_form_note" type="checkbox" name="fc_k" id="fc_k" value="K" /><label data-i18n="timeline.finger_k" for="fc_k"><b data-slot="b">K</b></label><br />
+				<input class="fc_obs fc_form_note" type="checkbox" name="fc_p" id="fc_p" value="P" /><label data-i18n="timeline.finger_p" for="fc_p"><b data-slot="b">P</b></label><br />
+				<input class="fc_obs fc_form_note" type="checkbox" name="fc_y" id="fc_y" value="Y" /><label data-i18n="timeline.finger_y" for="fc_y"><b data-slot="b">Y</b></label><br />
+				<input class="fc_obs fc_form_note" type="checkbox" name="fc_r" id="fc_r" value="R" /><label data-i18n="timeline.finger_r" for="fc_r"><b data-slot="b">R</b></label><br />
+				<br />
+				<span data-i18n="timeline.recurrence_title" class="categorie pas_temp"></span><br />
+				<input class="fc_form_note" type="checkbox" name="fc_rec" id="fc_x1" value="X1" /><label data-i18n="timeline.recurrence_x1" for="fc_x1"><b data-slot="b">X1</b></label><br />
+				<input class="fc_form_note" type="checkbox" name="fc_rec" id="fc_x2" value="X2" /><label data-i18n="timeline.recurrence_x2" for="fc_x2"><b data-slot="b">X2</b></label><br />
+				<input class="fc_form_note" type="checkbox" name="fc_rec" id="fc_x3" value="X3" /><label data-i18n="timeline.recurrence_x3" for="fc_x3"><b data-slot="b">X3</b></label><br />
+				<input class="fc_form_note" type="checkbox" name="fc_rec" id="fc_ad" value="AD" /><label data-i18n="timeline.recurrence_ad" for="fc_ad"><b data-slot="b">AD</b></label><br />
+				<br />
+				<span data-i18n="timeline.pain_title" class="categorie pas_temp"></span><br />
+				<input class="fc_form_note" type="checkbox" name="fc_dou" id="fc_ap" value="AP" /><label data-i18n="timeline.pain_ap" for="fc_ap"><b data-slot="b">AP</b></label><br />
+				<input class="fc_form_note" type="checkbox" name="fc_dou" id="fc_rap" value="RAP" /><label data-i18n="timeline.pain_rap" for="fc_rap"><b data-slot="b">RAP</b></label><br />
+				<input class="fc_form_note" type="checkbox" name="fc_dou" id="fc_lap" value="LAP" /><label data-i18n="timeline.pain_lap" for="fc_lap"><b data-slot="b">LAP</b></label><br />
+				<br />
+				<span data-i18n="timeline.arrow_title" class="categorie"></span><br />
+				<input class="fc_form_note" type="radio" name="fc_arrow" id="fc_fh" value="↑" /><label data-i18n="timeline.arrow_up_icon" for="fc_fh"></label>
+				<input class="fc_form_note" type="radio" name="fc_arrow" id="fc_fb" value="↓" /><label data-i18n="timeline.arrow_down_icon" for="fc_fb"></label>
+				<input class="fc_form_note" type="radio" name="fc_arrow" id="fc_fd" value="→" /><label data-i18n="timeline.arrow_right_icon" for="fc_fd"></label>
+				<input class="fc_form_note" type="radio" name="fc_arrow" id="fc_fr" value="" checked /><label data-i18n="timeline.arrow_none" class="" for="fc_fr"></label><br />
+				<br />
+			</div>
+			<div class="pas_mucus pas_fc">
+				<span data-i18n="timeline.temperature_title" class="categorie"></span><br />
+				<input data-i18n-attr="placeholder:timeline.temperature_placeholder" type="number" step="0.1" min="0" max="99" name="temp" id="form_temp" /><span data-i18n="timeline.temperature_unit"></span><br/>
+				<span data-i18n="timeline.temperature_time_label"></span><input type="time" name="time_temp_taken" id="form_time_temp_taken" /><br/>
+				<br />
+			</div>
+			<div class="pas_fc pas_fc_temp">
+				<div class="desc_picker">
+					<div class="desc_category">
+						<span data-i18n="timeline.descriptions_sensations" class="categorie"></span>
+						<div class="desc_chips" id="menu_sensation_container"></div>
+						<button data-i18n="timeline.new_sensation" type="button" class="desc_add_toggle" data-desc-type="2"></button>
+						<div class="desc_add_form" id="desc_add_form_sensation" data-desc-type="2">
+							<input data-i18n-attr="placeholder:timeline.new_sensation_placeholder" type="text" class="desc_add_input" maxlength="256" autocomplete="off" />
+							<button data-i18n="timeline.desc_add_confirm_icon" type="button" class="desc_add_submit"></button>
+							<button data-i18n="timeline.desc_add_cancel_icon" type="button" class="desc_add_cancel"></button>
+							<span class="desc_add_status"></span>
+						</div>
+					</div>
+					<div class="desc_category">
+						<span data-i18n="timeline.descriptions_observations" class="categorie"></span>
+						<div class="desc_chips" id="menu_observation_container"></div>
+						<button data-i18n="timeline.new_observation" type="button" class="desc_add_toggle" data-desc-type="1"></button>
+						<div class="desc_add_form" id="desc_add_form_observation" data-desc-type="1">
+							<input data-i18n-attr="placeholder:timeline.new_observation_placeholder" type="text" class="desc_add_input" maxlength="256" autocomplete="off" />
+							<button data-i18n="timeline.desc_add_confirm_icon" type="button" class="desc_add_submit"></button>
+							<button data-i18n="timeline.desc_add_cancel_icon" type="button" class="desc_add_cancel"></button>
+							<span class="desc_add_status"></span>
+						</div>
+					</div>
+					<div class="desc_category" id="desc_category_other">
+						<span data-i18n="timeline.descriptions_other" class="categorie"></span>
+						<div class="desc_chips" id="menu_autre_container"></div>
+						<p data-i18n="timeline.descriptions_other_hint" class="desc_hint"><a data-i18n="timeline.descriptions_other_link" data-slot="a" href="settings#descriptions"></a></p>
+					</div>
+				</div>
+				<br />
+			</div>
+			<div>
+				<span data-i18n="timeline.events_title" class="categorie"></span><br />
+				<input type="checkbox" name="cycle_1st_day" id="ev_cycle_1st_day" class="ev_reload" value="1" /><label data-i18n="timeline.event_new_cycle" for="ev_cycle_1st_day"></label><br />
+				<input type="checkbox" name="union_sex" id="ev_union" value="1" /><label data-i18n="timeline.event_union" for="ev_union"></label><br />
+				<input type="checkbox" name="is_peak" id="ev_is_peak" value="1" /><label data-i18n="timeline.event_peak_icon" for="ev_is_peak"><span data-i18n="timeline.event_peak_day" data-slot="span" class="pas_fc pas_fc_temp"></span><span data-i18n="timeline.event_peak_mucus" data-slot="span2" class="pas_mucus pas_mucus_temp"></span></label><br />
+				<input type="checkbox" id="ev_counter_start_actif" value="1" class="pas_fc pas_fc_temp"/><label data-i18n="timeline.event_counter_before" for="ev_counter_start_actif" class="pas_fc pas_fc_temp"></label><input id="ev_counter_start_nb" type="number" value="3" min="1" class="pas_fc pas_fc_temp" /><label data-i18n="timeline.event_counter_after" for="counter_start_actif" class="pas_fc pas_fc_temp"></label><br class="pas_fc pas_fc_temp" />
+				<input type="hidden" id="ev_hidden_counter_start" name="counter_start" value="0" />
+				<input type="checkbox" name="day_not_observed" id="ev_jesaispas" value="1" /><label data-i18n="timeline.event_not_observed" for="ev_jesaispas"><span data-slot="span" class='note'>?</span></label><br />
+				<input type="checkbox" name="observation_paused" id="ev_observation_paused" class="ev_reload" value="1" /><label data-i18n="timeline.event_paused" for="ev_observation_paused"></label><br />
+				<br />
+				<span data-i18n="timeline.comment_title" class="categorie"></span><br />
+				<textarea name="comment" id="from_com" autocapitalize="off" maxlength="255"></textarea><br />
+				<span data-i18n="timeline.comment_hint" class="label_info"></span><br />
+				<br />
+			</div>
+			<span id="jour_form_suppr_holder" class="rouge">
+				<span id="jour_form_last_write"></span>
+				<button data-i18n="timeline.delete_day" id="jour_form_suppr" type="button" class="rouge"></button>
+			</span>
+			<div id="form_err" class="err"></div>
+			<br />
+			<br />
+		</div>
+	</form>
+</div>
+

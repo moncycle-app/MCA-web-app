@@ -3,6 +3,7 @@ import { test, expect } from "./fixtures.mjs";
 
 test("every panel opens from the menu", async ({ page, signed_in }) => {
 	await signed_in.goto("/settings");
+	await expect(page.locator("#menu a.menu_item:not([hidden])").first()).toBeVisible();
 	const names = await page.locator("#menu a.menu_item:not([hidden])").evaluateAll((items) => items.map((item) => item.id.replace("menu_", "")));
 	expect(names.length).toBeGreaterThanOrEqual(7);
 	for (const name of names) {

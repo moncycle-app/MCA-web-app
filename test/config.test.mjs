@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { install } from "./support/browser_stub.mjs";
 install();
-const { moncycle_config: config } = await import("/js/config.js");
+const { moncycle_config: config } = await import("/js/core/config.js");
 
 test("parse_api_url", () => {
 	assert.equal(config.parse_api_url("/api/v2"), "/api/v2");

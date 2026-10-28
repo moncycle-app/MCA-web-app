@@ -73,15 +73,15 @@ export const moncycle_config = {
 
 	// the pages name the API as "api/v2/..." in the action of a form and the link of a download (what a browser without script would
 	// use): they are pointed at the configured API once, so that the script reads the right address from the form
-	point_pages : function () {
-		document.querySelectorAll('form[action^="api/v"], a[href^="api/v"]').forEach(function (element) {
+	point_pages : function (root = document) {
+		root.querySelectorAll('form[action^="api/v"], a[href^="api/v"]').forEach(function (element) {
 			let name = element.tagName === "FORM" ? "action" : "href";
 			element.setAttribute(name, moncycle_config.api_url(element.getAttribute(name).replace(/^api\/v\d+/, "")));
 		});
 	},
 
 	load : function () {
-		return fetch("config.json", {cache : "no-store", credentials : "omit"})
+		return fetch("/config.json", {cache : "no-store", credentials : "omit"})
 			.then(function (response) { return response.ok ? response.json() : Promise.reject(new Error("HTTP " + response.status)); })
 			.then(function (config) { moncycle_config.set_api_url((config || {}).apiUrl); })
 			.catch(function (e) {
@@ -94,9 +94,6 @@ export const moncycle_config = {
 const $ = globalThis.$;   // jQuery is a classic script, loaded before the modules; the tests have none
 if ($) {
 	moncycle_config.ready = moncycle_config.load();
-	moncycle_config.ready.then(function () {
-		moncycle_config.point_pages();
-	});
 	$.ajaxPrefilter(function (options, original, jqXHR) {
 		if (moncycle_config.remote && moncycle_config.is_api_call(options.url)) {
 			let headers = moncycle_config.headers();
