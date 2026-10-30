@@ -20,7 +20,7 @@ import { t, t_map } from "../core/i18n.js";
 // /api/v2/captcha gives a picture and a signed token for a purpose and an e-mail address, the visitor types what the picture
 // says, and the form posts the answer (`captcha`) with the token (`captchaToken`). The token is tied to the address
 // and, for a sign-in or a lost password, to the account's state: a new one is asked for whenever the address changes
-// and after anything the server refused. The picture is set with its src and nothing from the server is ever
+// and after anything the server refused. The picture sits in a frame (.captcha_box) that is always on the page, empty until a picture is loaded; it is set with its src and nothing from the server is ever
 // written into the page as HTML.
 
 const JPEG_DATA_URI = /^data:image\/jpeg;base64,[A-Za-z0-9+\/]+={0,2}$/;
@@ -50,7 +50,6 @@ function attach(options) {
 		requested++;
 		loaded_for = "";
 		options.image.removeAttribute("src");
-		options.image.hidden = true;
 		options.token.value = "";
 		options.answer.value = "";
 	};
@@ -77,7 +76,6 @@ function attach(options) {
 			if (options.error) options.error("");
 			loaded_for = email;
 			options.image.setAttribute("src", data.image);
-			options.image.hidden = false;
 			options.token.value = data.token;
 			options.answer.value = "";
 		}, function (failure) {

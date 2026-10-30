@@ -13,7 +13,7 @@
 */
 
 /* One page, several screens. The routes live in the hash of the address, so that the folder works from any static host, in any directory,
-** with no server setting (no rewrite, no fallback): index.html#/ the timeline, #/auth, #/register, #/verify_email, #/settings, and a panel of
+** with no server setting (no rewrite, no fallback): index.html#/ the timeline, #/auth, #/register, #/recover, #/verify_email, #/settings, and a panel of
 ** the settings is one level deeper: #/settings/notifications. What follows a "?" in the hash is the query (#/auth?login_email=a@b.c).
 ** A screen is a module that exports `screen`: {name, path, auth, html, mount(root, ctx), unmount(), on_hash(sub), redirect(), title()}.
 ** The router fetches its markup once, puts it in <main id="app">, fills it from the catalog and calls mount(); a screen's listeners all use
@@ -28,6 +28,7 @@ import { apply } from "./i18n.js";
 const routes = {
 	"/": () => import("../../screens/timeline/timeline.js"),
 	"/auth": () => import("../../screens/auth/auth.js"),
+	"/recover": () => import("../../screens/recover/recover.js"),
 	"/register": () => import("../../screens/register/register.js"),
 	"/verify_email": () => import("../../screens/verify_email/verify_email.js"),
 	"/settings": () => import("../../screens/settings/settings.js"),

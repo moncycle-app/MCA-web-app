@@ -19,7 +19,7 @@ import { moncycle_store } from "../../js/model/store.js";
 import { moncycle_captcha } from "../../js/services/captcha.js";
 import { api } from "../../js/core/api.js";
 import { field } from "../../js/core/dom.js";
-import { t, t_node, t_map, attach_language_select } from "../../js/core/i18n.js";
+import { t, t_map, attach_language_select } from "../../js/core/i18n.js";
 import { has_session } from "../../js/core/router.js";
 
 const by_id = (root, id) => root.querySelector("#" + id);
@@ -42,7 +42,6 @@ export const screen = {
 		attach_language_select({root, select: by_id(root, "i_language"), signal: ctx.signal, after: () => { document.title = screen.title(); }});
 
 		const form = by_id(root, "connexion_form");
-		const reset_form = by_id(root, "reset_form");
 		const wrapper = by_id(root, "captcha_wrapper");
 		// the sign-in asks for a captcha once the account has failed too often (the server says so with captchaRequired); the
 		// token is tied to the account's counters, so a new one is made after every refused attempt
@@ -54,16 +53,6 @@ export const screen = {
 			answer: by_id(root, "i_captcha"),
 			active: () => !wrapper.hidden,
 			error: moncycle_captcha.message_in(by_id(root, "message_err")),
-			signal: ctx.signal,
-		});
-		// the lost password always asks for one
-		const reset_captcha = moncycle_captcha.attach({
-			purpose: "recover",
-			email: by_id(root, "r_login_email"),
-			image: by_id(root, "rc_captcha_img"),
-			token: by_id(root, "rc_captcha_token"),
-			answer: by_id(root, "rc_captcha"),
-			error: moncycle_captcha.message_in(by_id(root, "reset_error_msg")),
 			signal: ctx.signal,
 		});
 		// the link to the terms of service is the server's (TERMS_OF_SERVICE_URL, told by server_info): none told, no link
@@ -111,37 +100,6 @@ export const screen = {
 				// the token is tied to the account's counters, which this attempt may have moved: a new one, whenever the
 				// captcha is shown (and the first one, when this answer is the one that asks for it)
 				login_captcha.reload(true);
-			}
-		}, listen);
-
-		const reset_button = by_id(root, "reset_but");
-		const reset_error = by_id(root, "reset_error_msg");
-		reset_form.addEventListener("submit", async (event) => {
-			event.preventDefault();
-			reset_button.disabled = true;
-			reset_button.value = t("auth.but_reset_busy");
-			reset_error.textContent = "";
-			const email = field(reset_form, "login_email");
-			try {
-				const ret = await api("POST", "/recover_password", {email: email, captcha: field(reset_form, "captcha"), captchaToken: field(reset_form, "captchaToken")});
-				reset_button.value = t("auth.but_reset");
-				reset_button.disabled = false;
-				if (ret.data && ret.data.sent) {
-					reset_form.hidden = true;
-					// the address is what was typed: a text node, never HTML
-					const bold = document.createElement("b");
-					bold.textContent = email;
-					by_id(root, "password_reseted_msg").replaceChildren(t_node("auth.reset_sent", {br: document.createElement("br"), email: bold}));
-				}
-			}
-			catch (failure) {
-				reset_button.value = t("auth.but_reset");
-				reset_button.disabled = false;
-				console.error(failure);
-				const code = ((failure.responseJSON || {}).error || {}).code;
-				reset_error.textContent = moncycle_store.error_pick(failure, t_map("auth.reset_errors")) || moncycle_store.error_text(failure);
-				// a captcha that was refused is not asked again with the same answer
-				if (code === "captcha_invalid" || code === "captcha_expired") reset_captcha.reload(true);
 			}
 		}, listen);
 

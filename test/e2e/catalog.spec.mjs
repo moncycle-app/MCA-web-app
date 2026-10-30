@@ -6,7 +6,7 @@ async function check_catalog_applied(page, language = "en") {
 	const attributes = await page.locator("[data-i18n-attr]").evaluateAll((elements) => elements.filter((element) => element.dataset.i18nAttr.split(";").some((pair) => !element.getAttribute(pair.split(":")[0].trim()))).length);
 	expect(attributes).toBe(0);
 	const shown = await page.evaluate(() => document.body.innerText + " " + [...document.querySelectorAll("[placeholder],[title]")].map((element) => element.placeholder + " " + element.title).join(" "));
-	expect(shown).not.toMatch(/\b(timeline|settings|auth|register|verify_email|common|calendar|captcha|compat)\.[a-z_0-9]+/);
+	expect(shown).not.toMatch(/\b(timeline|settings|auth|register|recover|verify_email|common|calendar|captcha|compat)\.[a-z_0-9]+/);
 	await expect(page.locator("html")).toHaveAttribute("lang", language);
 }
 

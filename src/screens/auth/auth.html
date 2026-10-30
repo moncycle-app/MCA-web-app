@@ -22,7 +22,7 @@
 	<div id="captcha_wrapper" hidden>
 		<label data-i18n="auth.captcha_label" for="i_captcha"></label><br />
 		<input data-i18n-attr="placeholder:auth.captcha_placeholder" name="captcha" id="i_captcha" type="text" maxlength="6" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" /><br />
-		<img data-i18n-attr="title:auth.captcha_image_title;alt:auth.captcha_image_alt" class="captcha" id="l_captcha" hidden />
+		<span class="captcha_box"><img data-i18n-attr="title:auth.captcha_image_title;alt:auth.captcha_image_alt" class="captcha" id="l_captcha" /></span>
 		<input type="hidden" name="captchaToken" id="i_captcha_token" value="" /><br />
 		<span data-i18n="auth.captcha_hint" class="label_info"></span><br />
 		<br />
@@ -32,23 +32,8 @@
 	<center><a data-i18n="auth.demo_mucus" class="register_commente" id="but_demo_mucus" href="#/auth"><b data-i18n="auth.cervical_mucus" data-slot="b"></b></a></center>
 	<center><a data-i18n="auth.demo_fc" class="register_commente" id="but_demo_fc" href="#/auth"><b data-i18n="auth.fertility_care" data-slot="b"></b></a></center>
 	<br /><br />
-	<h2 data-i18n="auth.lost_password_title"></h2>
-	<span id="password_reseted_msg" class="vert"></span>
-	<form method="post" action="api/v2/recover_password" id="reset_form"><br />
-		<label data-i18n="auth.email_label" for="r_login_email"></label><br />
-		<input data-i18n-attr="placeholder:auth.email_placeholder" name="login_email" id="r_login_email" type="email" required  value="" /><br />
-		<br />
-		<label data-i18n="auth.captcha_label" for="rc_captcha"></label><br />
-		<input data-i18n-attr="placeholder:auth.captcha_placeholder" name="captcha" id="rc_captcha" type="text" maxlength="6" required autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" /><br />
-		<img data-i18n-attr="title:auth.captcha_image_title;alt:auth.captcha_image_alt" class="captcha" id="rc_captcha_img" hidden />
-		<input type="hidden" name="captchaToken" id="rc_captcha_token" value="" /><br />
-		<span data-i18n="auth.captcha_hint_after_email" class="label_info"></span><br />
-		<br />
-		<span class="rouge" id="reset_error_msg"></span><br />
-		<input data-i18n-attr="value:auth.but_reset" type="submit" id="reset_but"/></form>
-		<br /><br /><br />
-	</form>
-
+	<center><a data-i18n="auth.lost_password_link" id="a_recover" href="#/recover"></a></center>
+	<br />
 </div>
 <center>
 	<p data-i18n="auth.footer_licence" class="label_info"><a data-i18n="auth.footer_licence_name" data-slot="a" href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank" rel="noopener noreferrer"></a><a data-i18n="auth.footer_source_code" data-slot="a2" href="https://github.com/moncycle-app" target="_blank" rel="noopener noreferrer"></a><a data-i18n="auth.footer_terms" data-slot="a3" id="a_terms" target="_blank" rel="noopener noreferrer" hidden></a></p>

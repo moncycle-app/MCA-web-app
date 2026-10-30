@@ -114,7 +114,7 @@ for (const file of files(src, [".js", ".html"])) {
 	for (const m of text.matchAll(/data-i18n="([^"]+)"/g)) used.add(m[1]);
 	for (const m of text.matchAll(/data-i18n-attr="([^"]+)"/g)) m[1].split(";").forEach((pair) => used.add(pair.slice(pair.indexOf(":") + 1)));
 	// keys handed over as plain strings ("timeline.cycle_title" to a function that calls t(key))
-	if (file.endsWith(".js")) for (const m of text.matchAll(/"((?:timeline|settings|auth|register|verify_email|captcha|compat|common|calendar|meta)\.[A-Za-z_0-9.]+)"/g)) used.add(m[1]);
+	if (file.endsWith(".js")) for (const m of text.matchAll(/"((?:timeline|settings|auth|register|recover|verify_email|captcha|compat|common|calendar|meta)\.[A-Za-z_0-9.]+)"/g)) used.add(m[1]);
 }
 // keys the code builds from a variable part: the catalog keeps them together under these prefixes
 const built = ["verify_email.page."];

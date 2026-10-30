@@ -12,40 +12,58 @@
 ** https://github.com/moncycle-app/backend-api-web-app
 */
 
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .input_user_account_totp {
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .input_user_account_totp {
 	text-align: center;
 	max-width: 100px;
 }
 
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) input[type=text],
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) input[type=email],
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) input[type=number],
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) input[type=password],
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) textarea,
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) select {
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) input[type=text],
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) input[type=email],
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) input[type=number],
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) input[type=password],
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) textarea,
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) select {
 	width: 90%;
 }
 
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .contennu {
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .contennu {
 	padding: 15px;
 }
 
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) form {
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) form {
 	display: inline;
 }
 
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .captcha {
+/* the picture's frame is always there: an empty dashed one until the picture comes, so the form does not jump when it does */
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .captcha_box {
+	display: inline-block;
+	box-sizing: content-box;
+	width: 180px;   /* the size of the server's picture (CAPTCHA_WIDTH x CAPTCHA_HEIGHT): the same box before and after it loads */
+	height: 60px;
 	margin-top: 3px;
+	border: 1px dashed #1e824c;
+	border-radius: 3px;
+	vertical-align: top;
+}
+
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .captcha_box:has(.captcha[src]) {
+	border-color: transparent;
+}
+
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .captcha {
+	display: block;
 	border-radius: 3px;
 	cursor: pointer;
 }
 
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .captcha[hidden] {
-	display: none;
+/* no picture yet: nothing to click, nothing to show (not even the alt text) */
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .captcha:not([src]) {
+	visibility: hidden;
+	cursor: default;
 }
 
 /* the terms of service of the sign-up page: another site's page, in a frame that scrolls (its height cannot follow the page's) */
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .terms_frame {
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .terms_frame {
 	display: block;
 	width: 90%;
 	height: 22em;
@@ -54,7 +72,7 @@
 	border-radius: 6px;
 }
 
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .terms_frame[hidden] {
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .terms_frame[hidden] {
 	display: none;
 }
 
@@ -63,31 +81,31 @@
 ** with its own round or square mark. Green like a description being edited, the same tints.
 */
 
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .choice_group {
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .choice_group {
 	border: 0;
 	margin: 0 0 18px;
 	padding: 0;
 	min-width: 0;
 }
 
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .choice_group legend {
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .choice_group legend {
 	padding: 0;
 	margin-bottom: 4px;
 	font-weight: bold;
 }
 
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .choice {
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .choice {
 	position: relative;
 	margin: 8px 0;
 }
 
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .choice input {
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .choice input {
 	position: absolute;
 	opacity: 0;
 	pointer-events: none;
 }
 
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .choice label {
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .choice label {
 	display: block;
 	position: relative;
 	box-sizing: border-box;
@@ -97,11 +115,11 @@
 	border-radius: 10px;
 }
 
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .choice label:hover {
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .choice label:hover {
 	border-color: #37a369;
 }
 
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .choice label::before {
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .choice label::before {
 	content: "";
 	position: absolute;
 	left: 14px;
@@ -119,55 +137,55 @@
 	text-align: center;
 }
 
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .choice_check label::before {
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .choice_check label::before {
 	border-radius: 5px;
 }
 
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .choice input:checked + label {
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .choice input:checked + label {
 	border-color: #1e824c;
 	background-color: #d9f0e1;
 }
 
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .choice input:checked + label::before {
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .choice input:checked + label::before {
 	border-color: #1e824c;
 	background-color: #1e824c;
 	box-shadow: inset 0 0 0 3px #d9f0e1;
 }
 
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .choice_check input:checked + label::before {
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .choice_check input:checked + label::before {
 	content: "✓";
 	box-shadow: none;
 }
 
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .choice input:focus-visible + label {
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .choice input:focus-visible + label {
 	outline: 2px solid #1e824c;
 	outline-offset: 2px;
 }
 
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .choice_title,
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .choice_text,
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .choice_note {
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .choice_title,
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .choice_text,
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .choice_note {
 	display: block;
 }
 
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .choice_title {
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .choice_title {
 	font-weight: bold;
 }
 
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .choice_text {
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .choice_text {
 	margin-top: 3px;
 	font-size: .85em;
 	color: #555;
 }
 
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .choice_note {
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .choice_note {
 	margin-top: 3px;
 	font-size: .75em;
 	font-style: italic;
 	color: gray;
 }
 
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .choice_hint {
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .choice_hint {
 	display: block;
 	margin: 10px 0 0;
 	padding: 4px 0 4px 12px;
@@ -175,35 +193,35 @@
 }
 
 @media (prefers-color-scheme: dark) {
-	:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .choice label {
+	:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .choice label {
 		border-color: #2a2a2a;
 	}
 
-	:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .choice label::before {
+	:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .choice label::before {
 		border-color: #6a6a6a;
 		background-color: black;
 	}
 
-	:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .choice input:checked + label {
+	:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .choice input:checked + label {
 		background-color: #0a2014;
 	}
 
-	:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .choice input:checked + label::before {
+	:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .choice input:checked + label::before {
 		background-color: #37a369;
 		border-color: #37a369;
 		box-shadow: inset 0 0 0 3px #0a2014;
 	}
 
-	:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .choice_check input:checked + label::before {
+	:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .choice_check input:checked + label::before {
 		box-shadow: none;
 	}
 
-	:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .choice_text {
+	:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .choice_text {
 		color: #b0b0b0;
 	}
 }
 
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"], [data-screen="settings"]) .register_commente {
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"], [data-screen="settings"]) .register_commente {
 	text-decoration: none;
 }
 
@@ -213,15 +231,15 @@
 }
 
 /* the sign-in, sign-up and mail-link screens show and hide with the hidden attribute, whatever display their classes give */
-:where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"]) [hidden] {
+:where([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) [hidden] {
 	display: none !important;
 }
 
 /* the language select at the bottom of the screens of someone not signed in */
-:where([data-screen="auth"], [data-screen="verify_email"]) .language_footer {
+:where([data-screen="auth"], [data-screen="recover"], [data-screen="verify_email"]) .language_footer {
 	margin: 10px 0 40px;
 }
 
-:where([data-screen="auth"], [data-screen="verify_email"]) .language_footer select {
+:where([data-screen="auth"], [data-screen="recover"], [data-screen="verify_email"]) .language_footer select {
 	width: auto;
 }
