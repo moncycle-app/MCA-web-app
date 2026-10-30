@@ -70,6 +70,10 @@ function start_timeline(ctx) {
 	});
 	by_id("form_fc").addEventListener("keyup", fc_note2form);
 	by_id("jour_form_suppr").addEventListener("click", suppr_day_timeline);
+	// the FertilityCare note sticks just under the day form's header, whose height changes (a wrapped line, the bulk form)
+	const header_size = new ResizeObserver(() => by_id("jour_form").style.setProperty("--jf-head", by_id("jour_form_header").offsetHeight + "px"));
+	header_size.observe(by_id("jour_form_header"));
+	signal.addEventListener("abort", () => header_size.disconnect());
 	delegate(by_id("sync_status"), "click", "#sync_retry", function () { moncycle_store.sync().catch(function () { }); });
 	delegate(by_id("sync_status"), "click", "#sync_dismiss", moncycle_store.dismiss_error);
 	bind_desc_add_forms();
