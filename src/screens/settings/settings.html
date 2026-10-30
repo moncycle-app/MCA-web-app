@@ -1,6 +1,6 @@
 <center>
-	<h1>mon<span class="gradiant_logo">cycle</span>.app</h1>
-	<div data-i18n="settings.settings" id="name"></div>
+	<h1 class="logo"><img class="logo_mark" src="img/logo.svg" alt="" width="32" height="32" /><span data-i18n="settings.settings" id="name"></span></h1>
+	<div class="logo_sub" data-i18n="common.on_app"><span data-slot="app">mon<span class="logo_cycle">cycle</span>.app</span></div>
 	<a href="#/"><button data-i18n="settings.back_to_cycles" type="button" class="nav_button"></button></a>
 	<form id="f_logout" action="api/v2/token" method="delete"><button data-i18n="settings.logout" type="submit" id="but_logout" class="nav_button rouge"></button></form>
 	<p data-i18n="settings.demo_notice" id="warning_demo" hidden><br data-slot="br" /><br data-slot="br2" /><a data-slot="a" href="#/register"><button data-i18n="settings.create_account" type="button"></button></a></p>

@@ -32,7 +32,7 @@
 	--pub-error-soft: #fbeaec;
 	box-sizing: border-box;
 	min-height: 100vh;
-	padding: 24px 16px 8px;
+	padding: clamp(32px, 8vh, 72px) 16px 8px;
 	background: radial-gradient(120% 60% at 50% 0%, var(--pub-green-soft), var(--pub-page) 70%);
 	color: var(--pub-text);
 }
@@ -73,15 +73,13 @@ body:has([data-screen="auth"], [data-screen="register"], [data-screen="recover"]
 	flex-wrap: wrap;
 	justify-content: center;
 	align-items: center;
-	gap: 10px;
+	gap: 18px 10px;
 }
 
 :is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) > center:first-child h1 {
 	flex: 0 0 100%;
 	margin: 16px 0 6px;
 	font-size: 1.7em;
-	font-weight: 300;
-	letter-spacing: .04em;
 	text-align: center;
 }
 
@@ -113,7 +111,7 @@ body:has([data-screen="auth"], [data-screen="register"], [data-screen="recover"]
 :is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) .contennu {
 	box-sizing: border-box;
 	max-width: 440px;
-	margin: 22px auto;
+	margin: 36px auto 22px;
 	padding: 28px 26px 30px;
 	border: 1px solid var(--pub-line);
 	border-radius: 18px;
@@ -401,13 +399,6 @@ body:has([data-screen="auth"], [data-screen="register"], [data-screen="recover"]
 }
 
 /* --- Fixes --- */
-
-/* the logo's green on the dark card: a lighter gradient */
-@media (prefers-color-scheme: dark) {
-	:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) .gradiant_logo {
-		background-image: linear-gradient(90deg, #5fd391, #a6efc4);
-	}
-}
 
 /* the empty frame of the picture takes the field's colour, white only once the picture is there */
 :is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) .captcha_box {
