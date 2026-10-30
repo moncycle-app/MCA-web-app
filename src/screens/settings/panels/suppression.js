@@ -11,10 +11,11 @@
 ** https://www.moncycle.app
 ** https://github.com/moncycle-app/backend-api-web-app
 */
-import { moncycle_store } from "/js/model/store.js";
-import { by_id } from "/js/core/dom.js";
-import { settings_api, settings_error, settings_read, settings_state } from "/screens/settings/common.js";
-import { settings_text } from "/screens/settings/text.js";
+import { restart } from "../../../js/core/router.js";
+import { moncycle_store } from "../../../js/model/store.js";
+import { by_id } from "../../../js/core/dom.js";
+import { settings_api, settings_error, settings_read, settings_state } from "../common.js";
+import { settings_text } from "../text.js";
 
 /* ===========================================================================
 ** 5h. SUPPRIMER MON COMPTE
@@ -32,7 +33,7 @@ export function settings_setup_deletion() {
 		settings_api("POST", form.getAttribute("action"), payload).then(function () {
 			moncycle_store.clear_storage();
 			alert(settings_text.delete_done(nickname));
-			window.location.replace("auth");
+			restart("/auth");
 		}, function (failure) {
 			alert(settings_text.delete_failed(nickname, settings_error(failure)));
 		});

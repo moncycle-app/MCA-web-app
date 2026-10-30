@@ -14,7 +14,7 @@
 
 /* The notice that stops the app when the API is out of the range this web app was tested with (see compat.js, store.js): what the web
 ** app and the server are, and nothing is sent, dropped or erased. */
-import { t } from "/js/core/i18n.js";
+import { t } from "./i18n.js";
 
 export function notice_text(detail) {
 	const range = detail.range.min === detail.range.max ? t("compat.range_one", {min: detail.range.min}) : t("compat.range_many", {min: detail.range.min, max: detail.range.max});

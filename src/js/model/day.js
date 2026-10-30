@@ -15,8 +15,8 @@
 /* A day in the shapes the app uses. The backend speaks a structured JSON API (every answer is {"data": ...}, a Day has NFP-inspired
 ** names: stampColor, isPeak, codifiedArrow, freeMucusSensation...). The screens read a flat shape (stamp "R", fc_score, pos...) and
 ** the day form is a list of {name, value}: these functions convert between the three. */
-import { fc_score_from_api, fc_score_to_codified } from "/js/model/fc_notation.js";
-import { of_day, to_day_fields } from "/js/model/descriptions.js";
+import { fc_score_from_api, fc_score_to_codified } from "./fc_notation.js";
+import { of_day, to_day_fields } from "./descriptions.js";
 
 export const codified_fields = ["codifiedBleedingObservation", "codifiedMucusSensation", "codifiedMucusObservation", "codifiedNumberObservations", "codifiedPainObservations"];
 // the content a Day holds, as opposed to where it stands in its cycle and when it was written

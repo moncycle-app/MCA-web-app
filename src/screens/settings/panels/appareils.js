@@ -11,12 +11,12 @@
 ** https://www.moncycle.app
 ** https://github.com/moncycle-app/backend-api-web-app
 */
-import { moncycle_config } from "/js/core/config.js";
-import { moncycle_captcha } from "/js/services/captcha.js";
-import { t, t_map } from "/js/core/i18n.js";
-import { by_id, el, delegate } from "/js/core/dom.js";
-import { settings_api, settings_error, settings_local_time, settings_read, settings_say } from "/screens/settings/common.js";
-import { settings_text } from "/screens/settings/text.js";
+import { moncycle_config } from "../../../js/core/config.js";
+import { moncycle_captcha } from "../../../js/services/captcha.js";
+import { t, t_map } from "../../../js/core/i18n.js";
+import { by_id, el, delegate } from "../../../js/core/dom.js";
+import { settings_api, settings_error, settings_local_time, settings_read, settings_say } from "../common.js";
+import { settings_text } from "../text.js";
 
 /* ===========================================================================
 ** 5f. APPAREILS ET ACCÈS: the connections, and the access tokens made by hand

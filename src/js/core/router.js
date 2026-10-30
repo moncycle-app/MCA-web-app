@@ -12,36 +12,62 @@
 ** https://github.com/moncycle-app/backend-api-web-app
 */
 
-/* One page, several screens. The routes are real paths (History API; the server answers index.html for them):
-**   /  the timeline   /auth   /register   /verify_email   /settings (its panels are in the hash: /settings#notifications)
-** A screen is a module that exports `screen`: {name, path, auth, html, mount(root, ctx), unmount(), on_hash(hash), redirect(), title()}.
+/* One page, several screens. The routes live in the hash of the address, so that the folder works from any static host, in any directory,
+** with no server setting (no rewrite, no fallback): index.html#/ the timeline, #/auth, #/register, #/verify_email, #/settings, and a panel of
+** the settings is one level deeper: #/settings/notifications. What follows a "?" in the hash is the query (#/auth?login_email=a@b.c).
+** A screen is a module that exports `screen`: {name, path, auth, html, mount(root, ctx), unmount(), on_hash(sub), redirect(), title()}.
 ** The router fetches its markup once, puts it in <main id="app">, fills it from the catalog and calls mount(); a screen's listeners all use
-** ctx.signal, which is aborted when the screen goes away. The old addresses (/auth.html) are written back without .html.
+** ctx.signal, which is aborted when the screen goes away. ctx.query is the query of the address, ctx.sub the part after the screen's path.
+** Addresses given to go() and restart() are routes ("/auth", "/settings/notifications"), not paths of the server.
+** An address of the first version (/auth, /auth.html, /settings#notifications, /verify_email#purpose=...&t=...) that a server still answers
+** with index.html is written back as a route at the start.
 */
-import { moncycle_config } from "/js/core/config.js";
-import { apply } from "/js/core/i18n.js";
+import { moncycle_config } from "./config.js";
+import { apply } from "./i18n.js";
 
 const routes = {
-	"/": () => import("/screens/timeline/timeline.js"),
-	"/auth": () => import("/screens/auth/auth.js"),
-	"/register": () => import("/screens/register/register.js"),
-	"/verify_email": () => import("/screens/verify_email/verify_email.js"),
-	"/settings": () => import("/screens/settings/settings.js"),
+	"/": () => import("../../screens/timeline/timeline.js"),
+	"/auth": () => import("../../screens/auth/auth.js"),
+	"/register": () => import("../../screens/register/register.js"),
+	"/verify_email": () => import("../../screens/verify_email/verify_email.js"),
+	"/settings": () => import("../../screens/settings/settings.js"),
 };
 const markup = new Map();
-let current = null;   // {screen, controller}
+let current = null;   // {screen, controller, path}
 let token = 0;
 
-export function normalise_path(pathname) {
-	let path = pathname.replace(/\.html$/, "").replace(/\/index$/, "");
-	if (path.length > 1) path = path.replace(/\/+$/, "");
-	return path === "" ? "/" : path;
+// "#/settings/notifications?a=b" (or a route without "#") -> {path: "/settings", sub: "notifications", query: URLSearchParams}
+export function parse_route(hash) {
+	const text = hash.replace(/^#/, "");
+	const cut = text.indexOf("?");
+	const segments = (cut < 0 ? text : text.slice(0, cut)).split("/").filter((segment) => segment !== "");
+	return {
+		path: "/" + (segments[0] || ""),
+		sub: segments.slice(1).join("/"),
+		query: new URLSearchParams(cut < 0 ? "" : text.slice(cut + 1)),
+	};
 }
-export function is_route(pathname) {
-	return Object.prototype.hasOwnProperty.call(routes, normalise_path(pathname));
+export function is_route(path) {
+	return Object.prototype.hasOwnProperty.call(routes, path === "/" ? "/" : path.replace(/\/+$/, ""));
 }
 export function has_session() {
 	return parseInt(localStorage.auth) > 0;
+}
+// the hash of a route: "/auth" -> "#/auth", "/" -> "#/"
+function hash_of(address) {
+	return "#" + (address.startsWith("/") ? address : "/" + address);
+}
+
+// An address of the first version, answered with index.html by a server that falls back to it: /auth.html, /settings#notifications...
+function upgrade_old_address() {
+	if (location.hash.startsWith("#/")) return;
+	const name = location.pathname.split("/").pop().replace(/\.html$/, "");
+	if (name === "" || name === "index") return;
+	const path = "/" + name;
+	if (!is_route(path)) return;
+	const fragment = location.hash.slice(1), search = location.search.slice(1);
+	const address = path === "/verify_email" ? path + (fragment ? "?" + fragment : "") : path + (fragment ? "/" + fragment : "") + (search ? "?" + search : "");
+	history.replaceState(null, "", location.pathname.replace(/[^\/]*$/, "") + hash_of(address));
 }
 
 async function load_markup(screen) {
@@ -60,13 +86,12 @@ function leave() {
 	document.getElementById("app").replaceChildren();
 }
 
-// Shows the screen of an address. `replace`: the address is written over the one in the history.
-async function show(url, replace) {
+// Shows the screen of the address in the bar.
+async function show() {
 	const mine = ++token;
-	const path = normalise_path(url.pathname);
-	if (!is_route(path)) return go("/", true);
-	if (path !== url.pathname) history.replaceState(null, "", path + url.search + url.hash);
-	const screen = (await routes[path]()).screen;
+	const route = parse_route(location.hash);
+	if (!is_route(route.path)) return go("/", true);
+	const screen = (await routes[route.path]()).screen;
 	if (mine !== token) return;
 	if (screen.auth && !has_session()) return go("/auth", true);
 	const elsewhere = screen.redirect && screen.redirect();
@@ -81,41 +106,44 @@ async function show(url, replace) {
 	apply(root);
 	document.title = screen.title ? screen.title() : document.title;
 	const controller = new AbortController();
-	current = {screen, controller};
-	await screen.mount(root, {signal: controller.signal, url: new URL(location.href), navigate: go});
+	current = {screen, controller, path: route.path};
+	await screen.mount(root, {signal: controller.signal, sub: route.sub, query: route.query, navigate: go});
 	window.scrollTo(0, 0);
 }
 
-// Goes to an address of the app (a path, with its query and hash).
+// Goes to a route. `replace`: it is written over the one in the history.
 export function go(address, replace = false) {
-	const url = new URL(address, location.origin);
-	if (replace) history.replaceState(null, "", url.pathname + url.search + url.hash);
-	else if (url.pathname + url.search + url.hash !== location.pathname + location.search + location.hash) history.pushState(null, "", url.pathname + url.search + url.hash);
-	return show(url, replace);
+	const hash = hash_of(address);
+	if (replace) {
+		history.replaceState(null, "", location.pathname + location.search + hash);
+		return show();
+	}
+	if (hash === location.hash) return Promise.resolve();
+	location.hash = hash;   // hashchange shows the screen
+	return Promise.resolve();
+}
+
+// A full load of a route: nothing of the screens or of an older session stays in memory (sign-in, sign-out).
+export function restart(address) {
+	window.history.replaceState(null, "", window.location.pathname + window.location.search + hash_of(address));
+	window.location.reload();
 }
 
 // Draws the screen on view again, from its markup: the language changed, and what its script wrote is still in the old one. No screen on view
 // (the start of the app): nothing to do.
 export function refresh() {
-	return current ? show(new URL(location.href), true) : Promise.resolve();
+	return current ? show() : Promise.resolve();
 }
 
-// A click on a link of the app is a change of screen; everything else (an export, another site, a modified click) is left to the browser.
-function on_click(event) {
-	if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-	const link = event.target.closest && event.target.closest("a[href]");
-	if (!link || (link.target && link.target !== "_self") || link.hasAttribute("download")) return;
-	const url = new URL(link.href, location.href);
-	if (url.origin !== location.origin || !is_route(url.pathname)) return;
-	// the same screen with another hash (the panels of the settings): the browser changes the hash, and hashchange tells the screen
-	if (normalise_path(url.pathname) === normalise_path(location.pathname) && url.search === location.search && url.hash !== "") return;
-	event.preventDefault();
-	go(url.pathname + url.search + url.hash);
+// The same screen with another sub-route (the panels of the settings) is the screen's business; any other change is a new screen.
+function on_hash_change() {
+	const route = parse_route(location.hash);
+	if (current && current.path === route.path && current.screen.on_hash) current.screen.on_hash(route.sub);
+	else show();
 }
 
 export function start() {
-	document.addEventListener("click", on_click);
-	window.addEventListener("popstate", () => show(new URL(location.href), true));
-	window.addEventListener("hashchange", () => { if (current && current.screen.on_hash) current.screen.on_hash(location.hash); });
-	return show(new URL(location.href), true);
+	upgrade_old_address();
+	window.addEventListener("hashchange", on_hash_change);
+	return show();
 }

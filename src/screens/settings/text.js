@@ -12,8 +12,8 @@
 ** https://github.com/moncycle-app/backend-api-web-app
 */
 
-import { t } from "/js/core/i18n.js";
-import { settings_local_date } from "/screens/settings/common.js";
+import { t } from "../../js/core/i18n.js";
+import { settings_local_date } from "./common.js";
 
 /* ===========================================================================
 ** 1. THE TEXT THE USER READS

@@ -11,9 +11,10 @@
 ** https://www.moncycle.app
 ** https://github.com/moncycle-app/backend-api-web-app
 */
-import { moncycle_news } from "/js/services/news.js";
-import { by_id } from "/js/core/dom.js";
-import { settings_show_panel } from "/screens/settings/settings.js";
+import { parse_route } from "../../../js/core/router.js";
+import { moncycle_news } from "../../../js/services/news.js";
+import { by_id } from "../../../js/core/dom.js";
+import { settings_show_panel } from "../settings.js";
 
 // The news of Tech 4 Fertility (js/news.js): the entry of the menu shows only when there is an item. The address #actualites is read again
 // once it is there, so that a link to it opens the panel.
@@ -26,6 +27,6 @@ export function settings_load_news(url) {
 		by_id("news_text").textContent = item.description;
 		by_id("but_news_read").onclick = function () { window.open(item.url, "_blank", "noopener,noreferrer"); };
 		by_id("menu_actualites").hidden = false;
-		if (location.hash === "#actualites") settings_show_panel();
+		if (parse_route(location.hash).sub === "actualites") settings_show_panel();
 	});
 }

@@ -11,21 +11,22 @@
 ** https://www.moncycle.app
 ** https://github.com/moncycle-app/backend-api-web-app
 */
-/* The settings screen: a menu, and one panel per entry. Which panel is open is the hash of the address (/settings#notifications); no hash is
+/* The settings screen: a menu, and one panel per entry. Which panel is open is the hash of the address (#/settings/notifications); no panel is
 ** the menu. The panels are in panels/*.js (each a form or two that save by themselves), the helpers they share in common.js. */
-import { moncycle_config } from "/js/core/config.js";
-import { moncycle_store } from "/js/model/store.js";
-import { t } from "/js/core/i18n.js";
-import { by_id } from "/js/core/dom.js";
-import { settings_state, settings_api, settings_error, settings_say } from "/screens/settings/common.js";
-import { settings_fill_suivi, settings_setup_autosave } from "/screens/settings/panels/suivi.js";
-import { settings_descriptions_load, settings_setup_descriptions } from "/screens/settings/panels/descriptions.js";
-import { settings_fill_notifications, settings_setup_notifications } from "/screens/settings/panels/notifications.js";
-import { settings_fill_data, settings_setup_export, settings_setup_import } from "/screens/settings/panels/donnees.js";
-import { settings_fill_connexion, settings_setup_login_email, settings_setup_password, settings_setup_totp } from "/screens/settings/panels/connexion.js";
-import { settings_tokens_load, settings_setup_tokens } from "/screens/settings/panels/appareils.js";
-import { settings_fill_about, settings_load_server_info, settings_setup_local_copy } from "/screens/settings/panels/apropos.js";
-import { settings_setup_deletion } from "/screens/settings/panels/suppression.js";
+import { parse_route, restart } from "../../js/core/router.js";
+import { moncycle_config } from "../../js/core/config.js";
+import { moncycle_store } from "../../js/model/store.js";
+import { t } from "../../js/core/i18n.js";
+import { by_id } from "../../js/core/dom.js";
+import { settings_state, settings_api, settings_error, settings_say } from "./common.js";
+import { settings_fill_suivi, settings_setup_autosave } from "./panels/suivi.js";
+import { settings_descriptions_load, settings_setup_descriptions } from "./panels/descriptions.js";
+import { settings_fill_notifications, settings_setup_notifications } from "./panels/notifications.js";
+import { settings_fill_data, settings_setup_export, settings_setup_import } from "./panels/donnees.js";
+import { settings_fill_connexion, settings_setup_login_email, settings_setup_password, settings_setup_totp } from "./panels/connexion.js";
+import { settings_tokens_load, settings_setup_tokens } from "./panels/appareils.js";
+import { settings_fill_about, settings_load_server_info, settings_setup_local_copy } from "./panels/apropos.js";
+import { settings_setup_deletion } from "./panels/suppression.js";
 
 
 /* ===========================================================================
@@ -75,7 +76,7 @@ const settings_on_open = {
 };
 
 export function settings_show_panel() {
-	let name = location.hash.slice(1);
+	let name = parse_route(location.hash).sub;
 	const entry = by_id("menu_" + name);
 	if (!entry || entry.hidden) name = "";
 
@@ -92,7 +93,7 @@ export const screen = {
 	name: "settings",
 	path: "/settings",
 	auth: true,
-	html: "/screens/settings/settings.html",
+	html: "screens/settings/settings.html",
 	title: () => t("settings.document_title"),
 
 	mount(root, ctx) {
@@ -105,7 +106,7 @@ export const screen = {
 			by_id("but_logout").disabled = true;
 			settings_api("DELETE", moncycle_config.api_url("/token")).then(function () {
 				moncycle_store.clear_storage();
-				window.location.replace("/auth");
+				restart("/auth");
 			}, function (failure) {
 				by_id("but_logout").disabled = false;
 				alert(t("settings.logout_failed", {reason: settings_error(failure)}));
@@ -135,7 +136,7 @@ export const screen = {
 	},
 
 	// the address changed inside the screen: another panel
-	on_hash() { settings_show_panel(); },
+	on_hash(sub) { settings_show_panel(); },
 
 	unmount() {
 		settings_state.signal = undefined;

@@ -12,13 +12,14 @@
 ** https://github.com/moncycle-app/backend-api-web-app
 */
 
-import { moncycle_config } from "/js/core/config.js";
-import { send } from "/js/core/api.js";
-import { say } from "/js/core/dom.js";
-import { moncycle_store } from "/js/model/store.js";
-import * as dates from "/js/model/dates.js";
-import { t, t_map, locale } from "/js/core/i18n.js";
-import { settings_text } from "/screens/settings/text.js";
+import { restart } from "../../js/core/router.js";
+import { moncycle_config } from "../../js/core/config.js";
+import { send } from "../../js/core/api.js";
+import { say } from "../../js/core/dom.js";
+import { moncycle_store } from "../../js/model/store.js";
+import * as dates from "../../js/model/dates.js";
+import { t, t_map, locale } from "../../js/core/i18n.js";
+import { settings_text } from "./text.js";
 
 /* ===========================================================================
 ** 2. SMALL HELPERS
@@ -51,7 +52,7 @@ export function settings_is_checked(form, name) {
 export function settings_leave_if_signed_out(failure) {
 	if (failure.status == 401) {
 		moncycle_store.clear_storage();
-		window.location.replace("/auth");
+		restart("/auth");
 	}
 }
 

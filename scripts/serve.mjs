@@ -1,5 +1,5 @@
-// Static server for src/, with no dependency. The app is one page: an address with no file and no extension (/auth, /settings) answers
-// index.html, as the Docker image's Apache does (FallbackResource), and the router shows the screen. /api/ never falls back.
+// Static server for src/, with no dependency. The app is one page whose routes live in the hash (index.html#/auth), so, like any FTP
+// directory, it needs no rewrite: an address with no file is a 404.
 //   node scripts/serve.mjs [port] [--api-url URL] [--api-proxy URL]
 // --api-url answers /config.json with that apiUrl instead of the file, to try another API without editing anything.
 // --api-proxy forwards /api/... to another server, so that the page and the API share one origin (cookie mode, like production).
@@ -57,8 +57,6 @@ createServer(async (request, response) => {
 	}
 	const path = normalize(join(root, decodeURIComponent(url.pathname)));
 	let file = path.startsWith(root) ? await find(path) : null;
-	// no file, and what is asked is not a file (an address of a screen, or an old one ending in .html): the app
-	if (!file && !url.pathname.startsWith("/api/") && [".html", ""].includes(extname(url.pathname))) file = join(root, "index.html");
 	if (!file) { response.writeHead(404, security_headers); return response.end("not found"); }
 	const extension = extname(file);
 	const cache = [".html", ".js", ".css", ".json"].includes(extension) ? { "Cache-Control": "no-cache" } : {};

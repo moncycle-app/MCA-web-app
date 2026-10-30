@@ -12,19 +12,19 @@
 ** https://github.com/moncycle-app/backend-api-web-app
 */
 
-import { moncycle_store } from "/js/model/store.js";
-import { moncycle_news } from "/js/services/news.js";
-import * as dates from "/js/model/dates.js";
-import { t, t_map } from "/js/core/i18n.js";
-import { by_id, delegate, display, el } from "/js/core/dom.js";
-import { blank_day, day_from_api } from "/js/model/day.js";
-import { constante_from_api, cycle_line_length, cycle_of, cycle_span, structure_of } from "/js/model/cycles.js";
-import { description_from_api } from "/js/model/descriptions.js";
-import { bind_desc_add_forms, bulk_show_hide, bulk_submit_menu, close_menu, fc_note2form, go_blank_or_empty, open_menu, refresh_day, submit_menu, suppr_day_timeline } from "/screens/timeline/day_form.js";
-import { cycle2graph, graph_preparation_data, graph_update } from "/screens/timeline/chart_view.js";
-import { cycle2recap, day_timeline2recap } from "/screens/timeline/recap_view.js";
-import { cycle2timeline, day_timeline2timeline, form_nouveau_cycle, hide_method_parts, trois_jours } from "/screens/timeline/cycle_view.js";
-import { state, reset_state } from "/screens/timeline/state.js";
+import { moncycle_store } from "../../js/model/store.js";
+import { moncycle_news } from "../../js/services/news.js";
+import * as dates from "../../js/model/dates.js";
+import { t, t_map } from "../../js/core/i18n.js";
+import { by_id, delegate, display, el } from "../../js/core/dom.js";
+import { blank_day, day_from_api } from "../../js/model/day.js";
+import { constante_from_api, cycle_line_length, cycle_of, cycle_span, structure_of } from "../../js/model/cycles.js";
+import { description_from_api } from "../../js/model/descriptions.js";
+import { bind_desc_add_forms, bulk_show_hide, bulk_submit_menu, close_menu, fc_note2form, go_blank_or_empty, open_menu, refresh_day, submit_menu, suppr_day_timeline } from "./day_form.js";
+import { cycle2graph, graph_preparation_data, graph_update } from "./chart_view.js";
+import { cycle2recap, day_timeline2recap } from "./recap_view.js";
+import { cycle2timeline, day_timeline2timeline, form_nouveau_cycle, hide_method_parts, trois_jours } from "./cycle_view.js";
+import { state, reset_state } from "./state.js";
 
 // the sentence of a refused or failed export (the API's own words are English)
 function export_failed_text(failure) {
@@ -98,7 +98,7 @@ function start_timeline(ctx) {
 	// another tab wrote its copy: nothing to do. It logged out, or logged in as someone else: leave.
 	window.addEventListener("storage", function (event) {
 		if (event.key !== null && event.key != "auth") return;
-		if (localStorage.auth != state.constante.no_user_account) window.location.href = window.location.href;
+		if (localStorage.auth != state.constante.no_user_account) location.reload();
 	}, {signal});
 	if (moncycle_store.account) show_account();
 }
@@ -114,7 +114,7 @@ export const screen = {
 	name: "timeline",
 	path: "/",
 	auth: true,
-	html: "/screens/timeline/timeline.html",
+	html: "screens/timeline/timeline.html",
 	title: () => t("timeline.document_title"),
 	mount(root, ctx) { start_timeline(ctx); },
 	unmount() { stop_timeline(); },

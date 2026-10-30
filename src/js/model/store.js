@@ -12,13 +12,14 @@
 ** https://github.com/moncycle-app/backend-api-web-app
 */
 
-import { moncycle_config } from "/js/core/config.js";
-import { moncycle_compat } from "/js/core/compat.js";
-import { show_notice } from "/js/core/compat_notice.js";
-import { t } from "/js/core/i18n.js";
-import { send } from "/js/core/api.js";
-import { blank_day, is_blank, day_from_body, day_meta, codified_fields } from "/js/model/day.js";
-import { day_number, cycle_of, set_member, place_days } from "/js/model/cycles.js";
+import { restart } from "../core/router.js";
+import { moncycle_config } from "../core/config.js";
+import { moncycle_compat } from "../core/compat.js";
+import { show_notice } from "../core/compat_notice.js";
+import { t } from "../core/i18n.js";
+import { send } from "../core/api.js";
+import { blank_day, is_blank, day_from_body, day_meta, codified_fields } from "./day.js";
+import { day_number, cycle_of, set_member, place_days } from "./cycles.js";
 
 
 /* ===========================================================================
@@ -197,7 +198,7 @@ export const moncycle_store = {
 		moncycle_store.expired = true;
 		clearTimeout(moncycle_store.retry_timer);
 		moncycle_store.clear_storage();
-		window.location.replace("/auth");
+		restart("/auth");
 	},
 	// 401 "unauthorized" is a session that is over. Another 401 is an answer of an endpoint to a
 	// wrong password or code (POST /api/v2/account with a password, POST /api/v2/account/deletion): the session is fine.
@@ -725,7 +726,7 @@ export const moncycle_store = {
 	// version.json, the web app's own file (never the API's): read once per page load; null when it cannot be read.
 	load_webapp : function () {
 		if (!moncycle_store.webapp) {
-			moncycle_store.webapp = fetch("/version.json", {cache : "no-store", credentials : "omit"})
+			moncycle_store.webapp = fetch("version.json", {cache : "no-store", credentials : "omit"})
 				.then(function (response) { return response.ok ? response.json() : null; })
 				.catch(function () { return null; })
 				.then(function (webapp) { moncycle_store.webapp_version = webapp; return webapp; });

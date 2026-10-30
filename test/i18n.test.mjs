@@ -75,7 +75,7 @@ test("the language: account, then the register select, then the browser, then EN
 test("no catalog for the language asked: English is read, and the news follow what was asked", async () => {
 	const fetched = globalThis.fetch;
 	globalThis.fetch = async (url) => {
-		const name = String(url).replace("/i18n/", "");
+		const name = String(url).replace("i18n/", "");
 		if (name === "en.json" || name === "fr.json") return { ok: true, json: async () => JSON.parse(readFileSync(join(src, "i18n", name), "utf8")) };
 		return { ok: false, json: async () => { throw new Error("404"); } };
 	};

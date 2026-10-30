@@ -13,12 +13,12 @@
 */
 
 /* The sign-up screen: the form carries the data (the language too), the script submits it. */
-import { moncycle_store } from "/js/model/store.js";
-import { moncycle_captcha } from "/js/services/captcha.js";
-import { api } from "/js/core/api.js";
-import { field, checked, el } from "/js/core/dom.js";
-import { t, t_map, attach_language_select } from "/js/core/i18n.js";
-import { has_session } from "/js/core/router.js";
+import { moncycle_store } from "../../js/model/store.js";
+import { moncycle_captcha } from "../../js/services/captcha.js";
+import { api } from "../../js/core/api.js";
+import { field, checked, el } from "../../js/core/dom.js";
+import { t, t_map, attach_language_select } from "../../js/core/i18n.js";
+import { has_session } from "../../js/core/router.js";
 
 const by_id = (root, id) => root.querySelector("#" + id);
 
@@ -26,7 +26,7 @@ export const screen = {
 	name: "register",
 	path: "/register",
 	auth: false,
-	html: "/screens/register/register.html",
+	html: "screens/register/register.html",
 	title: () => t("register.page_title"),
 	// Someone on a demo account can sign up: they stay here, and what the browser keeps of the demo goes (its session ends on the
 	// server with the captcha this screen asks for, which replaces its cookie).

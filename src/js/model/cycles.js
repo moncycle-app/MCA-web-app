@@ -14,7 +14,7 @@
 
 /* Cycles: where a date stands among the first days of the cycles, how long a cycle is, which days follow a peak. The account lists the
 ** first days ("starts", newest first) and the dates the observation was paused. Dates are "YYYY-MM-DD". */
-import * as dates from "/js/model/dates.js";
+import * as dates from "./dates.js";
 
 // the number of days from a cycle's first day to a date, plus one
 export function day_number(cycle, date) {

@@ -11,12 +11,12 @@
 ** https://www.moncycle.app
 ** https://github.com/moncycle-app/backend-api-web-app
 */
-import * as dates from "/js/model/dates.js";
-import { t, t_map } from "/js/core/i18n.js";
-import { el } from "/js/core/dom.js";
-import { cycle_option, cycle_title_click, cycle_title_node } from "/screens/timeline/cycle_view.js";
-import { open_menu } from "/screens/timeline/day_form.js";
-import { state } from "/screens/timeline/state.js";
+import * as dates from "../../js/model/dates.js";
+import { t, t_map } from "../../js/core/i18n.js";
+import { el } from "../../js/core/dom.js";
+import { cycle_option, cycle_title_click, cycle_title_node } from "./cycle_view.js";
+import { open_menu } from "./day_form.js";
+import { state } from "./state.js";
 
 export function cycle2recap(c, nb, fin) {
 	let c_id = "rc-" + c;

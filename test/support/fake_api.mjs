@@ -27,13 +27,14 @@ function fake_fetch(url, options = {}) {
 export const location_calls = [];
 
 export function install_fake_api() {
-	globalThis.window.location.replace = (url) => location_calls.push("replace " + url);
+	Object.assign(globalThis.window.location, { pathname: "/", search: "" });
+	globalThis.window.history = { replaceState: (state, title, url) => location_calls.push("replace " + url) };
 	globalThis.window.location.reload = () => location_calls.push("reload");
 	globalThis.window.addEventListener = () => { };
 	globalThis.document = { addEventListener() { }, hidden: false, querySelectorAll: () => [] };
 	globalThis.fetch = async (url, options) => {
 		const path = String(url);
-		if (path.startsWith("/i18n/")) return { ok: true, json: async () => JSON.parse(readFileSync(new URL("../../src" + path, import.meta.url), "utf8")) };
+		if (path.startsWith("i18n/")) return { ok: true, json: async () => JSON.parse(readFileSync(new URL("../../src/" + path, import.meta.url), "utf8")) };
 		if (path.includes("config.json")) return { ok: true, json: async () => ({ apiUrl: "/api/v2" }) };
 		if (path.includes("version.json")) return { ok: true, json: async () => ({ version: "1.0.0", api: { min: 16, max: 16 } }) };
 		return fake_fetch(url, options);

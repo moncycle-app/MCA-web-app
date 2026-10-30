@@ -46,7 +46,7 @@ export function locale() { return String(catalog["meta.locale"] || fallback_cata
 
 async function fetch_catalog(code) {
 	try {
-		const response = await fetch("/i18n/" + code + ".json", {credentials: "omit"});
+		const response = await fetch("i18n/" + code + ".json", {credentials: "omit"});
 		return response.ok ? await response.json() : null;
 	}
 	catch (e) { return null; }
@@ -103,7 +103,7 @@ export function language_from_browser(navigator_languages) {
 let names = null;
 export function language_names() {
 	if (!names) {
-		names = fetch("/i18n/languages.json", {credentials: "omit"})
+		names = fetch("i18n/languages.json", {credentials: "omit"})
 			.then((answer) => (answer.ok ? answer.json() : {}))
 			.catch(() => ({}));
 	}

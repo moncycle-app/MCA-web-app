@@ -13,13 +13,14 @@
 */
 
 /* The sign-in screen: the form carries the data, the script submits it. A mail link comes here with ?login_email=. */
-import { moncycle_config } from "/js/core/config.js";
-import { moncycle_store } from "/js/model/store.js";
-import { moncycle_captcha } from "/js/services/captcha.js";
-import { api } from "/js/core/api.js";
-import { field } from "/js/core/dom.js";
-import { t, t_node, t_map, attach_language_select } from "/js/core/i18n.js";
-import { has_session } from "/js/core/router.js";
+import { restart } from "../../js/core/router.js";
+import { moncycle_config } from "../../js/core/config.js";
+import { moncycle_store } from "../../js/model/store.js";
+import { moncycle_captcha } from "../../js/services/captcha.js";
+import { api } from "../../js/core/api.js";
+import { field } from "../../js/core/dom.js";
+import { t, t_node, t_map, attach_language_select } from "../../js/core/i18n.js";
+import { has_session } from "../../js/core/router.js";
 
 const by_id = (root, id) => root.querySelector("#" + id);
 
@@ -27,7 +28,7 @@ export const screen = {
 	name: "auth",
 	path: "/auth",
 	auth: false,
-	html: "/screens/auth/auth.html",
+	html: "screens/auth/auth.html",
 	title: () => t("auth.page_title"),
 	// someone signed in has nothing to do here
 	redirect: () => (has_session() ? "/" : null),
@@ -36,7 +37,7 @@ export const screen = {
 		const listen = {signal: ctx.signal};
 		moncycle_store.clear_storage();
 		// another tab signed in: this one follows
-		window.addEventListener("storage", () => { if (has_session()) location.replace("/"); }, listen);
+		window.addEventListener("storage", () => { if (has_session()) restart("/"); }, listen);
 
 		attach_language_select({root, select: by_id(root, "i_language"), signal: ctx.signal, after: () => { document.title = screen.title(); }});
 
@@ -100,7 +101,7 @@ export const screen = {
 				const ret = await api("POST", "/token", payload);
 				if (moncycle_config.remote) moncycle_config.set_token(ret.data.token);
 				localStorage.auth = ret.data.userId;
-				location.replace("/");   // a full load: nothing of the screen or of an older session stays in memory
+				restart("/");   // a full load: nothing of the screen or of an older session stays in memory
 			}
 			catch (failure) {
 				button.disabled = false;
@@ -146,7 +147,7 @@ export const screen = {
 
 		// The address of the link in a mail. A "+" that reaches the page as itself (a mail reader or a link checker that
 		// decodes %2B) is read as a space by URLSearchParams, and an address never holds a space: it is a "+".
-		const login_email = new URLSearchParams(location.search).get("login_email");
+		const login_email = ctx.query.get("login_email");
 		by_id(root, "i_login_email").value = login_email === null ? "" : login_email.trim().replace(/ /g, "+");
 		// the two public demo accounts
 		for (const [id, email] of [["but_demo_mucus", "demo.bl@moncycle.app"], ["but_demo_fc", "demo.fc@moncycle.app"]]) {

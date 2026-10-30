@@ -69,7 +69,7 @@ export const test = base.extend({
 	signed_in: async ({ page, account }, use) => {
 		const answer = await page.request.post("/api/v2/token", { data: { email: account.email, password: account.password, name: "WEB-APP e2e", cookie: true } });
 		expect(answer.ok()).toBe(true);
-		await page.goto("/auth");
+		await page.goto("/#/auth");
 		await expect(page.locator("#i_login_email")).toBeVisible();   // the screen has mounted (it empties the storage), the session can be set
 		await page.evaluate((id) => { localStorage.auth = id; }, String((await answer.json()).data.userId));
 		await use(page);
@@ -81,11 +81,11 @@ export async function sql(request, statement, params = []) {
 }
 
 export async function sign_in_with_ui(page, account) {
-	await page.goto("/auth");
+	await page.goto("/#/auth");
 	await page.locator("#i_login_email").fill(account.email);
 	await page.locator("#i_password").fill(account.password);
 	await page.locator("#connexion_but").click();
-	await page.waitForURL((url) => url.pathname === "/");
+	await page.waitForURL((url) => url.hash === "#/");
 }
 
 // the timeline in its detailed ("maxi") view, with today's row

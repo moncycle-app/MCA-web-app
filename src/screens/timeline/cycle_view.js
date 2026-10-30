@@ -11,15 +11,15 @@
 ** https://www.moncycle.app
 ** https://github.com/moncycle-app/backend-api-web-app
 */
-import { moncycle_config } from "/js/core/config.js";
-import { moncycle_store } from "/js/model/store.js";
-import * as dates from "/js/model/dates.js";
-import { t, t_map, t_node, date_short, date_row } from "/js/core/i18n.js";
-import { by_id, el, display } from "/js/core/dom.js";
-import { counter_days, peak_follow_days } from "/js/model/cycles.js";
-import { description_cell } from "/screens/timeline/recap_view.js";
-import { open_menu } from "/screens/timeline/day_form.js";
-import { state } from "/screens/timeline/state.js";
+import { moncycle_config } from "../../js/core/config.js";
+import { moncycle_store } from "../../js/model/store.js";
+import * as dates from "../../js/model/dates.js";
+import { t, t_map, t_node, date_short, date_row } from "../../js/core/i18n.js";
+import { by_id, el, display } from "../../js/core/dom.js";
+import { counter_days, peak_follow_days } from "../../js/model/cycles.js";
+import { description_cell } from "./recap_view.js";
+import { open_menu } from "./day_form.js";
+import { state } from "./state.js";
 
 // every element of the page that matches (none is fine: a day can be on one view and not the other)
 function each(selector, action) {

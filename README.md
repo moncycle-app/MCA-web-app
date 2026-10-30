@@ -8,7 +8,7 @@ text of the pages is English by default, or French (`src/i18n/`; see `src/i18n/R
 
 ```sh
 npm ci                      # installs jQuery and Chart.js and copies their dist files to src/vendor/ (postinstall)
-npm run serve               # http://localhost:8080, extension-less addresses (/auth) work
+npm run serve               # http://localhost:8080, routes are in the hash: http://localhost:8080/#/auth
 node scripts/serve.mjs 8193 --api-url http://localhost:8003/api/v2   # try another API without editing config.json
 npm test                    # node --test: compat rules and API address handling
 ```
@@ -30,8 +30,10 @@ base plus a path of the contract (`/token`, `/day/2026-03-10`). A missing or inv
 
 ## Hosting it on its own static server
 
-Serve `src/` (after `npm ci`) from the root of a host: addresses are absolute (`/auth`). Map `/auth` to `auth.html` (nginx:
-`try_files $uri $uri.html =404;`). The Content-Security-Policy of the image is a good start; for a remote API it needs the API origin in
+Copy `src/` (after `npm ci`) to any directory of any static host, an FTP space included: nothing to configure. The routes are in the hash
+(`index.html#/auth`, `#/settings/notifications`) and every path in the code is relative to `index.html`, so the folder works at the root of a
+host or in a sub-directory, with no rewrite and no `config.json` (the API is then `api/v2` of the same site; `config.json` points elsewhere).
+The Content-Security-Policy of the image is a good start; for a remote API it needs the API origin in
 `connect-src` (and `form-action`, `img-src data: blob:`). Set the API's `APP_URL` to the public URL of this site: it builds the links of the mails.
 
 ## Versions

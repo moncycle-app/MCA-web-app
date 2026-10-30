@@ -11,13 +11,13 @@
 ** https://www.moncycle.app
 ** https://github.com/moncycle-app/backend-api-web-app
 */
-import { moncycle_config } from "/js/core/config.js";
-import { t, set_language, fill_language_select } from "/js/core/i18n.js";
-import { refresh } from "/js/core/router.js";
-import { by_id, delegate } from "/js/core/dom.js";
-import { settings_account_error, settings_api, settings_is_checked, settings_read, settings_say, settings_state, settings_sync_later } from "/screens/settings/common.js";
-import { settings_fill_notifications } from "/screens/settings/panels/notifications.js";
-import { settings_show_method_entries } from "/screens/settings/settings.js";
+import { moncycle_config } from "../../../js/core/config.js";
+import { t, set_language, fill_language_select } from "../../../js/core/i18n.js";
+import { refresh } from "../../../js/core/router.js";
+import { by_id, delegate } from "../../../js/core/dom.js";
+import { settings_account_error, settings_api, settings_is_checked, settings_read, settings_say, settings_state, settings_sync_later } from "../common.js";
+import { settings_fill_notifications } from "./notifications.js";
+import { settings_show_method_entries } from "../settings.js";
 
 /* ===========================================================================
 ** 5a. MON SUIVI: nickname, method, temperature, display, birth year, research. Each control saves by itself.

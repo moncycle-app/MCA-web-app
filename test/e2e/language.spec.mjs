@@ -14,7 +14,7 @@ async function account_language(account) {
 
 test.describe("not signed in", () => {
 	test("sign-in: English by default, a select at the bottom changes the language and keeps what was typed", async ({ page }) => {
-		await page.goto("/auth");
+		await page.goto("/#/auth");
 		await expect(page.locator("html")).toHaveAttribute("lang", "en");
 		await expect(page.locator("#connexion_but")).toHaveValue("Sign in 🔑");
 		const select = page.locator("#i_language");
@@ -32,7 +32,7 @@ test.describe("not signed in", () => {
 		await expect(page.locator('label[for="i_language"]')).toHaveText("Langue:");
 
 		// the choice is for the visit: the sign-up screen follows it, with its own select on it
-		await page.locator('a[href="/register"]').click();
+		await page.locator('a[href="#/register"]').click();
 		await expect(page.locator("#i_language")).toHaveValue("FR");
 		await expect(page.locator("html")).toHaveAttribute("lang", "fr");
 		await page.locator("#i_language").selectOption("EN");
@@ -43,7 +43,7 @@ test.describe("not signed in", () => {
 	test.describe("browser in French", () => {
 		test.use({ locale: "fr-FR" });
 		test("sign-in: the browser's language, which the select shows", async ({ page }) => {
-			await page.goto("/auth");
+			await page.goto("/#/auth");
 			await expect(page.locator("html")).toHaveAttribute("lang", "fr");
 			await expect(page.locator("#i_language")).toHaveValue("FR");
 			await page.locator("#i_language").selectOption("EN");
@@ -52,7 +52,7 @@ test.describe("not signed in", () => {
 	});
 
 	test("mail link: the texts the script writes follow the select", async ({ page }) => {
-		await page.goto("/verify_email#purpose=accountCreation&t=abcdef");
+		await page.goto("/#/verify_email?purpose=accountCreation&t=abcdef");
 		await expect(page.locator("#et_title")).toHaveText("Confirm your email address");
 		await expect(page.locator("#but_et")).toHaveValue("Confirm my address ✅");
 		await page.locator("#i_language").selectOption("FR");
@@ -62,7 +62,7 @@ test.describe("not signed in", () => {
 	});
 
 	test("mail link that says nothing: the select is there too", async ({ page }) => {
-		await page.goto("/verify_email");
+		await page.goto("/#/verify_email");
 		await expect(page.locator("#et_invalid")).toBeVisible();
 		await page.locator("#i_language").selectOption("FR");
 		await expect(page.locator("#et_invalid")).toContainText("lien");
@@ -72,7 +72,7 @@ test.describe("not signed in", () => {
 test.describe("signed in", () => {
 	test("the language of the account is the one used, over the browser's", async ({ page, signed_in, account }) => {
 		await set_account_language(account, "FR");
-		await signed_in.goto("/settings#suivi");
+		await signed_in.goto("/#/settings/suivi");
 		await expect(page.locator("html")).toHaveAttribute("lang", "fr");
 		await expect(page.locator("#i_language")).toHaveValue("FR");
 		await expect(page.locator('label[for="i_language"]')).toHaveText("Langue");
@@ -82,7 +82,7 @@ test.describe("signed in", () => {
 
 	test("an account in a language we have no catalog for is read in English, and the select says where the account stands", async ({ page, signed_in, account }) => {
 		await set_account_language(account, "ES");
-		await signed_in.goto("/settings#suivi");
+		await signed_in.goto("/#/settings/suivi");
 		await expect(page.locator("html")).toHaveAttribute("lang", "en");
 		await expect(page.locator("#i_language")).toHaveValue("ES");
 		expect(await page.locator("#i_language option").evaluateAll((options) => options.map((option) => option.value))).toEqual(["EN", "FR", "ES"]);
@@ -90,7 +90,7 @@ test.describe("signed in", () => {
 	});
 
 	test("the settings change the language of the account and of the screen", async ({ page, signed_in, account }) => {
-		await signed_in.goto("/settings#suivi");
+		await signed_in.goto("/#/settings/suivi");
 		await expect(page.locator("html")).toHaveAttribute("lang", "en");
 		await expect(page.locator("#i_language")).toHaveValue("EN");
 		const saved = page.waitForResponse((answer) => answer.url().endsWith("/api/v2/account") && answer.request().method() === "POST");
@@ -105,7 +105,7 @@ test.describe("signed in", () => {
 		expect(await account_language(account)).toBe("FR");
 
 		// the next visit: French, from the account
-		await page.goto("/settings#suivi");
+		await page.goto("/#/settings/suivi");
 		await expect(page.locator("html")).toHaveAttribute("lang", "fr");
 		await page.locator("#i_language").selectOption("EN");
 		await expect(page.locator("html")).toHaveAttribute("lang", "en");
@@ -117,12 +117,12 @@ test.describe("signed in, first visit of this browser", () => {
 	test.use({ locale: "fr-FR" });
 	test("the sign-in page is read in the browser's language, then the account's takes over", async ({ page, account }) => {
 		await set_account_language(account, "EN");
-		await page.goto("/auth");
+		await page.goto("/#/auth");
 		await expect(page.locator("html")).toHaveAttribute("lang", "fr");
 		await page.locator("#i_login_email").fill(account.email);
 		await page.locator("#i_password").fill(account.password);
 		await page.locator("#connexion_but").click();
-		await page.waitForURL((url) => url.pathname === "/");
+		await page.waitForURL((url) => url.hash === "#/");
 		// a full load with no copy of the account yet: French for a moment, English once the account is there
 		await expect(page.locator("html")).toHaveAttribute("lang", "en");
 	});

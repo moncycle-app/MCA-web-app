@@ -3,7 +3,7 @@
 ** no referrer go out, the answer must be JSON and small, only the four strings of one item are kept (length-capped; the pages draw
 ** them with .text()), and the link must be https. A missing item (null), an item a month old or older and any failure give no item, and
 ** the details go to the console. */
-import { requested_language } from "/js/core/i18n.js";
+import { requested_language } from "../core/i18n.js";
 
 export const moncycle_news = {
 	max_age_days : 30,

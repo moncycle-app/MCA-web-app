@@ -11,18 +11,18 @@
 ** https://www.moncycle.app
 ** https://github.com/moncycle-app/backend-api-web-app
 */
-import { moncycle_store } from "/js/model/store.js";
-import * as dates from "/js/model/dates.js";
-import { t, date_short, date_long, clock } from "/js/core/i18n.js";
-import { by_id, el, display, is_hidden } from "/js/core/dom.js";
-import { day_to_api } from "/js/model/day.js";
-import { fc_note_regex } from "/js/model/fc_notation.js";
-import { type_from_int, unsent_description } from "/js/model/descriptions.js";
-import { day_timeline2recap } from "/screens/timeline/recap_view.js";
-import { day_timeline2timeline, hide_method_parts, trois_jours } from "/screens/timeline/cycle_view.js";
-import { graph_preparation_data } from "/screens/timeline/chart_view.js";
-import { rebuild, track_day, view_day } from "/screens/timeline/timeline.js";
-import { state } from "/screens/timeline/state.js";
+import { moncycle_store } from "../../js/model/store.js";
+import * as dates from "../../js/model/dates.js";
+import { t, date_short, date_long, clock } from "../../js/core/i18n.js";
+import { by_id, el, display, is_hidden } from "../../js/core/dom.js";
+import { day_to_api } from "../../js/model/day.js";
+import { fc_note_regex } from "../../js/model/fc_notation.js";
+import { type_from_int, unsent_description } from "../../js/model/descriptions.js";
+import { day_timeline2recap } from "./recap_view.js";
+import { day_timeline2timeline, hide_method_parts, trois_jours } from "./cycle_view.js";
+import { graph_preparation_data } from "./chart_view.js";
+import { rebuild, track_day, view_day } from "./timeline.js";
+import { state } from "./state.js";
 
 // the siblings of a node that match a selector
 function siblings(node, selector) {

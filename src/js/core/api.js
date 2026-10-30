@@ -16,7 +16,7 @@
 ** store's helpers read (error_pick, error_text, error_code): {status, responseJSON, statusText}. A 401 `unauthorized` ends the session (the
 ** handler is set by main.js); any other 401 is an answer of an endpoint (a wrong password), the session goes on.
 */
-import { moncycle_config } from "/js/core/config.js";
+import { moncycle_config } from "./config.js";
 
 let on_session_end = () => { };
 export function set_session_end_handler(fn) { on_session_end = fn; }

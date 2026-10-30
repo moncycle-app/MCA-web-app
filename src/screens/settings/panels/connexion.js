@@ -11,9 +11,9 @@
 ** https://www.moncycle.app
 ** https://github.com/moncycle-app/backend-api-web-app
 */
-import { t } from "/js/core/i18n.js";
-import { by_id } from "/js/core/dom.js";
-import { settings_api, settings_confirmed_change, settings_error, settings_form_say, settings_is_checked, settings_read, settings_say, settings_state } from "/screens/settings/common.js";
+import { t } from "../../../js/core/i18n.js";
+import { by_id } from "../../../js/core/dom.js";
+import { settings_api, settings_confirmed_change, settings_error, settings_form_say, settings_is_checked, settings_read, settings_say, settings_state } from "../common.js";
 
 /* ===========================================================================
 ** 5e. CONNEXION ET SÉCURITÉ: login address, password, double authentication

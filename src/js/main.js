@@ -13,11 +13,11 @@
 */
 
 /* The start of the app: the address of the API (config.json), the catalog, the local copy when someone is signed in, then the router. */
-import { moncycle_config } from "/js/core/config.js";
-import { ready as i18n_ready, resolve_language, set_language, requested_language } from "/js/core/i18n.js";
-import { set_session_end_handler } from "/js/core/api.js";
-import { moncycle_store } from "/js/model/store.js";
-import { start, refresh, has_session } from "/js/core/router.js";
+import { moncycle_config } from "./core/config.js";
+import { ready as i18n_ready, resolve_language, set_language, requested_language } from "./core/i18n.js";
+import { set_session_end_handler } from "./core/api.js";
+import { moncycle_store } from "./model/store.js";
+import { start, refresh, has_session } from "./core/router.js";
 
 await Promise.all([moncycle_config.ready, i18n_ready]);
 set_session_end_handler(() => moncycle_store.expire_session());

@@ -4,26 +4,26 @@ import { test, expect, sign_in_with_ui, sql, open_today } from "./fixtures.mjs";
 test("sign in from /auth, see the timeline, sign out", async ({ page, account }) => {
 	await sign_in_with_ui(page, account);
 	await expect(page.locator("#recap:visible, #timeline:visible")).toHaveCount(1);
-	await page.goto("/settings");
+	await page.goto("/#/settings");
 	await page.locator("#but_logout").click();
-	await page.waitForURL((url) => url.pathname === "/auth");
+	await page.waitForURL((url) => url.hash === "#/auth");
 	expect(await page.evaluate(() => localStorage.length)).toBe(0);
 });
 
 test("a signed-in user leaves /auth, a signed-out one leaves /settings", async ({ page, signed_in }) => {
-	await signed_in.goto("/auth").catch(() => { });
-	await expect(page).toHaveURL(/\/$/);
+	await signed_in.goto("/#/auth").catch(() => { });
+	await expect(page).toHaveURL(/#\/$/);
 	await page.evaluate(() => localStorage.clear());
 	await page.context().clearCookies();
-	await page.goto("/settings").catch(() => { });   // the redirect to /auth may abort this navigation
-	await expect(page).toHaveURL(/\/auth$/);
+	await page.goto("/#/settings").catch(() => { });   // the redirect to /auth may abort this navigation
+	await expect(page).toHaveURL(/#\/auth$/);
 });
 
 test("a session that ended on the server sends back to /auth with an empty storage", async ({ page, signed_in, account }) => {
 	await open_today(signed_in);
 	await sql(account.request, "DELETE FROM auth_token WHERE no_user_account = ?", [account.user_id]);
 	await page.locator("#go_vert").check();
-	await page.waitForURL((url) => url.pathname === "/auth");
+	await page.waitForURL((url) => url.hash === "#/auth");
 	expect(await page.evaluate(() => localStorage.length)).toBe(0);
 });
 

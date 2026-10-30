@@ -11,12 +11,12 @@
 ** https://www.moncycle.app
 ** https://github.com/moncycle-app/backend-api-web-app
 */
-import { moncycle_config } from "/js/core/config.js";
-import { moncycle_store } from "/js/model/store.js";
-import { t, locale } from "/js/core/i18n.js";
-import { by_id } from "/js/core/dom.js";
-import { settings_api, settings_say } from "/screens/settings/common.js";
-import { settings_load_news } from "/screens/settings/panels/actualites.js";
+import { moncycle_config } from "../../../js/core/config.js";
+import { moncycle_store } from "../../../js/model/store.js";
+import { t, locale } from "../../../js/core/i18n.js";
+import { by_id } from "../../../js/core/dom.js";
+import { settings_api, settings_say } from "../common.js";
+import { settings_load_news } from "./actualites.js";
 
 /* ===========================================================================
 ** 5g. À PROPOS: the application, the terms, the numbers of the account

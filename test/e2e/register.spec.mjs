@@ -3,7 +3,7 @@ import { test, expect } from "./fixtures.mjs";
 
 // the sign-up form with every field filled, up to the captcha answer
 async function fill_form(page) {
-	await page.goto("/register");
+	await page.goto("/#/register");
 	await page.locator("#i_nickname").fill("AB");
 	await page.locator('label[for="m_cervical_mucus"]').click();
 	await page.locator("#i_login_email").fill("nobody@example.test");
@@ -68,7 +68,7 @@ test.describe("browser in French", () => {
 test.describe("browser in German then French", () => {
 	test("the first of the browser's languages that we have", async ({ page }) => {
 		await page.addInitScript(() => Object.defineProperty(navigator, "languages", { get: () => ["de-DE", "fr-CA", "en"] }));
-		await page.goto("/register");
+		await page.goto("/#/register");
 		await expect(page.locator("#i_language")).toHaveValue("FR");
 		await expect(page.locator("html")).toHaveAttribute("lang", "fr");
 	});

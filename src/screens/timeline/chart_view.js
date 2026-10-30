@@ -11,11 +11,11 @@
 ** https://www.moncycle.app
 ** https://github.com/moncycle-app/backend-api-web-app
 */
-import * as dates from "/js/model/dates.js";
-import { date_short } from "/js/core/i18n.js";
-import { by_id, display, is_hidden } from "/js/core/dom.js";
-import { load_chart } from "/js/vendor/chart.js";
-import { state } from "/screens/timeline/state.js";
+import * as dates from "../../js/model/dates.js";
+import { date_short } from "../../js/core/i18n.js";
+import { by_id, display, is_hidden } from "../../js/core/dom.js";
+import { load_chart } from "../../js/vendor/chart.js";
+import { state } from "./state.js";
 
 // The chart of a cycle, once Chart.js is there (it is loaded when the first one is asked for); then it is drawn from the data held.
 export async function cycle2graph(id) {

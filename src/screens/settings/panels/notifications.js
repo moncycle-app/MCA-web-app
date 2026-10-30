@@ -11,9 +11,9 @@
 ** https://www.moncycle.app
 ** https://github.com/moncycle-app/backend-api-web-app
 */
-import { t } from "/js/core/i18n.js";
-import { by_id } from "/js/core/dom.js";
-import { settings_confirmed_change, settings_form_say, settings_read, settings_sync_later } from "/screens/settings/common.js";
+import { t } from "../../../js/core/i18n.js";
+import { by_id } from "../../../js/core/dom.js";
+import { settings_confirmed_change, settings_form_say, settings_read, settings_sync_later } from "../common.js";
 
 /* ===========================================================================
 ** 5c. CYCLES PAR E-MAIL: the automatic mail of each cycle, and who gets it

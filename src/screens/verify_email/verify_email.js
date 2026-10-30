@@ -17,10 +17,10 @@
 ** it uses nothing up. The fragment is read once and then taken off the address; the form carries the purpose and the token (hidden fields) and
 ** is what is sent to POST /api/v2/verify_email.
 */
-import { moncycle_store } from "/js/model/store.js";
-import { api } from "/js/core/api.js";
-import { field } from "/js/core/dom.js";
-import { t, t_map, attach_language_select } from "/js/core/i18n.js";
+import { moncycle_store } from "../../js/model/store.js";
+import { api } from "../../js/core/api.js";
+import { field } from "../../js/core/dom.js";
+import { t, t_map, attach_language_select } from "../../js/core/i18n.js";
 
 const by_id = (root, id) => root.querySelector("#" + id);
 
@@ -32,7 +32,7 @@ export const screen = {
 	name: "verify_email",
 	path: "/verify_email",
 	auth: false,
-	html: "/screens/verify_email/verify_email.html",
+	html: "screens/verify_email/verify_email.html",
 	title: () => t("verify_email.page_title"),
 
 	mount(root, ctx) {
@@ -42,8 +42,8 @@ export const screen = {
 			if (policy) for (const id of ["i_new_password", "i_new_password_conf"]) by_id(root, id).setAttribute("pattern", policy);
 		}, () => { });
 
-		const fragment = new URLSearchParams(location.hash.slice(1));
-		history.replaceState(null, "", location.pathname + location.search);
+		const fragment = ctx.query;   // the token stays out of the address bar once read
+		history.replaceState(null, "", location.pathname + location.search + "#/verify_email");
 		const purpose = fragment.get("purpose");
 		const page = Object.prototype.hasOwnProperty.call(purposes, purpose) ? purposes[purpose] : null;
 		// the texts of the purpose are written by the script: written again when the language is changed

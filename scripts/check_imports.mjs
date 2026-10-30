@@ -1,7 +1,7 @@
-// Every `import { a, b } from "/x.js"` of the app names something that module exports (a typo only shows in the browser otherwise).
+// Every `import { a, b } from "./x.js"` of the app names something that module exports (a typo only shows in the browser otherwise).
 //   node scripts/check_imports.mjs
 import { readFileSync, readdirSync, statSync } from "node:fs";
-import { join, dirname } from "node:path";
+import { join, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const src = join(dirname(fileURLToPath(import.meta.url)), "..", "src");
@@ -18,7 +18,7 @@ for (const file of files(src)) {
 	const text = readFileSync(file, "utf8");
 	for (const m of text.matchAll(/^import \{([^}]*)\} from "([^"]+)";/gm)) {
 		let target;
-		try { target = readFileSync(join(src, m[2]), "utf8"); }
+		try { target = readFileSync(resolve(dirname(file), m[2]), "utf8"); }
 		catch { console.error(file.slice(src.length) + ": no such module " + m[2]); bad++; continue; }
 		const names = exported(target);
 		for (const raw of m[1].split(",")) {

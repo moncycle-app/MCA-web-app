@@ -1,9 +1,9 @@
 <center>
 	<h1>mon<span class="gradiant_logo">cycle</span>.app</h1>
 	<div data-i18n="settings.settings" id="name"></div>
-	<a href="/"><button data-i18n="settings.back_to_cycles" type="button" class="nav_button"></button></a>
+	<a href="#/"><button data-i18n="settings.back_to_cycles" type="button" class="nav_button"></button></a>
 	<form id="f_logout" action="api/v2/token" method="delete"><button data-i18n="settings.logout" type="submit" id="but_logout" class="nav_button rouge"></button></form>
-	<p data-i18n="settings.demo_notice" id="warning_demo" hidden><br data-slot="br" /><br data-slot="br2" /><a data-slot="a" href="/register"><button data-i18n="settings.create_account" type="button"></button></a></p>
+	<p data-i18n="settings.demo_notice" id="warning_demo" hidden><br data-slot="br" /><br data-slot="br2" /><a data-slot="a" href="#/register"><button data-i18n="settings.create_account" type="button"></button></a></p>
 </center>
 
 <div class="contennu settings">
@@ -13,39 +13,39 @@
 	<!-- ===== The menu: one entry per panel below. A panel opens with the address #name (settings#securite). ===== -->
 	<nav id="menu">
 		<h2 data-i18n="settings.settings"></h2>
-		<a class="menu_item" id="menu_suivi" href="#suivi">
+		<a class="menu_item" id="menu_suivi" href="#/settings/suivi">
 			<span data-i18n="settings.menu_icon_follow" class="menu_icon"></span>
 			<span class="menu_text"><b data-i18n="settings.menu_follow"></b><small data-i18n="settings.menu_follow_hint"></small></span>
 		</a>
-		<a class="menu_item" id="menu_descriptions" href="#descriptions">
+		<a class="menu_item" id="menu_descriptions" href="#/settings/descriptions">
 			<span data-i18n="settings.menu_icon_descriptions" class="menu_icon"></span>
 			<span class="menu_text"><b data-i18n="settings.menu_descriptions"></b><small data-i18n="settings.menu_descriptions_hint"></small></span>
 		</a>
-		<a class="menu_item" id="menu_notifications" href="#notifications">
+		<a class="menu_item" id="menu_notifications" href="#/settings/notifications">
 			<span data-i18n="settings.menu_icon_notifications" class="menu_icon"></span>
 			<span class="menu_text"><b data-i18n="settings.menu_notifications"></b><small data-i18n="settings.menu_notifications_hint"></small></span>
 		</a>
-		<a class="menu_item" id="menu_donnees" href="#donnees">
+		<a class="menu_item" id="menu_donnees" href="#/settings/donnees">
 			<span data-i18n="settings.menu_icon_data" class="menu_icon"></span>
 			<span class="menu_text"><b data-i18n="settings.menu_data"></b><small data-i18n="settings.menu_data_hint"></small></span>
 		</a>
-		<a class="menu_item" id="menu_connexion" href="#connexion">
+		<a class="menu_item" id="menu_connexion" href="#/settings/connexion">
 			<span data-i18n="settings.menu_icon_login" class="menu_icon"></span>
 			<span class="menu_text"><b data-i18n="settings.menu_login"></b><small data-i18n="settings.menu_login_hint"></small></span>
 		</a>
-		<a class="menu_item" id="menu_appareils" href="#appareils">
+		<a class="menu_item" id="menu_appareils" href="#/settings/appareils">
 			<span data-i18n="settings.menu_icon_devices" class="menu_icon"></span>
 			<span class="menu_text"><b data-i18n="settings.menu_devices"></b><small data-i18n="settings.menu_devices_hint"></small></span>
 		</a>
-		<a class="menu_item" id="menu_apropos" href="#apropos">
+		<a class="menu_item" id="menu_apropos" href="#/settings/apropos">
 			<span data-i18n="settings.menu_icon_about" class="menu_icon"></span>
 			<span class="menu_text"><b data-i18n="settings.menu_about"></b><small data-i18n="settings.menu_about_hint"></small></span>
 		</a>
-		<a class="menu_item" id="menu_actualites" href="#actualites" hidden>
+		<a class="menu_item" id="menu_actualites" href="#/settings/actualites" hidden>
 			<span data-i18n="settings.menu_icon_news" class="menu_icon"></span>
 			<span class="menu_text"><b data-i18n="settings.menu_news"></b><small data-i18n="settings.menu_news_hint"></small></span>
 		</a>
-		<a class="menu_item menu_danger" id="menu_suppression" href="#suppression">
+		<a class="menu_item menu_danger" id="menu_suppression" href="#/settings/suppression">
 			<span data-i18n="settings.menu_icon_deletion" class="menu_icon"></span>
 			<span class="menu_text"><b data-i18n="settings.menu_deletion"></b><small data-i18n="settings.menu_deletion_hint"></small></span>
 		</a>
@@ -54,7 +54,7 @@
 
 	<!-- ===== Mon suivi: every control saves by itself ===== -->
 	<section class="panel" id="panel_suivi" hidden>
-		<a data-i18n="settings.back_to_menu" class="back" href="#"></a>
+		<a data-i18n="settings.back_to_menu" class="back" href="#/settings"></a>
 		<h2 data-i18n="settings.follow_title"></h2>
 		<p data-i18n="settings.autosave_hint" class="label_info"></p>
 
@@ -140,7 +140,7 @@
 
 	<!-- ===== Sensations & observations ===== -->
 	<section class="panel" id="panel_descriptions" hidden>
-		<a data-i18n="settings.back_to_menu" class="back" href="#"></a>
+		<a data-i18n="settings.back_to_menu" class="back" href="#/settings"></a>
 		<h2 data-i18n="settings.descriptions_title"></h2>
 		<p data-i18n="settings.descriptions_intro"></p>
 
@@ -168,7 +168,7 @@
 
 	<!-- ===== Cycles par e-mail ===== -->
 	<section class="panel" id="panel_notifications" hidden>
-		<a data-i18n="settings.back_to_menu" class="back" href="#"></a>
+		<a data-i18n="settings.back_to_menu" class="back" href="#/settings"></a>
 		<h2 data-i18n="settings.notifications_title"></h2>
 
 		<form id="f_auto_mail">
@@ -203,7 +203,7 @@
 
 	<!-- ===== Mes données: export, import ===== -->
 	<section class="panel" id="panel_donnees" hidden>
-		<a data-i18n="settings.back_to_menu" class="back" href="#"></a>
+		<a data-i18n="settings.back_to_menu" class="back" href="#/settings"></a>
 		<h2 data-i18n="settings.data_title"></h2>
 
 		<h3 data-i18n="settings.export_title"></h3>
@@ -281,7 +281,7 @@
 
 	<!-- ===== Connexion et sécurité ===== -->
 	<section class="panel" id="panel_connexion" hidden>
-		<a data-i18n="settings.back_to_menu" class="back" href="#"></a>
+		<a data-i18n="settings.back_to_menu" class="back" href="#/settings"></a>
 		<h2 data-i18n="settings.login_title"></h2>
 
 		<div class="card">
@@ -392,7 +392,7 @@
 
 	<!-- ===== Appareils et accès: connections, access tokens ===== -->
 	<section class="panel" id="panel_appareils" hidden>
-		<a data-i18n="settings.back_to_menu" class="back" href="#"></a>
+		<a data-i18n="settings.back_to_menu" class="back" href="#/settings"></a>
 		<h2 data-i18n="settings.devices_title"></h2>
 
 		<h3 data-i18n="settings.connections_title"></h3>
@@ -462,7 +462,7 @@
 
 	<!-- ===== À propos et contact ===== -->
 	<section class="panel" id="panel_apropos" hidden>
-		<a data-i18n="settings.back_to_menu" class="back" href="#"></a>
+		<a data-i18n="settings.back_to_menu" class="back" href="#/settings"></a>
 		<h2 data-i18n="settings.about_title"></h2>
 		<p data-i18n="settings.about_free"></p>
 		<p data-i18n="settings.about_open_source"><a data-i18n="settings.about_licence_name" data-slot="a" href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank" rel="noopener"></a><a data-i18n="settings.about_repository" data-slot="a2" href="https://github.com/moncycle-app/backend-api-web-app" target="_blank" rel="noopener"></a></p>
@@ -506,7 +506,7 @@
 
 	<!-- ===== Tech 4 Fertility actualités: the latest news, from the news file (js/news.js); the entry shows only when there is one ===== -->
 	<section class="panel" id="panel_actualites" hidden>
-		<a data-i18n="settings.back_to_menu" class="back" href="#"></a>
+		<a data-i18n="settings.back_to_menu" class="back" href="#/settings"></a>
 		<h2 data-i18n="settings.news_title"></h2>
 		<h3 id="news_title"></h3>
 		<p id="news_text"></p>
@@ -518,7 +518,7 @@
 
 	<!-- ===== Supprimer mon compte ===== -->
 	<section class="panel" id="panel_suppression" hidden>
-		<a data-i18n="settings.back_to_menu" class="back" href="#"></a>
+		<a data-i18n="settings.back_to_menu" class="back" href="#/settings"></a>
 		<h2 data-i18n="settings.deletion_title" class="rouge"></h2>
 		<p data-i18n="settings.deletion_text" class="rouge"></p>
 		<form method="post" action="api/v2/account/deletion" id="f_suppr_user_account">

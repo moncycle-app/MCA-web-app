@@ -12,9 +12,9 @@
 ** https://github.com/moncycle-app/backend-api-web-app
 */
 
-import { moncycle_store } from "/js/model/store.js";
-import { api } from "/js/core/api.js";
-import { t, t_map } from "/js/core/i18n.js";
+import { moncycle_store } from "../model/store.js";
+import { api } from "../core/api.js";
+import { t, t_map } from "../core/i18n.js";
 
 // The captcha of a form (register, sign-in once an account asks for it, lost password). The server keeps nothing: POST
 // /api/v2/captcha gives a picture and a signed token for a purpose and an e-mail address, the visitor types what the picture

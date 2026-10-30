@@ -8,6 +8,8 @@ import { server, install_fake_api, location_calls } from "./support/fake_api.mjs
 install();
 install_fake_api();
 const { moncycle_store: store } = await import("/js/model/store.js");
+const { moncycle_config } = await import("/js/core/config.js");
+moncycle_config.set_api_url("/api/v2");   // the default is relative to the page
 
 const ACCOUNT = { userId: 7, nickname: "T", method: "cervicalMucus", temperatureTracking: false, timelineAscending: true };
 const DAY = "2026-03-10";
@@ -108,7 +110,7 @@ test("401 unauthorized ends the session: storage emptied, back to /auth", async 
 	store.queue_day(body());
 	await assert.rejects(store.flush());
 	assert.equal(localStorage.length, 0);
-	assert.deepEqual(location_calls, ["replace /auth"]);
+	assert.deepEqual(location_calls, ["replace /#/auth", "reload"]);
 	assert.equal(store.expired, true);
 });
 

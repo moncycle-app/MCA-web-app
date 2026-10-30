@@ -6,6 +6,7 @@ const { moncycle_config: config } = await import("/js/core/config.js");
 
 test("parse_api_url", () => {
 	assert.equal(config.parse_api_url("/api/v2"), "/api/v2");
+	assert.equal(config.parse_api_url("api/v2"), "api/v2");
 	assert.equal(config.parse_api_url("https://tableau.moncycle.app/api/v2/"), "https://tableau.moncycle.app/api/v2");
 	assert.equal(config.parse_api_url("https://tableau.moncycle.app"), null);
 	assert.equal(config.parse_api_url("ftp://x/api/v2"), null);
