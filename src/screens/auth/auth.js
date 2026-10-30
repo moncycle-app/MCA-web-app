@@ -19,6 +19,7 @@ import { moncycle_store } from "../../js/model/store.js";
 import { moncycle_captcha } from "../../js/services/captcha.js";
 import { api } from "../../js/core/api.js";
 import { field } from "../../js/core/dom.js";
+import { attach_terms_link } from "../../js/core/public_footer.js";
 import { t, t_map, attach_language_select } from "../../js/core/i18n.js";
 import { has_session } from "../../js/core/router.js";
 
@@ -55,15 +56,7 @@ export const screen = {
 			error: moncycle_captcha.message_in(by_id(root, "message_err")),
 			signal: ctx.signal,
 		});
-		// the link to the terms of service is the server's (TERMS_OF_SERVICE_URL, told by server_info): none told, no link
-		api("GET", "/server_info", undefined, {signal: ctx.signal}).then((ret) => {
-			const url = ((ret || {}).data || {}).termsOfServiceUrl;
-			if (/^https:\/\//i.test(url || "")) {
-				const link = by_id(root, "a_terms");
-				link.setAttribute("href", url);
-				link.hidden = false;
-			}
-		}, () => { });
+		attach_terms_link(root, ctx.signal);
 		// another origin than the API's gets no cookie: the sign-in asks for the token alone and the script keeps it
 		if (moncycle_config.remote) by_id(root, "i_token_cookie").value = "false";
 		// the session is named after the site it was opened on, as the browser knows it

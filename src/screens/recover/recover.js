@@ -18,6 +18,7 @@ import { moncycle_store } from "../../js/model/store.js";
 import { moncycle_captcha } from "../../js/services/captcha.js";
 import { api } from "../../js/core/api.js";
 import { field } from "../../js/core/dom.js";
+import { attach_terms_link } from "../../js/core/public_footer.js";
 import { t, t_node, t_map, attach_language_select } from "../../js/core/i18n.js";
 import { has_session } from "../../js/core/router.js";
 
@@ -33,6 +34,7 @@ export const screen = {
 
 	mount(root, ctx) {
 		const listen = {signal: ctx.signal};
+		attach_terms_link(root, ctx.signal);
 		attach_language_select({root, select: by_id(root, "i_language"), signal: ctx.signal, after: () => { document.title = screen.title(); }});
 
 		const form = by_id(root, "reset_form");

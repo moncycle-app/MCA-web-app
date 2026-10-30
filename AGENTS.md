@@ -1,4 +1,4 @@
-# AGENT.md
+# AGENTS.md
 
 Working notes for coding agents (and for people) changing the moncycle.app web app. The README says how to run it; the API it talks to
 (MCA-backend-and-API) has its own AGENT.md, and its OpenAPI file is the contract: this repository keeps no copy. The calls of the app

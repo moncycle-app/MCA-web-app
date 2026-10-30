@@ -20,6 +20,7 @@
 import { moncycle_store } from "../../js/model/store.js";
 import { api } from "../../js/core/api.js";
 import { field } from "../../js/core/dom.js";
+import { attach_terms_link } from "../../js/core/public_footer.js";
 import { t, t_map, attach_language_select } from "../../js/core/i18n.js";
 
 const by_id = (root, id) => root.querySelector("#" + id);
@@ -53,6 +54,7 @@ export const screen = {
 			by_id(root, "but_et").value = text_of(purpose, "button");
 			if (!by_id(root, "et_done").hidden) by_id(root, "et_done_text").textContent = text_of(purpose, "done");
 		};
+		attach_terms_link(root, ctx.signal);
 		attach_language_select({root, select: by_id(root, "i_language"), signal: ctx.signal, after: () => {
 			document.title = screen.title();
 			if (page !== null) draw_texts();

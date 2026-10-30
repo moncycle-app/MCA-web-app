@@ -66,6 +66,9 @@ export const screen = {
 			const data = (ret || {}).data || {};
 			if (data.passwordPolicyRegex) for (const id of ["i_password", "i_password_conf"]) by_id(root, id).setAttribute("pattern", data.passwordPolicyRegex);
 			if (!/^https:\/\//i.test(data.termsOfServiceUrl || "")) return;
+			const footer_link = by_id(root, "a_footer_terms");
+			footer_link.setAttribute("href", data.termsOfServiceUrl);
+			footer_link.hidden = false;
 			const frame = by_id(root, "f_terms");
 			frame.setAttribute("src", data.termsOfServiceUrl);
 			frame.hidden = false;

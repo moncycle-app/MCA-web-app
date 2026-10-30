@@ -1,0 +1,457 @@
+/* moncycle.app
+**
+** Copyright (C) 2021-2026 Tech 4 Fertility, aka. T4F (https://tech4fertility.org)
+** SPDX-License-Identifier: AGPL-3.0-or-later
+**
+** This program is free software: you can redistribute it and/or modify it under
+** the terms of the GNU Affero General Public License as published by the Free
+** Software Foundation, either version 3 of the License, or (at your option) any
+** later version. It is distributed WITHOUT ANY WARRANTY; see the licence for details.
+**
+** https://www.moncycle.app
+** https://github.com/moncycle-app/backend-api-web-app
+*/
+
+/* The screens of someone not signed in (auth, register, recover, verify_email): a centred card on a soft green page.
+** Everything is scoped by data-screen: the fields and buttons of common.css are shared with the timeline and the settings and stay as they are. */
+
+[data-screen="auth"],
+[data-screen="register"],
+[data-screen="recover"],
+[data-screen="verify_email"] {
+	--pub-green: #1e824c;
+	--pub-green-dark: #166339;
+	--pub-green-soft: #e6f4ec;
+	--pub-page: #f3f8f5;
+	--pub-card: #ffffff;
+	--pub-field: #f6f8f7;
+	--pub-line: #d9e2dc;
+	--pub-text: #1b2420;
+	--pub-muted: #5f6b65;
+	--pub-error: #ac2433;
+	--pub-error-soft: #fbeaec;
+	box-sizing: border-box;
+	min-height: 100vh;
+	padding: 24px 16px 8px;
+	background: radial-gradient(120% 60% at 50% 0%, var(--pub-green-soft), var(--pub-page) 70%);
+	color: var(--pub-text);
+}
+
+@media (prefers-color-scheme: dark) {
+	[data-screen="auth"],
+	[data-screen="register"],
+	[data-screen="recover"],
+	[data-screen="verify_email"] {
+		--pub-green: #37a369;
+		--pub-green-dark: #2d8a58;
+		--pub-green-soft: #0e2a1b;
+		--pub-page: #080c0a;
+		--pub-card: #121815;
+		--pub-field: #1a221e;
+		--pub-line: #2a3530;
+		--pub-text: #eef3f0;
+		--pub-muted: #9aa8a0;
+		--pub-error: #ff7d8c;
+		--pub-error-soft: #2d1519;
+	}
+}
+
+body:has([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) {
+	background: #f3f8f5;
+}
+
+@media (prefers-color-scheme: dark) {
+	body:has([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) {
+		background: #080c0a;
+	}
+}
+
+/* --- Header: logo and the links to the other screens --- */
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) > center:first-child {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+	gap: 10px;
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) > center:first-child h1 {
+	flex: 0 0 100%;
+	margin: 16px 0 6px;
+	font-size: 1.7em;
+	font-weight: 300;
+	letter-spacing: .04em;
+	text-align: center;
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) > center:first-child a {
+	text-decoration: none;
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) .nav_button {
+	margin: 0;
+	padding: 7px 16px;
+	border: 1px solid var(--pub-line);
+	border-radius: 999px;
+	background: var(--pub-card);
+	color: var(--pub-green);
+	font-size: .78em;
+	font-weight: 600;
+	letter-spacing: .04em;
+	transition: border-color .15s, background-color .15s;
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) .nav_button:hover,
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) .nav_button:focus-visible {
+	border-color: var(--pub-green);
+	background: var(--pub-green-soft);
+}
+
+/* --- The card --- */
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) .contennu {
+	box-sizing: border-box;
+	max-width: 440px;
+	margin: 22px auto;
+	padding: 28px 26px 30px;
+	border: 1px solid var(--pub-line);
+	border-radius: 18px;
+	background: var(--pub-card);
+	box-shadow: 0 1px 2px rgba(20, 50, 35, .06), 0 12px 32px -12px rgba(20, 50, 35, .18);
+}
+
+[data-screen="register"] .contennu {
+	max-width: 560px;
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) h2 {
+	margin: 0 0 6px;
+	background: none;
+	color: var(--pub-text);
+	font-size: 1.25em;
+	font-weight: 600;
+}
+
+/* the line breaks of the markup are no spacing: the labels and fields carry it */
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) form {
+	display: block;
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) form br {
+	display: none;
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) form label:not(.choice label) {
+	display: block;
+	margin: 18px 0 6px;
+	font-size: .88em;
+	font-weight: 600;
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) form p label {
+	display: inline;
+	margin: 0;
+	font-weight: normal;
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) .label_info {
+	display: block;
+	margin-top: 6px;
+	font-size: .78em;
+	font-style: normal;
+	color: var(--pub-muted);
+}
+
+/* --- Fields --- */
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) input[type=text],
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) input[type=email],
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) input[type=number],
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) input[type=password],
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) textarea,
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) select {
+	box-sizing: border-box;
+	width: 100%;
+	padding: 11px 13px;
+	border: 1px solid var(--pub-line);
+	border-radius: 10px;
+	background-color: var(--pub-field);
+	color: var(--pub-text);
+	font-size: 1em;
+	transition: border-color .15s, box-shadow .15s, background-color .15s;
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) textarea {
+	height: 80px;
+	font-family: inherit;
+	resize: vertical;
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) input[type=number] {
+	-moz-appearance: textfield;
+	appearance: textfield;
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) input::-webkit-inner-spin-button,
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) input::-webkit-outer-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) ::placeholder {
+	font-size: 1em;
+	font-style: normal;
+	color: var(--pub-muted);
+	opacity: .7;
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) input:focus,
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) select:focus,
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) textarea:focus {
+	border-color: var(--pub-green);
+	background-color: var(--pub-card);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--pub-green) 25%, transparent);
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) input[type=checkbox] {
+	accent-color: var(--pub-green);
+	width: 1.1em;
+	height: 1.1em;
+	vertical-align: -.2em;
+}
+
+/* --- The main button of a form --- */
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) input[type=submit] {
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	margin: 26px 0 0;
+	padding: 13px 16px;
+	border: 1px solid var(--pub-green);
+	border-radius: 10px;
+	background: var(--pub-green);
+	color: #fff;
+	font-size: .95em;
+	font-weight: 600;
+	letter-spacing: .06em;
+	transition: background-color .15s, box-shadow .15s;
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) input[type=submit]:hover {
+	background: var(--pub-green-dark);
+	border-color: var(--pub-green-dark);
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) input[type=submit]:focus-visible {
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--pub-green) 35%, transparent);
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) input[type=submit]:disabled {
+	opacity: .55;
+	color: #fff;
+	cursor: default;
+}
+
+/* --- Messages: nothing while empty, a tinted box when the script writes in them --- */
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) span.rouge[id]:not(:empty),
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) span.vert[id]:not(:empty) {
+	display: block;
+	margin: 14px 0 0;
+	padding: 10px 12px;
+	border-radius: 10px;
+	font-size: .9em;
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) span.rouge[id]:not(:empty) {
+	background: var(--pub-error-soft);
+	color: var(--pub-error);
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) span.vert[id]:not(:empty) {
+	background: var(--pub-green-soft);
+	color: var(--pub-green);
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) .rouge {
+	color: var(--pub-error);
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) .vert {
+	color: var(--pub-green);
+}
+
+/* the sign-up confirmation and the "done" box are green text on a card: keep them readable and centred */
+:is([data-screen="register"], [data-screen="verify_email"]) .contennu.vert {
+	text-align: center;
+	line-height: 1.5;
+}
+
+/* --- Captcha, terms, links --- */
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) .captcha_box {
+	display: block;
+	margin: 10px 0 0;
+	border-color: var(--pub-green);
+	border-radius: 10px;
+	background: #fff;
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) .captcha_box:has(.captcha[src]) {
+	border-color: transparent;
+	background: transparent;
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) .terms_frame {
+	width: 100%;
+	margin: 8px 0;
+	border-color: var(--pub-line);
+	border-radius: 10px;
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) a {
+	color: var(--pub-green);
+}
+
+/* the two demo links and the lost-password link of the sign-in card */
+[data-screen="auth"] .contennu center {
+	margin-top: 14px;
+	font-size: .9em;
+}
+
+[data-screen="auth"] .contennu form + br,
+[data-screen="auth"] .contennu form + br + br,
+[data-screen="auth"] .contennu form + br + br + br {
+	display: none;
+}
+
+[data-screen="auth"] .contennu center:has(#but_demo_mucus) {
+	margin-top: 28px;
+	padding-top: 22px;
+	border-top: 1px solid var(--pub-line);
+}
+
+[data-screen="auth"] .contennu center + center:has(#but_demo_fc) {
+	margin-top: 8px;
+}
+
+[data-screen="auth"] #a_recover {
+	color: var(--pub-muted);
+}
+
+/* --- Footers --- */
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) > center .label_info {
+	display: block;
+	margin: 0 0 8px;
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) .language_footer {
+	margin: 10px 0 24px;
+	font-size: .85em;
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) .language_footer label {
+	margin-right: 6px;
+	color: var(--pub-muted);
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) .language_footer select {
+	width: auto;
+	padding: 6px 10px;
+}
+
+/* the method cards of the sign-up page follow the same palette (the base rules are in account.css) */
+[data-screen="register"] .choice label {
+	border-color: var(--pub-line);
+	border-radius: 12px;
+}
+
+[data-screen="register"] .choice label:hover {
+	border-color: var(--pub-green);
+}
+
+[data-screen="register"] .choice input:checked + label {
+	border-color: var(--pub-green);
+	background-color: var(--pub-green-soft);
+}
+
+[data-screen="register"] .choice label::before {
+	background-color: var(--pub-card);
+}
+
+[data-screen="register"] .choice input:checked + label::before {
+	border-color: var(--pub-green);
+	background-color: var(--pub-green);
+	box-shadow: inset 0 0 0 3px var(--pub-green-soft);
+}
+
+[data-screen="register"] .choice_check input:checked + label::before {
+	box-shadow: none;
+}
+
+[data-screen="register"] .choice_text {
+	color: var(--pub-muted);
+}
+
+[data-screen="register"] .choice_group legend {
+	font-size: .88em;
+}
+
+/* --- Fixes --- */
+
+/* the logo's green on the dark card: a lighter gradient */
+@media (prefers-color-scheme: dark) {
+	:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) .gradiant_logo {
+		background-image: linear-gradient(90deg, #5fd391, #a6efc4);
+	}
+}
+
+/* the empty frame of the picture takes the field's colour, white only once the picture is there */
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) .captcha_box {
+	background: var(--pub-field);
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) .captcha_box:has(.captcha[src]) {
+	background: transparent;
+}
+
+/* terms: the checkbox and its sentence on one line, in normal weight */
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) form p {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	margin: 16px 0 0;
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) form p input[type=checkbox] {
+	flex: 0 0 auto;
+	margin: .2em 0 0;
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) form p label:not(.choice label) {
+	display: block;
+	margin: 0;
+	font-size: .9em;
+	font-weight: normal;
+	line-height: 1.45;
+}
+
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) .terms_title {
+	display: block;
+	margin: 26px 0 6px;
+	font-size: .88em;
+	font-weight: 600;
+}
+
+/* the line breaks that close the sign-up card are no spacing */
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) .contennu > br {
+	display: none;
+}
+
+/* footer notes */
+:is([data-screen="auth"], [data-screen="register"], [data-screen="recover"], [data-screen="verify_email"]) > center > p.label_info {
+	margin: 4px 0;
+}
