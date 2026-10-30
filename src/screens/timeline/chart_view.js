@@ -29,7 +29,7 @@ export async function cycle2graph(id) {
 			datasets: [{
 				data: state.graph_data[id],
 				fill: false,
-				borderColor: '#1e824c',
+				borderColor: getComputedStyle(document.documentElement).getPropertyValue("--green").trim(),   // css/theme.css
 				tension: 0.1,
 			}]
 		},

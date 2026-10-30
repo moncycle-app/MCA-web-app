@@ -227,19 +227,15 @@ export function day_timeline2timeline(j) {
 			day_timeline.append(el("span", {class: "fc pas_mucus pas_mucus_temp"}, ...fc_note2nodes(j.fc_score || "")));
 			if ((state.constante.nfp_method==1 || state.constante.nfp_method==4) && j.temperature) {
 				let temp = parseFloat(j.temperature);
-				let color = "#4169e1";
-				if (temp > 37.5) color = "#b469e1";
-				else if (temp <= 37.5 && temp >= 36.5) {
-					let r = parseInt((1-(37.5-temp))*115)+65;
-					color = `rgb(${r}, 105, 225)`;
-				}
+				// how warm, from 0 (36.5° and under) to 1 (37.5° and over): the colours are in timeline.css
+				const heat = String(Math.min(1, Math.max(0, temp - 36.5)) || 0);
 				const temp_cell = el("span", {class: "t pas_mucus pas_fc", text: String(temp)});
-				temp_cell.style.backgroundColor = color;
+				temp_cell.style.setProperty("--heat", heat);
 				day_timeline.append(temp_cell);
 				if (j.time_temp_taken) {
 					let hm = j.time_temp_taken.substring(0,5).split(':');
 					const time_cell = el("span", {class: "th mucus pas_fc pas_mucus", text: t("timeline.temperature_time", {hh: hm[0], mm: hm[1]})});
-					time_cell.style.color = color;
+					time_cell.style.setProperty("--heat", heat);
 					day_timeline.append(time_cell);
 				}
 				tbd = false;

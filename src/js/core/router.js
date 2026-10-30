@@ -101,6 +101,7 @@ async function show() {
 	leave();
 	const root = document.getElementById("app");
 	root.dataset.screen = screen.name;
+	root.classList.toggle("public_screen", !screen.auth);   // the screens of someone not signed in share a layout (css/public.css)
 	root.innerHTML = await load_markup(screen);   // our own static markup, never data
 	if (mine !== token) return;
 	moncycle_config.point_pages(root);

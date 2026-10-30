@@ -1,8 +1,8 @@
-<center>
+<header class="app_header">
 	<h1 class="logo"><img class="logo_mark" src="img/logo.svg" alt="" width="32" height="32" /><span>mon<span class="logo_cycle">cycle</span>.app</span></h1>
-	<a href="#/auth"><button data-i18n="recover.back_to_signin" type="button" class="nav_button"></button></a>
-	<a href="#/register"><button data-i18n="auth.create_account" type="button" class="nav_button"></button></a>
-</center>
+	<a data-i18n="recover.back_to_signin" class="nav_button" href="#/auth"></a>
+	<a data-i18n="auth.create_account" class="nav_button" href="#/register"></a>
+</header>
 <div class="contennu" id="recover">
 	<h2 data-i18n="recover.title"></h2>
 	<span id="password_reseted_msg" class="vert"></span>
@@ -23,11 +23,12 @@
 	</form>
 </div>
 
-<center>
+<footer class="app_footer">
+	<!-- Someone who is not signed in picks the language here (the screen of the sign-up asks for it first, in its form). -->
+	<p class="language_footer">
+		<label data-i18n="common.language_label" for="i_language"></label>
+		<select id="i_language"></select>
+	</p>
+	<p data-i18n="common.footer_by" class="label_info"><a data-slot="a" href="https://tech4fertility.org" target="_blank" rel="noopener noreferrer">Tech 4 Fertility</a></p>
 	<p data-i18n="auth.footer_licence" class="label_info"><a data-i18n="auth.footer_licence_name" data-slot="a" href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank" rel="noopener noreferrer"></a><a data-i18n="auth.footer_source_code" data-slot="a2" href="https://github.com/moncycle-app" target="_blank" rel="noopener noreferrer"></a><a data-i18n="auth.footer_terms" data-slot="a3" id="a_footer_terms" target="_blank" rel="noopener noreferrer" hidden></a></p>
-</center>
-
-<center class="language_footer">
-	<label data-i18n="common.language_label" for="i_language"></label>
-	<select id="i_language"></select>
-</center>
+</footer>

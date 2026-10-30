@@ -15,114 +15,60 @@
 /* --- the timeline and the mini view ---------------------------------------------------------------------------------------------
    One square per day, in the colour of its stamp; in the timeline the stamp also tints the whole row and its day number, so each
    day reads in one colour. Sized for a phone: a row is 22px high (a 20px square), so a cycle of 30 days fits on one screen; in the
-   mini view a cycle is one line of squares (--cycle-cols of them, js cycle_line_length), aligned by day of cycle. */
-:where([data-screen="timeline"]) {
-	--tl-bg: white;
-	--tl-ink: #141414;
-	--tl-muted: #6b6f6c;
-	--tl-line: #e3e5e3;
-	--tl-card: #f5f6f5;
-	--tl-tint: 11%;
-	--tl-red: #ac2433;
-	--tl-red-ink: #ac2433;
-	--tl-green: #1e824c;
-	--tl-green-ink: #1e824c;
-	--tl-yellow: #fbca0b;
-	--tl-yellow-ink: #8f7000;
-	--tl-white: white;
-	--tl-white-edge: #d2d2d2;
-	--tl-red-edge: #5e0f19;
-	--tl-green-edge: #0f4a2a;
-	--tl-yellow-edge: #a67c00;
-	--tl-blue-edge: #4f8cc8;
-	--tl-hatch-edge: #b08800;
-	--tl-pause-edge: #c04a5a;
-	--tl-blue-ink: #3b78b8;
-	--tl-blue-hatch: repeating-linear-gradient(45deg, #edf6ff 0 3px, #d3eaff 3px 6px);
-	--tl-yellow-hatch: repeating-linear-gradient(45deg, #fffae7 0 3px, #ffeda8 3px 6px);
-	--tl-pause: #ffd9de;
-	--tl-pause-ink: #821521;
-	--tl-peak: #8b4513;
-}
-
-.flou {
-	filter: blur(5px);
-	pointer-events: none;
-}
-
-.bold {
-	font-weight: bold;
-}
-
-.uppercase {
-	text-transform: uppercase;
-}
-
-.err {
-	color: red;
-}
-
-/* the colour of each stamp: --stamp fills the square, --ink is its text (day number, marks), --wash tints the row */
+   mini view a cycle is one line of squares (--cycle-cols of them, js cycle_line_length), aligned by day of cycle. The colours are
+   those of css/theme.css. */
+/* the colour of each stamp: --stamp fills the square, --stamp-ink is its text (day number, marks), --wash tints the row */
 :is(.stamp_rouge, .g.rouge) {
-	--stamp: var(--tl-red);
-	--ink: var(--tl-red-ink);
-	--edge: var(--tl-red-edge);
+	--stamp: var(--red);
+	--stamp-ink: var(--red-ink);
+	--edge: var(--red-edge);
 }
 
 :is(.stamp_vert, .g.vert) {
-	--stamp: var(--tl-green);
-	--ink: var(--tl-green-ink);
-	--edge: var(--tl-green-edge);
+	--stamp: var(--green);
+	--stamp-ink: var(--green-ink);
+	--edge: var(--green-edge);
 }
 
 :is(.stamp_jaune, .g.jaune) {
-	--stamp: var(--tl-yellow);
-	--ink: var(--tl-yellow-ink);
-	--edge: var(--tl-yellow-edge);
+	--stamp: var(--yellow);
+	--stamp-ink: var(--yellow-ink);
+	--edge: var(--yellow-edge);
 	--tint-boost: 5%;
 }
 
 :is(.stamp_baby, .g.baby) {
-	--stamp: var(--tl-white);
-	--ink: var(--tl-muted);
-	--edge: var(--tl-white-edge);
-	--wash: #8a8a8a;
+	--stamp: var(--white);
+	--stamp-ink: var(--muted);
+	--edge: var(--white-edge);
+	--wash: var(--neutral);
 }
 
 :is(.stamp_jcpas, .g.jcpas) {
-	--stamp: var(--tl-blue-hatch);
-	--ink: var(--tl-blue-ink);
-	--edge: var(--tl-blue-edge);
-	--wash: #5a9ee0;
+	--stamp: var(--blue-hatch);
+	--stamp-ink: var(--blue-ink);
+	--edge: var(--blue-edge);
+	--wash: var(--blue-wash);
 }
 
 :is(.stamp_ar, .g.ar, .g.vide) {
-	--stamp: var(--tl-yellow-hatch);
-	--ink: var(--tl-yellow-ink);
-	--edge: var(--tl-hatch-edge);
-	--wash: #f0be1e;
+	--stamp: var(--yellow-hatch);
+	--stamp-ink: var(--yellow-ink);
+	--edge: var(--hatch-edge);
+	--wash: var(--hatch-wash);
 }
 
 :is(.o_paused, .g.pink) {
-	--stamp: var(--tl-pause);
-	--ink: var(--tl-pause-ink);
-	--edge: var(--tl-pause-edge);
-	--wash: #e06a7a;
+	--stamp: var(--pause);
+	--stamp-ink: var(--pause-ink);
+	--edge: var(--pause-edge);
+	--wash: var(--pause-wash);
 }
 
 /* --- the page around the cycles --------------------------------------------------------------------------------------------- */
 :where([data-screen="timeline"]) :is(#timeline, #recap) {
 	padding-left: 8px;
 	padding-right: 8px;
-	font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-}
-
-:where([data-screen="timeline"]) center .nav_button {
-	margin: 6px 1px 0;
-	padding: 5px 10px;
-	border-radius: 999px;
-	font-size: 11px;
-	letter-spacing: .03em;
 }
 
 /* the news: text from another site, drawn as text */
@@ -132,10 +78,9 @@
 	max-width: 584px;
 	margin: 18px auto 0;
 	padding: 10px 12px;
-	border: 1px solid color-mix(in srgb, var(--tl-green) 28%, transparent);
+	border: 1px solid color-mix(in srgb, var(--green) 28%, transparent);
 	border-radius: 12px;
-	background-color: color-mix(in srgb, var(--tl-green) 6%, var(--tl-bg));
-	font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+	background-color: color-mix(in srgb, var(--green) 6%, var(--bg));
 	font-size: 14px;
 	line-height: 1.35;
 }
@@ -143,8 +88,8 @@
 .actu .tag {
 	padding: 1px 7px;
 	border-radius: 999px;
-	background-color: var(--tl-green);
-	color: white;
+	background-color: var(--green);
+	color: var(--on-color);
 	font-size: 10px;
 	font-weight: 700;
 	letter-spacing: .06em;
@@ -161,14 +106,11 @@
 	margin: 0 0 8px;
 	max-height: 10em;
 	overflow-y: auto;
-	color: var(--tl-muted);
+	color: var(--muted);
 }
 
 .actu button {
 	margin: 0 4px 0 0;
-	padding: 4px 10px;
-	border-radius: 999px;
-	font-size: 11px;
 }
 
 /* the bar at the bottom of the page that says a change could not be sent (above the day form) */
@@ -181,16 +123,18 @@
 	padding: 8px 12px;
 	font-size: .85em;
 	text-align: center;
-	color: white;
-	background-color: #555;
+	color: var(--bg);
+	background-color: color-mix(in srgb, var(--ink) 75%, var(--bg));
 }
 
 .sync_status.sync_error {
-	background-color: #b3261e;
+	color: var(--on-color);
+	background-color: var(--red);
 }
 
 .sync_status.sync_warning {
-	background-color: #8a5a00;
+	color: var(--on-yellow);
+	background-color: var(--yellow);
 }
 
 .sync_status button {
@@ -209,8 +153,8 @@
 	z-index: 100000;
 	margin: 0 -8px;
 	padding: 9px 34px 9px 8px;
-	border-bottom: 1px solid var(--tl-line);
-	background-color: color-mix(in srgb, var(--tl-bg) 88%, transparent);
+	border-bottom: 1px solid var(--line);
+	background-color: color-mix(in srgb, var(--bg) 88%, transparent);
 	-webkit-backdrop-filter: blur(10px);
 	backdrop-filter: blur(10px);
 	font-size: 15px;
@@ -230,39 +174,36 @@
 	top: 50%;
 	right: 10px;
 	translate: 0 -50%;
-	color: var(--tl-muted);
+	color: var(--muted);
 	font-weight: 700;
 }
 
 .title .nb_jours {
-	color: var(--tl-green-ink);
+	color: var(--green-ink);
 	font-weight: 800;
 }
 
 .title .cycle_fin {
-	color: var(--tl-muted);
+	color: var(--muted);
 }
 
 .cycle_options {
 	margin: 6px 0;
 	padding: 8px 10px;
 	border-radius: 10px;
-	background-color: var(--tl-card);
+	background-color: var(--card);
 	font-size: 13px;
 	line-height: 1.4;
 }
 
 .cycle_options button {
 	margin: 2px 0;
-	padding: 4px 10px;
-	border-radius: 999px;
-	font-size: 11px;
 }
 
 .label_anonymous_export {
 	font-size: 12px;
 	vertical-align: middle;
-	color: var(--tl-muted);
+	color: var(--muted);
 }
 
 .unknown_type_note {
@@ -285,15 +226,15 @@
 	margin-top: 8px;
 	padding: 10px 12px;
 	border-radius: 10px;
-	background-color: var(--tl-card);
+	background-color: var(--card);
 	font-size: 14px;
 	line-height: 1.8;
 }
 
 #nocycle {
 	margin-top: 20px;
-	color: var(--tl-muted);
-	font-family: 'Montserrat';
+	color: var(--muted);
+	font-family: var(--font-title);
 	font-size: 13px;
 	text-align: center;
 }
@@ -301,7 +242,7 @@
 /* --- a day of the timeline: day number, square, marks, notes ... date on the right ------------------------------------------- */
 .day {
 	--stamp: transparent;
-	--ink: var(--tl-muted);
+	--stamp-ink: var(--muted);
 	display: grid;
 	grid-template-columns: 22px 20px minmax(0, 1fr) auto;
 	align-items: start;
@@ -310,7 +251,7 @@
 	margin-bottom: 2px;
 	padding: 0 8px 0 0;
 	border-radius: 6px;
-	background-color: color-mix(in srgb, var(--wash, var(--stamp)) calc(var(--tl-tint) + var(--tint-boost, 0%)), transparent);
+	background-color: color-mix(in srgb, var(--wash, var(--stamp)) calc(var(--row-tint) + var(--tint-boost, 0%)), transparent);
 	font-size: 13px;
 	line-height: 1.2;
 	cursor: pointer;
@@ -318,7 +259,7 @@
 }
 
 .day:hover {
-	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 40%, transparent);
+	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--stamp-ink) 40%, transparent);
 }
 
 .day span {
@@ -352,7 +293,7 @@
 .day .j {
 	grid-column: 1;
 	line-height: 20px;
-	color: var(--ink);
+	color: var(--stamp-ink);
 	font-size: 12px;
 	font-weight: 600;
 	font-variant-numeric: tabular-nums;
@@ -367,7 +308,7 @@
 	height: 20px;
 	border-radius: 5px;
 	background: var(--stamp);
-	box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .08);
+	box-shadow: inset 0 0 0 1px var(--hairline);
 	color: transparent;
 	font-size: 12px;
 	font-weight: 700;
@@ -377,15 +318,15 @@
 }
 
 .day .g:is(.baby, .jcpas, .ar, .pink) {
-	color: var(--ink);
+	color: var(--stamp-ink);
 }
 
 .day .g.baby {
-	box-shadow: inset 0 0 0 1px var(--tl-white-edge);
+	box-shadow: inset 0 0 0 1px var(--white-edge);
 }
 
 .day .g.g_none {
-	border: 1px dashed color-mix(in srgb, var(--tl-muted) 45%, transparent);
+	border: 1px dashed color-mix(in srgb, var(--muted) 45%, transparent);
 	background: none;
 	box-shadow: none;
 }
@@ -395,7 +336,7 @@
 	grid-column: 4;
 	grid-row: 1;
 	line-height: 20px;
-	color: var(--tl-muted);
+	color: var(--muted);
 	font-size: 10.5px;
 	font-variant-numeric: tabular-nums;
 	letter-spacing: .03em;
@@ -404,7 +345,7 @@
 }
 
 .day .d.bold {
-	color: var(--tl-ink);
+	color: var(--ink);
 }
 
 /* the peak and the days after it (.s), the days of a counter (.n): small tags */
@@ -418,13 +359,13 @@
 }
 
 .day .s {
-	background-color: color-mix(in srgb, var(--tl-peak) 14%, transparent);
-	color: var(--tl-peak);
+	background-color: color-mix(in srgb, var(--peak) 14%, transparent);
+	color: var(--peak);
 }
 
 .day .n {
-	background-color: color-mix(in srgb, var(--tl-green) 14%, transparent);
-	color: var(--tl-green-ink);
+	background-color: color-mix(in srgb, var(--green) 14%, transparent);
+	color: var(--green-ink);
 }
 
 /* descriptions: observations as they are, sensations in bold, the ones with no type struck through */
@@ -444,7 +385,7 @@
 }
 
 .day .fc {
-	font-family: "Montserrat";
+	font-family: var(--font-title);
 	font-size: 13px;
 	font-weight: 700;
 }
@@ -454,16 +395,21 @@
 }
 
 .day .fc .note_rouge {
-	color: var(--tl-red-ink);
+	color: var(--red-ink);
 	font-weight: 400;
 }
 
-/* the temperature: a pill coloured by its value (js), then the time it was taken in the same colour */
+/* the temperature: a pill coloured by its value (the js sets --heat, 0 at 36.5° and under, 1 at 37.5° and over), then the time it
+   was taken in the same colour */
+.day :is(.t, .th) {
+	--temp: color-mix(in srgb, var(--temp-hot) calc(var(--heat, 0) * 100%), var(--temp-cold));
+}
+
 .day .t {
 	padding: 0 6px;
 	border-radius: 999px;
-	background-color: gray;
-	color: white;
+	background-color: var(--temp);
+	color: var(--on-color);
 	font-size: 11px;
 	font-weight: 600;
 	line-height: 16px;
@@ -475,6 +421,7 @@
 }
 
 .day .th {
+	color: var(--temp);
 	font-size: 11px;
 	font-variant-numeric: tabular-nums;
 }
@@ -484,7 +431,7 @@
 }
 
 .day .e {
-	color: var(--ink);
+	color: var(--stamp-ink);
 	font-size: 11px;
 	font-weight: 600;
 	letter-spacing: .05em;
@@ -492,13 +439,13 @@
 }
 
 .day .r {
-	color: var(--ink);
+	color: var(--stamp-ink);
 	font-size: 12px;
 	font-weight: 600;
 }
 
 .day .p {
-	color: var(--tl-muted);
+	color: var(--muted);
 	font-size: 12px;
 	font-style: italic;
 }
@@ -508,7 +455,7 @@
 	flex: 0 1 auto;
 	min-width: 0;
 	padding: 1px 0 2px;
-	color: var(--tl-muted);
+	color: var(--muted);
 	font-size: 11px;
 	font-style: italic;
 	line-height: 1.15;
@@ -532,8 +479,8 @@
 	position: relative;
 	margin: 0 0 3px;
 	padding-right: 24px;
-	color: var(--tl-muted);
-	font-family: 'Montserrat';
+	color: var(--muted);
+	font-family: var(--font-title);
 	font-size: 12px;
 	font-weight: 400;
 	line-height: 1.3;
@@ -585,9 +532,9 @@
 	aspect-ratio: 1;
 	margin: 1px 0;
 	border-radius: 22%;
-	background: var(--stamp, var(--tl-yellow-hatch));
-	box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .07);
-	color: var(--ink);
+	background: var(--stamp, var(--yellow-hatch));
+	box-shadow: inset 0 0 0 1px var(--hairline);
+	color: var(--stamp-ink);
 	font-size: 7px;
 	font-size: clamp(6px, 58cqw, 11px);
 	line-height: 1;
@@ -595,19 +542,19 @@
 
 /* the FertilityCare bleeding (H, M, L) on a coloured square */
 .cycle_recap .obs span.g:is(.rouge, .vert) {
-	color: rgba(255, 255, 255, .92);
+	color: var(--on-color);
 }
 
 .cycle_recap .obs span.g.jaune {
-	color: #2b2100;
+	color: var(--on-yellow);
 }
 
 .cycle_recap .obs span.g.baby {
-	box-shadow: inset 0 0 0 1px var(--tl-white-edge);
+	box-shadow: inset 0 0 0 1px var(--white-edge);
 }
 
 .cycle_recap .obs:hover span.g.baby {
-	box-shadow: inset 0 0 0 1px #8a8a8a;
+	box-shadow: inset 0 0 0 1px var(--neutral);
 }
 
 .cycle_recap .obs span.g:is(.jcpas, .vide) {
@@ -620,15 +567,15 @@
 }
 
 .cycle_recap .obs :is(.s, .n) {
-	color: var(--tl-peak);
+	color: var(--peak);
 }
 
 .cycle_recap .obs .n {
-	color: var(--tl-green-ink);
+	color: var(--green-ink);
 }
 
 .cycle_recap .obs .fc {
-	color: var(--tl-ink);
+	color: var(--ink);
 }
 
 .cycle_recap .obs .c {
@@ -644,7 +591,7 @@
 .mini_ruler span {
 	height: 11px;
 	border-radius: 2px;
-	color: color-mix(in srgb, var(--tl-ink) 80%, transparent);
+	color: color-mix(in srgb, var(--ink) 80%, transparent);
 	font-size: 7px;
 	font-weight: 600;
 	font-variant-numeric: tabular-nums;
@@ -654,7 +601,7 @@
 }
 
 .mini_ruler span.odd {
-	background-color: color-mix(in srgb, var(--tl-ink) 11%, transparent);
+	background-color: color-mix(in srgb, var(--ink) 11%, transparent);
 }
 
 @media (min-width: 601px) {
@@ -672,69 +619,32 @@
 
 @media (prefers-color-scheme: dark) {
 
-	:where([data-screen="timeline"]) {
-		--tl-bg: black;
-		--tl-ink: #ececec;
-		--tl-muted: #9a9e9b;
-		--tl-line: #2c2c2c;
-		--tl-card: #121212;
-		--tl-tint: 19%;
-		--tl-red: #c7303f;
-		--tl-red-ink: #f0707c;
-		--tl-green: #23955a;
-		--tl-green-ink: #3fc47c;
-		--tl-yellow: #fbca0b;
-		--tl-yellow-ink: #fbca0b;
-		--tl-white: #fbfbfb;
-		--tl-white-edge: #fbfbfb;
-		--tl-red-edge: #ff8a98;
-		--tl-green-edge: #7fe0aa;
-		--tl-yellow-edge: #fff0a8;
-		--tl-blue-edge: #8cc0f0;
-		--tl-hatch-edge: #fbca0b;
-		--tl-pause-edge: #ffaab4;
-		--tl-blue-ink: #8cc0f0;
-		--tl-blue-hatch: repeating-linear-gradient(45deg, #00284f 0 3px, #001e3c 3px 6px);
-		--tl-yellow-hatch: repeating-linear-gradient(45deg, #493b00 0 3px, #332900 3px 6px);
-		--tl-pause: #5a0a14;
-		--tl-pause-ink: #ffaab4;
-		--tl-peak: #e0a070;
-	}
-
 	:is(.stamp_jaune, .g.jaune) {
 		--tint-boost: -4%;
 	}
 
 	/* 6% of green on black does not show: the news keeps its light green box */
 	.actu {
-		border-color: color-mix(in srgb, var(--tl-green) 45%, transparent);
-		background-color: color-mix(in srgb, var(--tl-green) 16%, var(--tl-bg));
+		border-color: color-mix(in srgb, var(--green) 45%, transparent);
+		background-color: color-mix(in srgb, var(--green) 16%, var(--bg));
 	}
 
 	:is(.stamp_baby, .g.baby) {
-		--ink: #ececec;
-	}
-
-	.day .g {
-		box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08);
-	}
-
-	.cycle_recap .obs span.g {
-		box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .07);
+		--stamp-ink: var(--ink);
 	}
 
 	.mini_ruler span {
-		color: var(--tl-ink);
+		color: var(--ink);
 	}
 
 	.mini_ruler span.odd {
-		background-color: color-mix(in srgb, var(--tl-ink) 22%, transparent);
+		background-color: color-mix(in srgb, var(--ink) 22%, transparent);
 	}
 
 }
 
 /* --- the day form's popup and its leftovers -------------------------------------------------------------------------------- */
-#jour_form, #temp_graph {
+#jour_form {
 	display: block;
 	position: fixed;
 	top: 0;
@@ -746,67 +656,26 @@
 	border-radius: 3px;
 }
 
-.popup label.yellow,
-.popup label.red,
-.popup label.green {
-	font-weight: bold;
-}
-
 .note {
-	color: gray;
+	color: var(--muted);
 	font-size: .9em;
-	font-family: monospace;
+	font-family: var(--font-mono);
 	line-height: 1;
 	margin: 0;
 }
 
-#temp_graph {
-	padding-top: 10px;
-}
-
-#temp_graph_close {
-	display: block;
-	float: right;
-}
-
-#temp_graph_titre {
-	font-family: 'Montserrat';
-}
-
-#graph_container {
-	position: relative;
-	height: calc(100% - 20px);
-	width: 100%;
-}
-
 /* --- the day form (#jour_form): one card per part, a sticky header, chips for every choice --------------------------------------- */
 #jour_form {
-	--jf-bg: white;
-	--jf-card: #f5f6f5;
-	--jf-field: white;
-	--jf-line: #e3e5e3;
-	--jf-muted: #6b6f6c;
-	--jf-chip: #e9ebe9;
-	--jf-radius: 10px;
 	max-width: 600px;
 	margin: auto;
 	padding: 0 12px;
-	font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 	font-size: 15px;
 	line-height: 1.35;
 }
 
-#jour_form label {
-	margin-left: 0;
-}
-
 #jour_form button {
-	color: var(--jf-ink);
-	border-radius: 8px;
 	padding: 5px 9px;
-	margin: 0;
-	font-size: .8em;
-	letter-spacing: .02em;
+	color: var(--jf-ink);
 }
 
 /* a small caps title per part ("Stamps", "Events"...) */
@@ -817,7 +686,7 @@
 	font-weight: 700;
 	letter-spacing: .07em;
 	text-transform: uppercase;
-	color: var(--jf-muted);
+	color: var(--muted);
 }
 
 #jour_form_header {
@@ -826,7 +695,7 @@
 	z-index: 2;
 	margin: 0 -12px;
 	padding: 8px 12px 6px;
-	background-color: color-mix(in srgb, var(--jf-bg) 88%, transparent);
+	background-color: color-mix(in srgb, var(--bg) 88%, transparent);
 	-webkit-backdrop-filter: blur(10px);
 	backdrop-filter: blur(10px);
 }
@@ -862,8 +731,8 @@
 #jour_form_header .popup_enregistratement_status {
 	padding: 2px 8px;
 	border-radius: 999px;
-	background-color: var(--jf-bg);
-	box-shadow: 0 1px 4px rgba(0, 0, 0, .18);
+	background-color: var(--bg);
+	box-shadow: 0 1px 4px var(--shadow);
 	font-size: .75em;
 	white-space: nowrap;
 }
@@ -875,7 +744,7 @@
 	flex-wrap: wrap;
 	gap: 8px;
 	padding: 8px 0 2px;
-	font-family: 'Montserrat';
+	font-family: var(--font-title);
 	font-size: 1.05em;
 	letter-spacing: .02em;
 }
@@ -920,16 +789,8 @@
 
 .jf_section {
 	padding: 10px 12px 12px;
-	border-radius: var(--jf-radius);
-	background-color: var(--jf-card);
-}
-
-#jour_form :is(input[type=text], input[type=number], input[type=time], textarea) {
-	background-color: var(--jf-field);
-	border: 1px solid var(--jf-line);
-	border-radius: 8px;
-	font-size: .95em;
-	color: inherit;
+	border-radius: var(--radius);
+	background-color: var(--card);
 }
 
 #jour_form :is(input, textarea):focus {
@@ -945,14 +806,14 @@
 }
 
 #jour_form .go_color {
-	--stamp: #8a8a8a;
-	--stamp_fg: #141414;
+	--stamp: var(--neutral);
+	--stamp_fg: var(--ink);
 	position: relative;
 	padding: 8px 4px;
 	border: 1.5px solid color-mix(in srgb, var(--stamp) 55%, transparent);
 	border-radius: 8px;
-	background-color: color-mix(in srgb, var(--stamp) 12%, var(--jf-field));
-	color: color-mix(in srgb, var(--stamp) 80%, var(--jf-muted));
+	background-color: color-mix(in srgb, var(--stamp) 12%, var(--field));
+	color: color-mix(in srgb, var(--stamp) 80%, var(--muted));
 	font-weight: 600;
 	text-align: center;
 	white-space: nowrap;
@@ -972,29 +833,29 @@
 }
 
 #jour_form .go_color_red {
-	--stamp: #ac2433;
-	--stamp_fg: white;
+	--stamp: var(--red);
+	--stamp_fg: var(--on-color);
 }
 
 #jour_form .go_color_green {
-	--stamp: #1e824c;
-	--stamp_fg: white;
+	--stamp: var(--green);
+	--stamp_fg: var(--on-color);
 }
 
 #jour_form .go_color_yellow {
-	--stamp: #e3b607;
-	--stamp_fg: #2b2100;
+	--stamp: var(--yellow);
+	--stamp_fg: var(--on-yellow);
 }
 
 #jour_form .go_color:has(input:checked) {
 	background-color: var(--stamp);
 	border-color: var(--stamp);
 	color: var(--stamp_fg);
-	box-shadow: 0 0 0 2px var(--jf-card), 0 0 0 4px color-mix(in srgb, var(--stamp) 60%, transparent);
+	box-shadow: 0 0 0 2px var(--card), 0 0 0 4px color-mix(in srgb, var(--stamp) 60%, transparent);
 }
 
 #jour_form .go_color_empty:has(input:checked) {
-	background-color: var(--jf-field);
+	background-color: var(--field);
 	color: inherit;
 }
 
@@ -1006,27 +867,27 @@
 /* the colour of the form follows the stamp chosen (no stamp: near black, near white in dark mode): ticked chips, events,
    buttons, focus. --jf-accent fills, --jf-accent-fg is the text on it, --jf-ink is a text or a line on a neutral background */
 #jour_form {
-	--jf-accent: #141414;
-	--jf-accent-fg: white;
-	--jf-ink: #141414;
+	--jf-accent: var(--ink);
+	--jf-accent-fg: var(--bg);
+	--jf-ink: var(--ink);
 }
 
 #jour_form:has(#go_rouge:checked) {
-	--jf-accent: #ac2433;
-	--jf-accent-fg: white;
-	--jf-ink: #ac2433;
+	--jf-accent: var(--red);
+	--jf-accent-fg: var(--on-color);
+	--jf-ink: var(--red-ink);
 }
 
 #jour_form:has(#go_vert:checked) {
-	--jf-accent: #1e824c;
-	--jf-accent-fg: white;
-	--jf-ink: #1e824c;
+	--jf-accent: var(--green);
+	--jf-accent-fg: var(--on-color);
+	--jf-ink: var(--green-ink);
 }
 
 #jour_form:has(#go_jaune:checked) {
-	--jf-accent: #e3b607;
-	--jf-accent-fg: #2b2100;
-	--jf-ink: #8f7000;
+	--jf-accent: var(--yellow);
+	--jf-accent-fg: var(--on-yellow);
+	--jf-ink: var(--yellow-ink);
 }
 
 .jf_chips,
@@ -1070,7 +931,7 @@
 	gap: 6px;
 	padding: 5px 10px;
 	border-radius: 8px;
-	background-color: var(--jf-chip);
+	background-color: var(--chip);
 	border: 1px solid transparent;
 	line-height: 1.2;
 	user-select: none;
@@ -1099,7 +960,7 @@
 	padding: 1px 4px;
 	border-radius: 4px;
 	background-color: color-mix(in srgb, currentColor 12%, transparent);
-	font-family: ui-monospace, Menlo, Consolas, monospace;
+	font-family: var(--font-mono);
 	font-size: .9em;
 	text-align: center;
 }
@@ -1110,8 +971,8 @@
 	z-index: 1;
 	margin: -10px -12px 10px;
 	padding: 10px 12px 8px;
-	border-radius: var(--jf-radius) var(--jf-radius) 0 0;
-	background-color: var(--jf-card);
+	border-radius: var(--radius) var(--radius) 0 0;
+	background-color: var(--card);
 }
 
 #fc_score_holder .categorie {
@@ -1120,7 +981,7 @@
 
 #fc_msg {
 	float: right;
-	font-family: ui-monospace, Menlo, Consolas, monospace;
+	font-family: var(--font-mono);
 	font-size: .8em;
 }
 
@@ -1130,7 +991,7 @@
 	width: 100%;
 	margin-top: 6px;
 	text-transform: uppercase;
-	font-family: ui-monospace, Menlo, Consolas, monospace;
+	font-family: var(--font-mono);
 }
 
 /* temperature: the value and its unit, then the time it was taken */
@@ -1149,7 +1010,7 @@
 }
 
 .jf_temp_time label {
-	color: var(--jf-muted);
+	color: var(--muted);
 	font-size: .9em;
 }
 
@@ -1179,8 +1040,8 @@
 
 #jour_form .desc_add_toggle {
 	background-color: transparent;
-	border: 1px dashed color-mix(in srgb, var(--jf-muted) 60%, transparent);
-	color: var(--jf-muted);
+	border: 1px dashed color-mix(in srgb, var(--muted) 60%, transparent);
+	color: var(--muted);
 }
 
 .desc_add_form > * {
@@ -1200,7 +1061,7 @@
 .desc_hint {
 	margin: 0;
 	font-size: .8em;
-	color: var(--jf-muted);
+	color: var(--muted);
 }
 
 /* events: one row each, two columns when there is room; a ticked row is tinted */
@@ -1243,7 +1104,7 @@
 }
 
 .jf_check .note {
-	color: var(--jf-muted);
+	color: var(--muted);
 	font-size: .8em;
 	vertical-align: super;
 }
@@ -1268,7 +1129,7 @@
 	display: block;
 	margin-top: 4px;
 	font-size: .75em;
-	color: var(--jf-muted);
+	color: var(--muted);
 }
 
 /* the foot: when the day was saved, and its deletion */
@@ -1287,7 +1148,7 @@
 	gap: .3em;
 	white-space: nowrap;
 	font-size: .75em;
-	color: var(--jf-muted);
+	color: var(--muted);
 }
 
 #jour_form_last_write span {
@@ -1300,66 +1161,16 @@
 	flex: none;
 }
 
+/* a .rouge button of common.css, in red whatever the stamp */
 #jour_form #jour_form_suppr {
 	flex: none;
-	color: #ac2433;
-	background-color: transparent;
-	border: 1px solid color-mix(in srgb, #ac2433 45%, transparent);
+	color: var(--red-ink);
 	font-size: .7em;
 }
 
-#jour_form #jour_form_suppr:hover {
-	background-color: color-mix(in srgb, #ac2433 10%, transparent);
-}
-
 @media (prefers-color-scheme: dark) {
-	#jour_form {
-		--jf-bg: black;
-		--jf-card: #121212;
-		--jf-field: #1c1c1c;
-		--jf-line: #2c2c2c;
-		--jf-muted: #9a9e9b;
-		--jf-chip: #232323;
-		--jf-accent: #ececec;
-		--jf-accent-fg: #141414;
-		--jf-ink: #ececec;
-	}
-
-	#jour_form:has(#go_rouge:checked) {
-		--jf-accent: #c7303f;
-		--jf-ink: #f0707c;
-	}
-
-	#jour_form:has(#go_vert:checked) {
-		--jf-accent: #23955a;
-		--jf-ink: #3fc47c;
-	}
-
-	#jour_form:has(#go_jaune:checked) {
-		--jf-accent: #fbca0b;
-		--jf-ink: #fbca0b;
-	}
-
 	#jour_form .go_color {
-		--stamp_fg: white;
-		color: color-mix(in srgb, var(--stamp) 55%, white);
-	}
-
-	#jour_form .go_color_red {
-		--stamp: #c7303f;
-	}
-
-	#jour_form .go_color_green {
-		--stamp: #23955a;
-	}
-
-	#jour_form .go_color_yellow {
-		--stamp: #fbca0b;
-		--stamp_fg: #2b2100;
-	}
-
-	#jour_form .go_color_empty {
-		--stamp: #8a8a8a;
+		color: color-mix(in srgb, var(--stamp) 55%, var(--ink));
 	}
 }
 

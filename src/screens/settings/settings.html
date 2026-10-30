@@ -1,10 +1,10 @@
-<center>
+<header class="app_header">
 	<h1 class="logo"><img class="logo_mark" src="img/logo.svg" alt="" width="32" height="32" /><span data-i18n="settings.settings" id="name"></span></h1>
 	<div class="logo_sub" data-i18n="common.on_app"><span data-slot="app">mon<span class="logo_cycle">cycle</span>.app</span></div>
-	<a href="#/"><button data-i18n="settings.back_to_cycles" type="button" class="nav_button"></button></a>
+	<a data-i18n="settings.back_to_cycles" class="nav_button" href="#/"></a>
 	<form id="f_logout" action="api/v2/token" method="delete"><button data-i18n="settings.logout" type="submit" id="but_logout" class="nav_button rouge"></button></form>
-	<p data-i18n="settings.demo_notice" id="warning_demo" hidden><br data-slot="br" /><br data-slot="br2" /><a data-slot="a" href="#/register"><button data-i18n="settings.create_account" type="button"></button></a></p>
-</center>
+	<p data-i18n="settings.demo_notice" id="warning_demo" hidden><br data-slot="br" /><br data-slot="br2" /><a data-slot="a" data-i18n="settings.create_account" class="nav_button primary" href="#/register"></a></p>
+</header>
 
 <div class="contennu settings">
 	<p class="form_msg" id="page_msg" role="status"></p>
@@ -155,7 +155,7 @@
 				<option data-i18n="settings.type_sensation" value="2"></option>
 				<option data-i18n="settings.type_observation" value="1"></option>
 			</select>
-			<button data-i18n="settings.add" type="submit" id="i_desc_validate_new"></button>
+			<button data-i18n="settings.add" type="submit" id="i_desc_validate_new" class="primary"></button>
 			<p class="form_msg" role="status"></p>
 		</form>
 
@@ -195,7 +195,7 @@
 				<input type="password" id="i_notification_emails_password" name="password" autocomplete="current-password" required />
 				<span data-i18n="settings.notice_mail_hint" class="label_info"></span>
 			</div>
-			<button data-i18n="settings.save" type="submit" id="but_notification_emails"></button>
+			<button data-i18n="settings.save" type="submit" id="but_notification_emails" class="primary"></button>
 			<p class="form_msg" role="status"></p>
 		</form>
 	</section>
@@ -247,7 +247,7 @@
 				</div>
 			</fieldset>
 
-			<button data-i18n="settings.export_button" type="submit"></button>
+			<button data-i18n="settings.export_button" type="submit" class="primary"></button>
 			<p class="form_msg" id="export_err" role="status"></p>
 		</form>
 
@@ -266,7 +266,7 @@
 			</div>
 			<div class="buttons">
 				<button data-i18n="settings.import_check_button" type="button" id="i_import_check"></button>
-				<button data-i18n="settings.import_button" type="submit" id="i_import_submit"></button>
+				<button data-i18n="settings.import_button" type="submit" id="i_import_submit" class="primary"></button>
 			</div>
 			<p class="form_msg" role="status"></p>
 			<p data-i18n="settings.import_check_help" class="label_info"><b data-i18n="settings.import_check_name" data-slot="b"></b></p>
@@ -304,7 +304,7 @@
 						<label data-i18n="settings.totp_code_label" for="i_login_email_code"></label>
 						<input type="number" id="i_login_email_code" name="code" inputmode="numeric" autocomplete="one-time-code" />
 					</div>
-					<button data-i18n="settings.send_link" type="submit" id="but_login_email"></button>
+					<button data-i18n="settings.send_link" type="submit" id="but_login_email" class="primary"></button>
 					<p class="form_msg" role="status"></p>
 				</form>
 			</details>
@@ -335,7 +335,7 @@
 							<span data-i18n="settings.logout_others_hint" class="choice_text"></span>
 						</label>
 					</div>
-					<button data-i18n="settings.save" type="submit" id="but_mdp_change"></button>
+					<button data-i18n="settings.save" type="submit" id="but_mdp_change" class="primary"></button>
 					<p class="form_msg" role="status"></p>
 				</form>
 			</details>
@@ -347,7 +347,7 @@
 			<div id="totp_explications" hidden>
 				<p data-i18n="settings.totp_text"></p>
 				<form id="f_totp_start" action="api/v2/totp" method="post">
-					<button data-i18n="settings.totp_enable_start" type="submit" id="i_activate_otp"></button>
+					<button data-i18n="settings.totp_enable_start" type="submit" id="i_activate_otp" class="primary"></button>
 				</form>
 			</div>
 
@@ -368,7 +368,7 @@
 						<label data-i18n="settings.code_label" for="i_totp_code"></label>
 						<input type="number" id="i_totp_code" name="tmp_code" class="input_user_account_totp" inputmode="numeric" autocomplete="one-time-code" required />
 					</div>
-					<button data-i18n="settings.totp_enable" type="submit" id="i_submit_otp"></button>
+					<button data-i18n="settings.totp_enable" type="submit" id="i_submit_otp" class="primary"></button>
 				</form>
 			</div>
 
@@ -445,7 +445,7 @@
 					<span class="captcha_box"><img data-i18n-attr="title:settings.captcha_image_title;alt:settings.captcha_image_alt" class="captcha" id="i_token_new_captcha_img" /></span>
 					<input type="hidden" name="captchaToken" id="i_token_new_captcha_token" value="" />
 				</div>
-				<button data-i18n="settings.token_create_submit" type="submit" id="but_token_create"></button>
+				<button data-i18n="settings.token_create_submit" type="submit" id="but_token_create" class="primary"></button>
 				<p class="form_msg" id="token_new_err" role="status"></p>
 			</form>
 			<div id="token_new_result" hidden>

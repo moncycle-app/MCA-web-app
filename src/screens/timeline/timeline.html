@@ -1,12 +1,12 @@
-<center>
+<header class="app_header">
 	<h1 class="logo"><img class="logo_mark" src="img/logo.svg" alt="" width="32" height="32" /><span data-i18n="timeline.loading" id="name"></span></h1>
 	<div class="logo_sub" data-i18n="common.on_app"><span data-slot="app">mon<span class="logo_cycle">cycle</span>.app</span></div>
 	<button data-i18n="timeline.previous_cycle" type="button" id="charger_cycle" class="nav_button main_button"></button>
 	<button data-i18n="timeline.view_mini_button" id="but_mini_maxi" class="nav_button main_button"></button>
-	<a href="#/settings"><button data-i18n="timeline.settings_button" type="button" class="nav_button main_button"></button></a>
+	<a data-i18n="timeline.settings_button" class="nav_button main_button" href="#/settings"></a>
 	<!-- Not in src/i18n/: a browser without script cannot read the catalog. -->
 	<noscript><p class="rouge">Cette application a besoin de Javascript pour fonctionner.</p></noscript>
-</center>
+</header>
 <div class="actu" id="actu">
 	<span data-i18n="timeline.news_tag" class="tag"></span>
 	<strong class="actu_title" id="actu_title"></strong>

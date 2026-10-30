@@ -1,0 +1,123 @@
+/* moncycle.app
+**
+** Copyright (C) 2021-2026 Tech 4 Fertility, aka. T4F (https://tech4fertility.org)
+** SPDX-License-Identifier: AGPL-3.0-or-later
+**
+** This program is free software: you can redistribute it and/or modify it under
+** the terms of the GNU Affero General Public License as published by the Free
+** Software Foundation, either version 3 of the License, or (at your option) any
+** later version. It is distributed WITHOUT ANY WARRANTY; see the licence for details.
+**
+** https://www.moncycle.app
+** https://github.com/moncycle-app/backend-api-web-app
+*/
+
+/* The design tokens of the whole app: every colour is here, and only here (light, then dark). The other stylesheets use these
+** variables, or mix them (color-mix) for a tint; a new colour is a new variable in this file. */
+
+:root {
+	color-scheme: light dark;
+
+	--font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+	--font-title: "Montserrat", var(--font);
+	--font-mono: ui-monospace, Menlo, Consolas, monospace;
+	--radius: 10px;    /* a card */
+	--radius-s: 8px;   /* a button, a field, a chip */
+
+	/* the page */
+	--bg: #ffffff;
+	--ink: #141414;
+	--muted: #6b6f6c;
+	--line: #e3e5e3;
+	--card: #f5f6f5;
+	--field: #ffffff;
+	--chip: #e9ebe9;
+	--neutral: #8a8a8a;
+	--hairline: rgba(0, 0, 0, .08);
+	--shadow: rgba(0, 0, 0, .18);
+	--on-color: #ffffff;    /* text on a red or green fill */
+	--on-yellow: #2b2100;   /* text on a yellow fill */
+
+	/* the stamps: --x fills, --x-ink is a text or a line in that colour, --x-edge outlines a square under the pointer */
+	--red: #ac2433;
+	--red-ink: #ac2433;
+	--red-edge: #5e0f19;
+	--green: #1e824c;
+	--green-ink: #1e824c;
+	--green-edge: #0f4a2a;
+	--green-strong: #166339;   /* a green button under the pointer */
+	--yellow: #fbca0b;
+	--yellow-ink: #8f7000;
+	--yellow-edge: #a67c00;
+	--white: #ffffff;
+	--white-edge: #d2d2d2;
+	--blue-ink: #3b78b8;
+	--blue-edge: #4f8cc8;
+	--blue-wash: #5a9ee0;
+	--blue-hatch: repeating-linear-gradient(45deg, #edf6ff 0 3px, #d3eaff 3px 6px);
+	--yellow-hatch: repeating-linear-gradient(45deg, #fffae7 0 3px, #ffeda8 3px 6px);
+	--hatch-edge: #b08800;
+	--hatch-wash: #f0be1e;
+	--pause: #ffd9de;
+	--pause-ink: #821521;
+	--pause-edge: #c04a5a;
+	--pause-wash: #e06a7a;
+	--peak: #8b4513;
+	--row-tint: 11%;   /* how much of its stamp a day's row takes */
+
+	/* the temperature pill: from cold (36.5° and under) to hot (37.5° and over) */
+	--temp-cold: #4169e1;
+	--temp-hot: #b469e1;
+
+	/* the logo's square: a hairline and a soft shadow, so its white quarter does not fade into the page */
+	--logo-edge: rgba(0, 0, 0, .55);
+	--logo-shadow: rgba(0, 0, 0, .28);
+
+	/* tints made from the above */
+	--green-soft: color-mix(in srgb, var(--green) 12%, var(--bg));
+	--red-soft: color-mix(in srgb, var(--red) 10%, var(--bg));
+	--focus-ring: color-mix(in srgb, var(--green) 30%, transparent);
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--bg: #000000;
+		--ink: #ececec;
+		--muted: #9a9e9b;
+		--line: #2c2c2c;
+		--card: #121212;
+		--field: #1c1c1c;
+		--chip: #232323;
+		--hairline: rgba(255, 255, 255, .08);
+		--shadow: rgba(255, 255, 255, .18);
+
+		--red: #c7303f;
+		--red-ink: #f0707c;
+		--red-edge: #ff8a98;
+		--green: #23955a;
+		--green-ink: #3fc47c;
+		--green-edge: #7fe0aa;
+		--green-strong: #2aa866;
+		--yellow-ink: #fbca0b;
+		--yellow-edge: #fff0a8;
+		--white: #fbfbfb;
+		--white-edge: #fbfbfb;
+		--blue-ink: #8cc0f0;
+		--blue-edge: #8cc0f0;
+		--blue-hatch: repeating-linear-gradient(45deg, #00284f 0 3px, #001e3c 3px 6px);
+		--yellow-hatch: repeating-linear-gradient(45deg, #493b00 0 3px, #332900 3px 6px);
+		--hatch-edge: #fbca0b;
+		--pause: #5a0a14;
+		--pause-ink: #ffaab4;
+		--pause-edge: #ffaab4;
+		--peak: #e0a070;
+		--row-tint: 19%;
+
+		--logo-edge: rgba(255, 255, 255, .5);
+		--logo-shadow: rgba(255, 255, 255, .25);
+
+		--green-soft: color-mix(in srgb, var(--green) 20%, var(--bg));
+		--red-soft: color-mix(in srgb, var(--red) 22%, var(--bg));
+		--focus-ring: color-mix(in srgb, var(--green-ink) 40%, transparent);
+	}
+}

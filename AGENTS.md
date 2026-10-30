@@ -54,6 +54,12 @@ jQuery (`src/vendor/jquery.min.js`) stays in the project only until the existing
     (`moncycle_store.schema`, or the `appVersion` of `server_info`, changes) drops the copy and reloads the page. Neither a build nor a
     commit is in `server_info`: a server update that keeps `APP_VERSION` does not reach a page that is open.
   - Exports are fetched and saved as a blob (`moncycle_store.download()`): the API answers its errors in JSON.
+- **Styles: one look, one palette.** Every colour is a variable of `css/theme.css` (light and dark) and appears nowhere else, not
+  in another stylesheet, not in the script (read a variable, or set one the CSS mixes, like `--heat`). `css/common.css` holds what
+  the screens share (header, buttons, fields, cards, choice cards, messages); `css/public.css` the layout of the screens of someone
+  not signed in (`.public_screen`, set by the router); a screen's own CSS only what is its own. The timeline and the day form set the
+  look. Buttons: the default (grey), `.primary` or a submit input (the action of a form), `.rouge` (delete, leave), `.nav_button`
+  (the header), `.link_button`.
 - **A request to the API carries no cache-buster** (`cache: false` adds `_=...`, an unknown query parameter, which is refused).
 
 

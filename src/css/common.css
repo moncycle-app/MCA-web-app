@@ -12,96 +12,102 @@
 ** https://github.com/moncycle-app/backend-api-web-app
 */
 
+/* What every screen shares: the page, the header (logo or nickname), buttons, fields, cards, choice cards, messages. The colours
+** are the variables of theme.css; the timeline and the day form set the look, the other screens follow it. */
+
 @font-face {
 	font-family: "Montserrat";
 	src: url("../font/montserrat/Montserrat-VariableFont_wght.ttf") format("truetype");
 }
 
-h1, h2 {
-	font-family: 'Montserrat';
+/* --- The page ----------------------------------------------------------------------------------------------------------------- */
+
+html, body {
+	margin: 0;
+	padding: 0;
+	background-color: var(--bg);
+	color: var(--ink);
+	font-family: var(--font);
+	font-size: 15px;
+	line-height: 1.35;
 }
 
-h1 {
-	font-weight: normal;
-	margin-top: 50px;
-	margin-bottom: 10px;
-	text-transform: uppercase;
+h1, h2, h3, h5 {
+	font-family: var(--font-title);
 }
 
 h2 {
 	font-size: 1.1em;
-	font-weight: bold;
-	background-color: white;
-}
-
-h2 span.net_stat {
-	font-weight: normal;
-}
-
-.rouge {
-	color: #ac2433;
-}
-
-.vert {
-	color: #1e824c;
-}
-
-/* the logo: the four-colour square (img/logo.svg, the favicon's quarters with rounded corners) and "moncycle.app" in lower case */
-h1.logo {
-	display: inline-flex;
-	justify-content: center;
-	align-items: center;
-	gap: .4em;
-	color: #2b2b2b;
-	font-weight: 500;
-	letter-spacing: 0;
-	text-transform: none;
-	max-width: 90%;
-}
-
-.logo_mark {
-	width: 1.3em;
-	height: 1.3em;
-	flex: none;
-	/* a hairline and a soft shadow, so the white quarter does not fade into a white page (a light glow in dark mode) */
-	filter: drop-shadow(0 0 .5px rgba(0, 0, 0, .55)) drop-shadow(0 1px 3px rgba(0, 0, 0, .28));
-}
-
-.logo_cycle {
-	color: #1e824c;
-	font-weight: 800;
-}
-
-@media (prefers-color-scheme: dark) {
-	h1.logo {
-		color: white;
-	}
-
-	.logo_mark {
-		filter: drop-shadow(0 0 .5px rgba(255, 255, 255, .5)) drop-shadow(0 1px 3px rgba(255, 255, 255, .25));
-	}
-}
-
-html, body, .popup {
-	margin: 0;
-	padding: 0;
-	font-family: sans-serif;
-	color: black;
+	font-weight: 600;
 }
 
 a {
-	color: #1e824c;
+	color: var(--green-ink);
+}
+
+label {
+	cursor: pointer;
+}
+
+[hidden] {
+	display: none !important;
+}
+
+.contennu {
+	max-width: 600px;
+	margin: 0 auto;
+	padding-bottom: 60px;
 }
 
 .popup {
-	background-color: white;
+	background-color: var(--bg);
 }
 
-.popup label {
-	margin-left: 5px;
+/* --- The header: the logo (or the nickname once signed in), then the buttons to the other screens; the same on every screen --- */
+
+.app_header {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+	gap: 4px 2px;
+	padding: 44px 12px 14px;
+	text-align: center;
 }
 
-/* the account's nickname, in the logo's place on the signed-in screens (free text: it may be long) */
+.app_header > :is(h1, .logo_sub, p) {
+	flex: 0 0 100%;
+}
+
+.app_header a {
+	text-decoration: none;
+}
+
+/* the four-colour square (img/logo.svg) and "moncycle.app", or the account's nickname (free text: it may be long) */
+h1.logo {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: .45em;
+	margin: 0 0 12px;
+	color: var(--ink);
+	font-size: 1.6em;
+	font-weight: 500;
+	line-height: 1.2;
+}
+
+.logo_mark {
+	width: 1.2em;
+	height: 1.2em;
+	flex: none;
+	filter: drop-shadow(0 0 .5px var(--logo-edge)) drop-shadow(0 1px 3px var(--logo-shadow));
+}
+
+.logo_cycle {
+	color: var(--green-ink);
+	font-weight: 800;
+}
+
 #name {
 	min-width: 0;
 	overflow-wrap: anywhere;
@@ -109,183 +115,403 @@ a {
 
 /* "on moncycle.app", just under the nickname */
 .logo_sub {
-	margin: 0 0 14px;
-	font-family: 'Montserrat';
-	font-size: .85em;
-	color: gray;
+	margin: -12px 0 12px;
+	font-family: var(--font-title);
+	font-size: .8em;
+	color: var(--muted);
 }
 
 .logo_sub .logo_cycle {
 	font-weight: 700;
 }
 
-.nav_button {
-	margin-top: 20px;
-}
-
+/* the buttons of the timeline, shown once it is loaded */
 .main_button {
 	display: none;
 }
 
-.contennu {
-	padding-bottom: 60px;
-	max-width: 600px;
-	margin: 0 auto;
-}
+/* --- Buttons -------------------------------------------------------------------------------------------------------------------
+** one family: a grey button with green text (the default), .primary or a submit input (the action of a form: green), .rouge (what
+** deletes or leaves: red outline), .nav_button (the header's links to the other screens: green text, a pill under the pointer),
+** .link_button (reads as a link, inside a sentence). A link that goes to another screen is an <a>, styled, never a <button> in an <a>. */
 
+button,
 input[type=button],
 input[type=submit],
-button {
-	background-color: #f0f0f0;
-	border: #f0f0f0 1px solid;
-	border-radius: 5px;
-	color: #1e824c;
+a.button,
+a.nav_button {
+	display: inline-block;
+	box-sizing: border-box;
+	margin: 0;
+	padding: 6px 12px;
+	border: 1px solid transparent;
+	border-radius: var(--radius-s);
+	background-color: var(--chip);
+	color: var(--green-ink);
+	font: inherit;
+	font-size: .8em;
+	font-weight: 600;
+	letter-spacing: .03em;
+	line-height: 1.3;
 	text-transform: uppercase;
-	font-weight: normal;
-	padding: 3px 5px;
+	text-decoration: none;
 	cursor: pointer;
 	-webkit-appearance: none;
-	-moz-appearance: none;
 	appearance: none;
-	margin-bottom: 3px;
+	transition: background-color .15s, border-color .15s, color .15s, box-shadow .15s;
 }
 
-input[type=button].rouge,
-input[type=submit].rouge,
-button.rouge {
-	color: #ac2433;
+:is(button, input[type=button], input[type=submit], a.button, a.nav_button):hover {
+	background-color: color-mix(in srgb, var(--ink) 7%, var(--chip));
 }
 
-input[type=button].rougei:focus,
-input[type=submit].rouge:focus,
-button.rouge:focus {
-	border-color: #ac2433;
+:is(button, input[type=button], input[type=submit], a.button, a.nav_button):focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 3px var(--focus-ring);
 }
+
+:is(button, input[type=button], input[type=submit]):disabled {
+	opacity: .5;
+	cursor: default;
+}
+
+:is(button, a).nav_button {
+	padding: 7px 12px;
+	border-color: transparent;
+	border-radius: 999px;
+	background-color: transparent;
+	font-size: .78em;
+}
+
+:is(input[type=submit], button.primary, a.primary) {
+	border-color: var(--green);
+	background-color: var(--green);
+	color: var(--on-color);
+}
+
+:is(input[type=submit], button.primary, a.primary):hover {
+	border-color: var(--green-strong);
+	background-color: var(--green-strong);
+}
+
+:is(button, input[type=button], input[type=submit], a.button).rouge {
+	border-color: color-mix(in srgb, var(--red-ink) 45%, transparent);
+	background-color: transparent;
+	color: var(--red-ink);
+}
+
+:is(button, input[type=button], input[type=submit], a.button).rouge:hover {
+	background-color: var(--red-soft);
+}
+
+:is(button, a).nav_button.rouge {
+	border-color: transparent;
+}
+
+button.link_button {
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--green-ink);
+	font-size: inherit;
+	font-weight: normal;
+	font-style: italic;
+	letter-spacing: 0;
+	text-transform: none;
+	text-decoration: underline;
+}
+
+button.link_button:hover {
+	background: none;
+}
+
+/* --- Fields -------------------------------------------------------------------------------------------------------------------- */
 
 input[type=text],
 input[type=number],
 input[type=password],
 input[type=email],
 input[type=time],
+input[type=date],
 select,
 textarea {
-	background-color: #f0f0f0;
-	border: #f0f0f0 1px solid;
-	border-radius: 5px;
-	padding: 5px 7px;
-	font-size: .9em;
+	box-sizing: border-box;
+	padding: 8px 10px;
+	border: 1px solid var(--line);
+	border-radius: var(--radius-s);
+	background-color: var(--field);
+	color: var(--ink);
+	font: inherit;
+	font-size: .95em;
+	transition: border-color .15s, box-shadow .15s;
 }
 
 textarea {
-	height: 50px;
+	height: 64px;
+	resize: vertical;
 }
 
-input[type=time]{
-	width: 60px;
+input[type=time] {
 	text-align: center;
 }
 
-input:focus,
-select:focus,
-button:focus,
-textarea:focus {
+:is(input:not([type=checkbox], [type=radio], [type=submit], [type=button]), select, textarea):focus {
 	outline: none;
-	border-color: #1e824c;
+	border-color: var(--green);
+	box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
-input:focus.rouge,
-select:focus.rouge,
-button:focus.rouge,
-textarea:focus.rouge {
-	outline: none;
-	border-color: #ac2433;
+:is(input, select, textarea).rouge {
+	color: var(--red-ink);
 }
 
-input:disabled,
-input[type=email]:read-only,
-input[type=email]:-moz-read-only,
-select:disabled,
-button:disabled,
-textarea:disabled {
-	color: gray;
+:is(input, select, textarea).rouge:focus {
+	border-color: var(--red);
 }
 
-.placeholder,
+:is(input, select, textarea):disabled,
+input[type=email]:read-only {
+	color: var(--muted);
+}
+
 ::placeholder {
-	font-size: .7em;
-	font-style: italic;
+	color: var(--muted);
+	opacity: .8;
 }
 
-@media (prefers-color-scheme: dark) {
-	html, body, h2, .popup {
-		background-color: black;
-		color: white;
-	}
-	
-	.popup {
-		border-color: #393939;
-	}
-	
-	input[type=button],
-	input[type=submit],
-	button {
-		background-color: #191919;
-		border-color: #191919;
-	}
-	
-	input[type=text],
-	input[type=number],
-	input[type=time],
-	input[type=password],
-	input[type=email],
-	select,
-	textarea {
-		color: white;
-		background-color: #191919;
-		border-color: #191919;
-	}
-	
-	input[type=text].rouge,
-	input[type=number].rouge,
-	input[type=time].rouge,
-	input[type=password].rouge,
-	input[type=email].rouge,
-	select.rouge,
-	textarea.rouge {
-		color: #ac2433;
-	}
-
-	input:focus,
-	select:focus,
-	button:focus,
-	textarea:focus {
-		outline: none;
-		border-color: #1e824c;
-	}
-
-	input:focus.rouge,
-	select:focus.rouge,
-	button:focus.rouge,
-	textarea:focus.rouge {
-		outline: none;
-		border-color: #ac2433;
-	}
-
-	input[type=email]:read-only,
-	input[type=email]:-moz-read-only {
-		color: gray;
-	}
-
-}
-
-label {
-	cursor: pointer;
+input[type=checkbox],
+input[type=radio] {
+	accent-color: var(--green);
 }
 
 .label_info {
-	font-style: italic;
 	font-size: .8em;
-	color: gray;
+	color: var(--muted);
+}
+
+/* --- Cards: a block on a grey ground, the sections of the day form are the model ------------------------------------------------ */
+
+.card {
+	margin-bottom: 10px;
+	padding: 4px 14px 14px;
+	border-radius: var(--radius);
+	background-color: var(--card);
+}
+
+/* --- Messages: the answer of a form, nothing while empty, a tinted box when there is one --------------------------------------- */
+
+.form_msg {
+	margin: 8px 0 0;
+}
+
+.form_msg:empty {
+	display: none;
+}
+
+:is(.form_msg, .msg):is(.rouge, .vert):not(:empty) {
+	display: block;
+	padding: 9px 12px;
+	border-radius: var(--radius-s);
+	font-size: .9em;
+}
+
+:is(.form_msg, .msg).rouge:not(:empty) {
+	background-color: var(--red-soft);
+}
+
+:is(.form_msg, .msg).vert:not(:empty) {
+	background-color: var(--green-soft);
+}
+
+/* --- The choice cards (the method and the temperature, on the sign-up and settings screens) -------------------------------------
+** a radio or a checkbox hidden but still focusable, its label drawn as a card with its own round or square mark */
+
+.choice_group {
+	min-width: 0;
+	margin: 0 0 18px;
+	padding: 0;
+	border: 0;
+}
+
+.choice_group legend {
+	margin-bottom: 6px;
+	padding: 0;
+	font-weight: 600;
+}
+
+.choice {
+	position: relative;
+	margin: 8px 0;
+}
+
+.choice input {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.choice label {
+	display: block;
+	position: relative;
+	box-sizing: border-box;
+	margin: 0;
+	padding: 12px 14px 12px 48px;
+	border: 1.5px solid var(--line);
+	border-radius: var(--radius);
+	background-color: var(--field);
+	transition: border-color .15s, background-color .15s;
+}
+
+.choice label:hover {
+	border-color: var(--green);
+}
+
+.choice label::before {
+	content: "";
+	position: absolute;
+	left: 14px;
+	top: 14px;
+	box-sizing: border-box;
+	width: 20px;
+	height: 20px;
+	border: 2px solid var(--neutral);
+	border-radius: 50%;
+	background-color: var(--field);
+	color: var(--on-color);
+	font-size: 14px;
+	font-weight: bold;
+	line-height: 16px;
+	text-align: center;
+}
+
+.choice_check label::before {
+	border-radius: 5px;
+}
+
+.choice input:checked + label {
+	border-color: var(--green);
+	background-color: var(--green-soft);
+}
+
+.choice input:checked + label::before {
+	border-color: var(--green);
+	background-color: var(--green);
+	box-shadow: inset 0 0 0 3px var(--green-soft);
+}
+
+.choice_check input:checked + label::before {
+	content: "✓";
+	box-shadow: none;
+}
+
+.choice input:focus-visible + label {
+	outline: 2px solid var(--green);
+	outline-offset: 2px;
+}
+
+.choice_title,
+.choice_text,
+.choice_note {
+	display: block;
+}
+
+.choice_title {
+	font-weight: 600;
+}
+
+.choice_text {
+	margin-top: 3px;
+	font-size: .85em;
+	color: var(--muted);
+}
+
+.choice_note {
+	margin-top: 3px;
+	font-size: .75em;
+	font-style: italic;
+	color: var(--muted);
+}
+
+.choice_hint {
+	display: block;
+	margin: 10px 0 0;
+	padding: 4px 0 4px 12px;
+	border-left: 3px solid var(--green);
+}
+
+/* --- The captcha and the terms of service ------------------------------------------------------------------------------------- */
+
+/* the picture's frame is always there: an empty dashed one until the picture comes, so the form does not jump when it does */
+.captcha_box {
+	display: block;
+	box-sizing: content-box;
+	width: 180px;   /* the size of the server's picture (CAPTCHA_WIDTH x CAPTCHA_HEIGHT): the same box before and after it loads */
+	height: 60px;
+	margin-top: 8px;
+	border: 1px dashed var(--green);
+	border-radius: var(--radius-s);
+	background-color: var(--field);
+}
+
+.captcha_box:has(.captcha[src]) {
+	border-color: transparent;
+	background-color: transparent;
+}
+
+.captcha {
+	display: block;
+	border-radius: var(--radius-s);
+	cursor: pointer;
+}
+
+/* no picture yet: nothing to click, nothing to show (not even the alt text) */
+.captcha:not([src]) {
+	visibility: hidden;
+	cursor: default;
+}
+
+.input_user_account_totp {
+	max-width: 140px;
+	letter-spacing: .15em;
+	text-align: center;
+}
+
+/* the terms of service of the sign-up page: another site's page, in a frame that scrolls (its height cannot follow the page's) */
+.terms_frame {
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	height: 22em;
+	margin: 8px 0;
+	border: 1px solid var(--line);
+	border-radius: var(--radius);
+}
+
+/* --- Small things ------------------------------------------------------------------------------------------------------------- */
+
+.rouge {
+	color: var(--red-ink);
+}
+
+.vert {
+	color: var(--green-ink);
+}
+
+.err {
+	color: var(--red-ink);
+}
+
+.bold {
+	font-weight: bold;
+}
+
+.uppercase {
+	text-transform: uppercase;
+}
+
+.flou {
+	filter: blur(5px);
+	pointer-events: none;
 }
 
 .compat_notice {
@@ -293,8 +519,8 @@ label {
 	top: 0;
 	z-index: 1000;
 	padding: .8em 1em;
-	background: #fff3cd;
-	color: #664d03;
-	border-bottom: 2px solid #997404;
+	border-bottom: 2px solid var(--yellow-edge);
+	background-color: color-mix(in srgb, var(--yellow) 22%, var(--bg));
+	color: var(--ink);
 	font-weight: bold;
 }
