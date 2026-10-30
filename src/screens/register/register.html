@@ -66,10 +66,12 @@
 		<option data-i18n="register.birth_year_title" disabled selected class="placeholder"></option>
 	</select><br />
 	<br />
+	<label data-i18n="register.language_label" for="i_language"></label><br />
+	<select name="language" id="i_language"></select><br />
+	<br />
 	<label data-i18n="register.captcha_label" for="i_captcha"></label><br />
 	<input data-i18n-attr="placeholder:register.captcha_placeholder" name="captcha" id="i_captcha" type="text" maxlength="6" required autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" /><br />
 	<img data-i18n-attr="title:register.captcha_image_title;alt:register.captcha_image_alt" class="captcha" id="r_captcha" hidden />
-	<input type="hidden" name="language" id="i_language" value="FR" />
 	<input type="hidden" name="captchaToken" id="i_captcha_token" value="" /><br />
 	<span data-i18n="register.captcha_hint" class="label_info"></span><br />
 	<br />

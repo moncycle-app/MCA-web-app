@@ -14,7 +14,7 @@
 
 /* The start of the app: the address of the API (config.json), the catalog, the local copy when someone is signed in, then the router. */
 import { moncycle_config } from "/js/core/config.js";
-import { ready as i18n_ready } from "/js/core/i18n.js";
+import { ready as i18n_ready, resolve_language, set_language, requested_language, apply } from "/js/core/i18n.js";
 import { set_session_end_handler } from "/js/core/api.js";
 import { moncycle_store } from "/js/model/store.js";
 import { start, has_session } from "/js/core/router.js";
@@ -26,4 +26,16 @@ if (has_session()) {
 	moncycle_store.init();
 	moncycle_store.sync().catch(() => { });
 }
+
+// The language of the interface: the account's once there is one (the local copy has it from the last visit, a sync can change it), else the
+// browser's, else EN. French is the only catalog for now, so any other language falls back to it; the code path is the one a second catalog
+// will use. The screen on view is filled again when the language changes after it was drawn.
+async function follow_language() {
+	const wanted = resolve_language({account: (moncycle_store.account || {}).language, navigator_languages: navigator.languages}).toLowerCase();
+	if (wanted === requested_language()) return;
+	await set_language(wanted);
+	apply(document.getElementById("app"));
+}
+await follow_language();
+moncycle_store.on("changed", (change) => { if (change.account) follow_language(); });
 await start();

@@ -1,8 +1,10 @@
 /* The news of Tech 4 Fertility: the JSON file at NEWS_URL (the newsUrl of GET /api/v2/server_info), fetched and checked for the pages that
 ** show it (the banner of the timeline, the news of the settings). It is another site's data, so nothing of it is trusted: no cookie and
-** no referrer go out, the answer must be JSON and small, only the four strings of the French item are kept (length-capped; the pages draw
+** no referrer go out, the answer must be JSON and small, only the four strings of one item are kept (length-capped; the pages draw
 ** them with .text()), and the link must be https. A missing item (null), an item a month old or older and any failure give no item, and
 ** the details go to the console. */
+import { requested_language } from "/js/core/i18n.js";
+
 export const moncycle_news = {
 	max_age_days : 30,
 	max_chars : { title : 200, description : 600, url : 500 },
@@ -22,7 +24,7 @@ export const moncycle_news = {
 				let news;
 				try { news = JSON.parse(text); }
 				catch (e) { throw new Error("JSON parsing failed: " + e.message); }
-				return moncycle_news.item(news);
+				return moncycle_news.item(news, requested_language());
 			})
 			.catch(function (error) {
 				console.error("news: not shown (" + url + "):", error);
@@ -30,16 +32,18 @@ export const moncycle_news = {
 			});
 	},
 
-	// The French item of the file checked, or null when there is none to show (null, too old); throws on anything wrong.
-	item : function (news) {
+	// The item of the file for the language (the one of the interface, else the French one), checked, or null when there is none to show
+	// (null, too old); throws on anything wrong.
+	item : function (news, language = "fr") {
 		if (news === null || typeof news !== "object" || Array.isArray(news)) throw new Error("the file is not an object");
 		if (!("fr" in news)) throw new Error("no \"fr\" section");
-		let item = news.fr;
+		const section = Object.hasOwn(news, language) ? language : "fr";
+		let item = news[section];
 		if (item === null) {
-			console.info("news: the French section is null, nothing to show");
+			console.info("news: the \"" + section + "\" section is null, nothing to show");
 			return null;
 		}
-		if (typeof item !== "object" || Array.isArray(item)) throw new Error("the French section is not an object");
+		if (typeof item !== "object" || Array.isArray(item)) throw new Error("the \"" + section + "\" section is not an object");
 		let clean = {};
 		for (let key of ["title", "description", "url", "pubDate"]) {
 			if (typeof item[key] !== "string" || item[key].trim() === "") throw new Error("\"" + key + "\" is missing or not a text");

@@ -778,6 +778,7 @@
 	"register.password_confirm_label": "Confirmer (re-saisir) votre mot de passe:",
 	"register.password_confirm_placeholder": "Entrer une 2ème fois le mot de passe.",
 	"register.birth_year_label": "Année de naissance:",
+	"register.language_label": "Langue:",
 	"register.birth_year_title": "Sélectionner votre année de naissance",
 	"register.captcha_label": "Captcha:",
 	"register.captcha_placeholder": "Entrer les lettres ou chiffres affichés ci-dessous.",

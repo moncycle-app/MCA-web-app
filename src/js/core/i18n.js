@@ -34,9 +34,11 @@ export const FALLBACK = "fr";
 let fallback_catalog = {};
 let catalog = {};
 let language = FALLBACK;   // the catalog actually used
+let requested = FALLBACK;   // the language asked for, which can have no catalog (then French is used): what the news item follows
 const warned = new Set();
 
 export function current_language() { return language; }
+export function requested_language() { return requested; }
 export function locale() { return String(catalog["meta.locale"] || fallback_catalog["meta.locale"] || "fr-FR"); }
 
 async function fetch_catalog(code) {
@@ -50,6 +52,7 @@ async function fetch_catalog(code) {
 // Reads the French catalog (fallback), then the one of the language when it has one. Resolves with the language used.
 export async function load(code = FALLBACK) {
 	const wanted = String(code).toLowerCase();
+	requested = wanted;
 	if (Object.keys(fallback_catalog).length === 0) {
 		fallback_catalog = (await fetch_catalog(FALLBACK)) || {};
 		catalog = fallback_catalog;

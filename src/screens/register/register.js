@@ -17,7 +17,7 @@ import { moncycle_store } from "/js/model/store.js";
 import { moncycle_captcha } from "/js/services/captcha.js";
 import { api } from "/js/core/api.js";
 import { field, checked, el } from "/js/core/dom.js";
-import { t, t_map } from "/js/core/i18n.js";
+import { t, t_map, apply, set_language, language_from_browser, API_LANGUAGES } from "/js/core/i18n.js";
 import { has_session } from "/js/core/router.js";
 
 const by_id = (root, id) => root.querySelector("#" + id);
@@ -37,11 +37,35 @@ export const screen = {
 		moncycle_store.clear_storage();
 		// 5-year bands, the youngest ending 19 years back: someone born then is 18 or more whatever their birthday, so no band holds a minor
 		const year = new Date().getFullYear();
-		const bands = [];
-		for (let first = year - 23; first >= year - 100; first -= 5) {
-			bands.unshift(el("option", {value: first, text: t("register.birth_band", {from: first, to: first + 4})}));
-		}
-		by_id(root, "i_anaissance").append(...bands);
+		const birth_select = by_id(root, "i_anaissance");
+		// the bands are text of the catalog: drawn again when the language changes (the chosen one is kept)
+		const fill_bands = () => {
+			const chosen = birth_select.value;
+			birth_select.querySelectorAll("option[value]").forEach((option) => option.remove());
+			const bands = [];
+			for (let first = year - 23; first >= year - 100; first -= 5) {
+				bands.unshift(el("option", {value: first, text: t("register.birth_band", {from: first, to: first + 4})}));
+			}
+			birth_select.append(...bands);
+			birth_select.value = chosen;
+		};
+		fill_bands();
+
+		// the language of the account: each one under its own name (the same in every language), the browser's preselected, EN when it has none
+		// of the API's. Choosing one changes the language of the screen (French is the only catalog for now, so nothing changes yet).
+		const language_select = by_id(root, "i_language");
+		fetch("/i18n/languages.json", {credentials: "omit"}).then((answer) => answer.json()).then((names) => {
+			if (ctx.signal.aborted) return;
+			language_select.replaceChildren(...API_LANGUAGES.map((code) => el("option", {value: code, text: names[code] || code})));
+			language_select.value = language_from_browser(navigator.languages);
+		});
+		language_select.addEventListener("change", async () => {
+			await set_language(language_select.value.toLowerCase());
+			if (ctx.signal.aborted) return;
+			apply(root);
+			fill_bands();
+			document.title = screen.title();
+		}, listen);
 
 		// the terms of service are a page of the server's choice (TERMS_OF_SERVICE_URL, told by server_info): shown here in a frame, and in a tab of
 		// their own from the link below it. None told: no frame and no link, the box stays.

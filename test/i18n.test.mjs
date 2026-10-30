@@ -100,3 +100,14 @@ test("no catalog string holds markup", () => {
 	const html = Object.entries(catalog).filter(([key, value]) => !comment(key) && JSON.stringify(value).match(/<[a-z\/]/i));
 	assert.deepEqual(html.map(([key]) => key), []);
 });
+
+test("news: the item of the language, else the French one", async () => {
+	const { moncycle_news } = await import("/js/services/news.js");
+	const now = new Date().toISOString();
+	const item = (title) => ({ title, description: "d", url: "https://example.org/a", pubDate: now });
+	const news = { fr: item("Bonjour"), en: item("Hello") };
+	assert.equal(moncycle_news.item(news, "en").title, "Hello");
+	assert.equal(moncycle_news.item(news, "de").title, "Bonjour");
+	assert.equal(moncycle_news.item(news).title, "Bonjour");
+	assert.equal(moncycle_news.item({ fr: item("Bonjour"), en: null }, "en"), null);
+});
