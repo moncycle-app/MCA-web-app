@@ -295,7 +295,7 @@ export const moncycle_store = {
 		if (error.code === "validation_failed" && issues.length) return issues.map(function (issue) { return issue.message; }).join(" ");
 		return error.message || t("common.error_unknown");
 	},
-	// The French text a page keeps for a failure of the API. A validation_failed is described by its first issue: the first of
+	// The text, in the language of the interface, that a page keeps for a failure of the API. A validation_failed is described by its first issue: the first of
 	// map["field:code"], map["code"], map["field"] that exists (the code of the issue is specific: invalid_email,
 	// password_too_short...), then map[error code]; undefined when the page has no words for it.
 	error_pick : function (jqXHR, map) {

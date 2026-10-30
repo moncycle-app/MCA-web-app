@@ -19,7 +19,7 @@ import { settings_local_date } from "/screens/settings/common.js";
 ** 1. THE TEXT THE USER READS
 ** ======================================================================== */
 
-/* The texts are in the catalog (src/i18n/fr.json, keys settings.*); what is here only chooses and assembles them: plurals, the parts of a sentence. */
+/* The texts are in the catalog (src/i18n/*.json, keys settings.*); what is here only chooses and assembles them: plurals, the parts of a sentence. */
 export const settings_text = {
 	desc_confirm_delete_many : function (name, count) { return t("settings.desc_confirm_delete_many", {name: name, count: count}); },
 	desc_confirm_delete_one : function (name) { return t("settings.desc_confirm_delete_one", {name: name}); },

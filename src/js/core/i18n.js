@@ -12,8 +12,8 @@
 ** https://github.com/moncycle-app/backend-api-web-app
 */
 
-/* Every text a person reads comes from a catalog (src/i18n/<language>.json) through this module, and nothing else holds French (or any
-** language). See src/i18n/README.md.
+/* Every text a person reads comes from a catalog (src/i18n/<language>.json) through this module, and nothing else holds a language's
+** words. See src/i18n/README.md.
 **
 **  t(key, vars)         plain text; {name} is replaced by vars.name; a value {"one": "...", "other": "..."} is chosen from vars.count
 **  t_list(key)          an array of the catalog (the months, the weekdays)
@@ -22,19 +22,22 @@
 **                       data-i18n-attr="placeholder:key;title:key" sets attributes
 **  set_language(code)   changes the language of the catalog, then call apply() again
 **
-** French is the only catalog that ships, and the fallback for a language with no catalog and for a key missing from one. A key missing from
-** every catalog is warned about once in the console and shown as itself. Dates keep today's output (the names and the layouts are
-** catalog entries; Intl.DateTimeFormat would write "janv." for "jan"), numbers use Intl.NumberFormat with the catalog's "meta.locale".
+** Two catalogs ship, English and French. English is the default: the fallback for a language with no catalog and for a key missing from
+** one. A key missing from every catalog is warned about once in the console and shown as itself. Dates keep the catalog's output (the names
+** and the layouts are catalog entries; Intl.DateTimeFormat would write "janv." for "jan"), numbers use Intl.NumberFormat with the catalog's
+** "meta.locale".
 */
 
 
-export const API_LANGUAGES = ["EN", "FR", "ES", "DE", "IT", "PL", "PT"];
-export const FALLBACK = "fr";
+// The languages the interface is offered in, by their code in the API (the language of an account is one of EN FR ES DE IT PL PT): the ones
+// that have a catalog. Adding one is its catalog here and its code in this list.
+export const LANGUAGES = ["EN", "FR"];
+export const FALLBACK = "en";
 
 let fallback_catalog = {};
 let catalog = {};
 let language = FALLBACK;   // the catalog actually used
-let requested = FALLBACK;   // the language asked for, which can have no catalog (then French is used): what the news item follows
+let requested = FALLBACK;   // the language asked for, which can have no catalog (then English is used): what the news item follows
 const warned = new Set();
 
 export function current_language() { return language; }
@@ -49,14 +52,14 @@ async function fetch_catalog(code) {
 	catch (e) { return null; }
 }
 
-// Reads the French catalog (fallback), then the one of the language when it has one. Resolves with the language used.
+// Reads the English catalog (fallback), then the one of the language when it has one. Resolves with the language used.
 export async function load(code = FALLBACK) {
 	const wanted = String(code).toLowerCase();
 	requested = wanted;
 	if (Object.keys(fallback_catalog).length === 0) {
 		fallback_catalog = (await fetch_catalog(FALLBACK)) || {};
 		catalog = fallback_catalog;
-		if (Object.keys(fallback_catalog).length === 0) console.error("i18n: the French catalog could not be read");
+		if (Object.keys(fallback_catalog).length === 0) console.error("i18n: the English catalog could not be read");
 	}
 	if (wanted !== FALLBACK) {
 		const other = await fetch_catalog(wanted);
@@ -70,7 +73,7 @@ export async function load(code = FALLBACK) {
 	if (typeof document !== "undefined" && document.documentElement) document.documentElement.lang = language;
 	return language;
 }
-// The catalog given as an object (tests): it is the French one
+// The catalog given as an object (tests): it is the fallback one
 export function use_catalog(object, code = FALLBACK) {
 	fallback_catalog = object;
 	catalog = object;
@@ -79,20 +82,51 @@ export function use_catalog(object, code = FALLBACK) {
 export async function set_language(code) { return load(code); }
 
 // The language of the interface: the account's (once signed in), then the register select, then the first of navigator.languages that
-// the API knows, else EN. Returns an API code ("FR").
+// has a catalog, else EN. Returns an API code ("FR"). An account in a language with no catalog (ES...) is read in the browser's.
 export function resolve_language({account = null, selected = null, navigator_languages = []} = {}) {
 	for (const code of [account, selected]) {
-		if (code && API_LANGUAGES.includes(String(code).toUpperCase())) return String(code).toUpperCase();
+		if (code && LANGUAGES.includes(String(code).toUpperCase())) return String(code).toUpperCase();
 	}
 	return language_from_browser(navigator_languages);
 }
-// the first entry of navigator.languages whose 2-letter prefix is a language of the API, case-insensitive; EN when none is
+// the first entry of navigator.languages whose 2-letter prefix is a language of the interface, case-insensitive; EN when none is
 export function language_from_browser(navigator_languages) {
 	for (const entry of navigator_languages || []) {
 		const code = String(entry).slice(0, 2).toUpperCase();
-		if (API_LANGUAGES.includes(code)) return code;
+		if (LANGUAGES.includes(code)) return code;
 	}
 	return "EN";
+}
+
+/* --- the language selects -------------------------------------------------- */
+// The name of each language in that language (the same whatever the language of the interface): {EN: "English", FR: "Français", ...}
+let names = null;
+export function language_names() {
+	if (!names) {
+		names = fetch("/i18n/languages.json", {credentials: "omit"})
+			.then((answer) => (answer.ok ? answer.json() : {}))
+			.catch(() => ({}));
+	}
+	return names;
+}
+// Fills a <select> with the languages of the interface (the code of the API is the value) and selects `selected`, by default the one in use.
+// A language with no catalog that an account has is listed too, so that the select tells where the account stands.
+export async function fill_language_select(select, selected = requested.toUpperCase()) {
+	const known = await language_names();
+	const codes = LANGUAGES.includes(selected) ? LANGUAGES : [...LANGUAGES, selected];
+	select.replaceChildren(...codes.map((code) => new Option(known[code] || code, code)));
+	select.value = selected;
+}
+// The select of a screen of someone not signed in: it shows the language in use, and a choice changes it for this screen (`root` is filled
+// again, then `after()` draws what the script wrote itself) and for the screens after it. The choice is kept until the page is loaded again.
+export function attach_language_select({root, select, signal, after = () => { }}) {
+	fill_language_select(select);
+	select.addEventListener("change", async () => {
+		await set_language(select.value.toLowerCase());
+		if (signal.aborted) return;
+		apply(root);
+		after();
+	}, {signal});
 }
 
 function lookup(key) {
@@ -171,7 +205,7 @@ export function apply(root = document) {
 	});
 }
 
-// Numbers as a person writes them (36,5 in French)
+// Numbers as a person writes them (36,5 in French, 36.5 in English)
 export function format_number(value, options) {
 	return new Intl.NumberFormat(locale(), options).format(value);
 }

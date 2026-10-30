@@ -20,7 +20,7 @@
 import { moncycle_store } from "/js/model/store.js";
 import { api } from "/js/core/api.js";
 import { field } from "/js/core/dom.js";
-import { t, t_map } from "/js/core/i18n.js";
+import { t, t_map, attach_language_select } from "/js/core/i18n.js";
 
 const by_id = (root, id) => root.querySelector("#" + id);
 
@@ -46,6 +46,17 @@ export const screen = {
 		history.replaceState(null, "", location.pathname + location.search);
 		const purpose = fragment.get("purpose");
 		const page = Object.prototype.hasOwnProperty.call(purposes, purpose) ? purposes[purpose] : null;
+		// the texts of the purpose are written by the script: written again when the language is changed
+		const draw_texts = () => {
+			by_id(root, "et_title").textContent = text_of(purpose, "title");
+			by_id(root, "et_text").textContent = text_of(purpose, "text");
+			by_id(root, "but_et").value = text_of(purpose, "button");
+			if (!by_id(root, "et_done").hidden) by_id(root, "et_done_text").textContent = text_of(purpose, "done");
+		};
+		attach_language_select({root, select: by_id(root, "i_language"), signal: ctx.signal, after: () => {
+			document.title = screen.title();
+			if (page !== null) draw_texts();
+		}});
 		if (page === null || !fragment.get("t")) {
 			by_id(root, "et_invalid").hidden = false;
 			return;
@@ -53,9 +64,7 @@ export const screen = {
 
 		by_id(root, "i_purpose").value = purpose;
 		by_id(root, "i_token").value = fragment.get("t");
-		by_id(root, "et_title").textContent = text_of(purpose, "title");
-		by_id(root, "et_text").textContent = text_of(purpose, "text");
-		by_id(root, "but_et").value = text_of(purpose, "button");
+		draw_texts();
 		if (page.password) {
 			by_id(root, "et_password_block").hidden = false;
 			for (const id of ["i_new_password", "i_new_password_conf"]) by_id(root, id).required = true;

@@ -28,28 +28,59 @@ async function catch_registration(page) {
 
 test.describe("browser in German", () => {
 	test.use({ locale: "de-DE" });
-	test("the select shows the browser's language, and a change switches the catalog", async ({ page }) => {
+	test("English is the default: the select is the first field, offers EN and FR, and a change switches the screen", async ({ page }) => {
 		const seen = await catch_registration(page);
 		await fill_form(page);
-		await expect(page.locator("#i_language")).toHaveValue("DE");
-		expect(await page.locator("#i_language option").evaluateAll((options) => options.map((option) => option.value))).toEqual(["EN", "FR", "ES", "DE", "IT", "PL", "PT"]);
-		expect(await page.locator('#i_language option[value="DE"]').textContent()).toBe("Deutsch");
-		// no catalog but French: the screen stays French, with no missing key (the fixture fails the test on a warning)
-		await page.locator("#i_language").selectOption("IT");
+		await expect(page.locator("html")).toHaveAttribute("lang", "en");
+		await expect(page.locator("#i_language")).toHaveValue("EN");
+		expect(await page.locator("#i_language option").evaluateAll((options) => options.map((option) => option.value))).toEqual(["EN", "FR"]);
+		expect(await page.locator('#i_language option[value="FR"]').textContent()).toBe("Français");
+		// the first field of the form, before the nickname
+		expect(await page.locator("#f_registration").evaluate((form) => form.querySelector("select, input, textarea").id)).toBe("i_language");
+		await expect(page.locator("#f_registration label").first()).toHaveText("Language:");
+		await page.locator("#i_language").selectOption("FR");
 		await expect(page.locator("html")).toHaveAttribute("lang", "fr");
-		await expect(page.locator("#i_nickname")).toBeVisible();
+		await expect(page.locator("#f_registration label").first()).toHaveText("Langue:");
+		await expect(page).toHaveTitle("moncycle.app - inscription");
+		// what was typed is kept, the birth bands are written again in French
+		await expect(page.locator("#i_nickname")).toHaveValue("AB");
+		await expect(page.locator("#i_anaissance option").nth(1)).toContainText("entre");
 		await page.locator("#but_register").click();
 		await expect(page.locator("#register_ok")).toBeVisible();
-		expect(seen.body.language).toBe("IT");
+		expect(seen.body.language).toBe("FR");
+	});
+});
+
+test.describe("browser in French", () => {
+	test.use({ locale: "fr-FR" });
+	test("the select shows FR and the screen is French", async ({ page }) => {
+		const seen = await catch_registration(page);
+		await fill_form(page);
+		await expect(page.locator("#i_language")).toHaveValue("FR");
+		await expect(page.locator("html")).toHaveAttribute("lang", "fr");
+		await expect(page.locator("#f_registration label").first()).toHaveText("Langue:");
+		await page.locator("#but_register").click();
+		await expect(page.locator("#register_ok")).toBeVisible();
+		expect(seen.body.language).toBe("FR");
+	});
+});
+
+test.describe("browser in German then French", () => {
+	test("the first of the browser's languages that we have", async ({ page }) => {
+		await page.addInitScript(() => Object.defineProperty(navigator, "languages", { get: () => ["de-DE", "fr-CA", "en"] }));
+		await page.goto("/register");
+		await expect(page.locator("#i_language")).toHaveValue("FR");
+		await expect(page.locator("html")).toHaveAttribute("lang", "fr");
 	});
 });
 
 test.describe("browser in Japanese", () => {
 	test.use({ locale: "ja-JP" });
-	test("the select shows EN when the browser's language is not one of the API's", async ({ page }) => {
+	test("the select shows EN when the browser's language is not one we have", async ({ page }) => {
 		const seen = await catch_registration(page);
 		await fill_form(page);
 		await expect(page.locator("#i_language")).toHaveValue("EN");
+		await expect(page.locator("html")).toHaveAttribute("lang", "en");
 		await page.locator("#but_register").click();
 		await expect(page.locator("#register_ok")).toBeVisible();
 		expect(seen.body.language).toBe("EN");

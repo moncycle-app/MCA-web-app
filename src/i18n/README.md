@@ -1,7 +1,7 @@
 # Catalogs (src/i18n)
 
-Every text a person reads comes from `fr.json` (French, the only catalog that ships, and the fallback for any language or key that is
-missing). Nothing else holds a sentence: not the JavaScript, not the screens' HTML, except the two places a crawler or a browser
+Every text a person reads comes from a catalog: `en.json` (English, the default, and the fallback for any language or key that is
+missing) or `fr.json` (French). Nothing else holds a sentence: not the JavaScript, not the screens' HTML, except the two places a crawler or a browser
 without script reads (the link preview of `index.html` and its `<noscript>` message).
 
 ## The format
@@ -19,7 +19,7 @@ A group of keys under a prefix is read as a lookup by `t_map("settings.export_er
 Markup inside a sentence: the key holds `{end}` and the code gives `t_node(key, {end: node})` the element to put there. In a screen's
 HTML, a `data-i18n="key"` element lists its inline children with `data-slot="name"`: they take the place of `{name}`.
 
-`meta.locale` (`fr-FR`) is the locale of numbers (`Intl.NumberFormat`). Dates are not formatted by `Intl`: the names and the layouts are
+`meta.locale` (`en-GB`, `fr-FR`) is the locale of numbers (`Intl.NumberFormat`). Dates are not formatted by `Intl`: the names and the layouts are
 catalog entries (`calendar.date_short` is `{day} {month}`), so the output is the app's own.
 
 Not language, so not here: CSS class names, element ids, form field names, FertilityCare codes (`VL`, `10KL`, `X1`).
@@ -31,11 +31,24 @@ Not language, so not here: CSS class names, element ids, form field names, Ferti
 
 `i18n.apply(root)` fills them; the page does it once the catalog is read, and again when the language changes.
 
+## Which language is shown
+
+Only the languages in `LANGUAGES` (`js/core/i18n.js`: `EN`, `FR`) are offered; they are codes of the API, which knows seven (`EN FR ES DE
+IT PL PT`) and stores one per account. English is the default.
+
+- **Sign-up** (`/register`): the first field of the form is the language select. It starts on the language in use, which is the first of
+  `navigator.languages` that we have, else English. Choosing one changes the screen at once and is what `POST /register` carries.
+- **Not signed in** (`/auth`, `/verify_email`): the same language, with a select at the bottom of the screen. The choice lasts until the page
+  is loaded again, and carries over to the other screens of the visit (sign-in to sign-up).
+- **Signed in**: the language of the account (`language` of `GET /account`, from the local copy at once, then from the sync). An account in a
+  language we have no catalog for (`ES`...) is read in the browser's language, else English. The language select is in the settings
+  ("Mon suivi" / "About you"): it saves with `POST /account` and the screen is drawn again in the new language.
+
 ## Adding a language
 
-1. Copy `fr.json` to `<code>.json` (lower case, as in `en.json`) and translate the values. Keep every key and every `{placeholder}`.
-   Give each plural the forms its language needs. Set `meta.locale` (`en-US`). Keep the calendar layouts and names in your language.
-2. That is all: `languages.json` already lists the seven languages of the API with their endonyms (the same in every language), and the
-   language is chosen from the account, the sign-up form, then the browser (`i18n.resolve_language`). A key missing from your file shows
-   the French text.
-3. `npm test` checks that `fr.json` and the code agree (every key used exists, none is unused). Check your file with the same keys.
+1. Copy `en.json` to `<code>.json` (lower case) and translate the values. Keep every key and every `{placeholder}`.
+   Give each plural the forms its language needs. Set `meta.locale` (`es-ES`). Keep the calendar layouts and names in your language.
+2. Add its code to `LANGUAGES` in `js/core/i18n.js`. `languages.json` already holds the name of each of the seven languages of the API in
+   that language (the same in every language); the selects read it. A key missing from your file shows the English text.
+3. `npm test` checks that the catalogs and the code agree (every key used exists in `en.json` and `fr.json`, none is unused, both have the
+   same keys). Add your file to that test.

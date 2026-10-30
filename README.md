@@ -2,7 +2,7 @@
 
 The static web client of [moncycle.app](https://www.moncycle.app): HTML, CSS and JavaScript (jQuery, Chart.js), no build step. It talks to
 the moncycle.app API, whose contract is `moncycle_app_open_api.yaml` **in the backend repository** (this repository keeps no copy). The
-text of the pages is French.
+text of the pages is English by default, or French (`src/i18n/`; see `src/i18n/README.md` for how the language is chosen).
 
 ## Run it
 

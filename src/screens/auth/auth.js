@@ -18,7 +18,7 @@ import { moncycle_store } from "/js/model/store.js";
 import { moncycle_captcha } from "/js/services/captcha.js";
 import { api } from "/js/core/api.js";
 import { field } from "/js/core/dom.js";
-import { t, t_node, t_map } from "/js/core/i18n.js";
+import { t, t_node, t_map, attach_language_select } from "/js/core/i18n.js";
 import { has_session } from "/js/core/router.js";
 
 const by_id = (root, id) => root.querySelector("#" + id);
@@ -37,6 +37,8 @@ export const screen = {
 		moncycle_store.clear_storage();
 		// another tab signed in: this one follows
 		window.addEventListener("storage", () => { if (has_session()) location.replace("/"); }, listen);
+
+		attach_language_select({root, select: by_id(root, "i_language"), signal: ctx.signal, after: () => { document.title = screen.title(); }});
 
 		const form = by_id(root, "connexion_form");
 		const reset_form = by_id(root, "reset_form");

@@ -12,7 +12,8 @@
 ** https://github.com/moncycle-app/backend-api-web-app
 */
 import { moncycle_config } from "/js/core/config.js";
-import { t } from "/js/core/i18n.js";
+import { t, set_language, fill_language_select } from "/js/core/i18n.js";
+import { refresh } from "/js/core/router.js";
 import { by_id, delegate } from "/js/core/dom.js";
 import { settings_account_error, settings_api, settings_is_checked, settings_read, settings_say, settings_state, settings_sync_later } from "/screens/settings/common.js";
 import { settings_fill_notifications } from "/screens/settings/panels/notifications.js";
@@ -29,6 +30,7 @@ export const settings_autosave = {
 	temperature_tracking : function (form) { return settings_autosave.method(form); },
 	timeline_asc : function (form) { return {timelineAscending: settings_is_checked(form, "timeline_asc")}; },
 	age : function (form) { return {birthYear: parseInt(settings_read(form, "age"))}; },
+	language : function (form) { return {language: settings_read(form, "language")}; },
 	research : function (form) { return {research: settings_is_checked(form, "research")}; },
 	auto_mail_export : function (form) { return {autoMailExport: settings_is_checked(form, "auto_mail_export")}; },
 };
@@ -45,6 +47,8 @@ export function settings_save(payload, line) {
 			if (ret.data && ret.data.nickname && by_id("name")) by_id("name").textContent = ret.data.nickname;
 			settings_show_method_entries();
 			settings_sync_later();
+			// the language of the account is the one of the interface: the screen is drawn again in it
+			if (payload.language) return set_language(payload.language.toLowerCase()).then(refresh).catch(console.error);
 		}, function (failure) {
 			console.error(failure);
 			settings_say(line, "error", t("settings.not_saved") + settings_account_error(failure));
@@ -90,6 +94,7 @@ export function settings_fill_suivi(account) {
 	form.elements["timeline_asc"].checked = !!account.timelineAscending;
 	form.elements["research"].checked = !!account.research;
 	settings_fill_birth_years(form.elements["age"], account.birthYear);
+	fill_language_select(form.elements["language"], account.language);
 }
 
 // The years are asked in blocks of five: "entre 1985 et 1989", saved as 1985. The stored year can be any year (1992): it selects the block

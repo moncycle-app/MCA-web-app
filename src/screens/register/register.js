@@ -17,7 +17,7 @@ import { moncycle_store } from "/js/model/store.js";
 import { moncycle_captcha } from "/js/services/captcha.js";
 import { api } from "/js/core/api.js";
 import { field, checked, el } from "/js/core/dom.js";
-import { t, t_map, apply, set_language, language_from_browser, API_LANGUAGES } from "/js/core/i18n.js";
+import { t, t_map, attach_language_select } from "/js/core/i18n.js";
 import { has_session } from "/js/core/router.js";
 
 const by_id = (root, id) => root.querySelector("#" + id);
@@ -51,21 +51,14 @@ export const screen = {
 		};
 		fill_bands();
 
-		// the language of the account: each one under its own name (the same in every language), the browser's preselected, EN when it has none
-		// of the API's. Choosing one changes the language of the screen (French is the only catalog for now, so nothing changes yet).
-		const language_select = by_id(root, "i_language");
-		fetch("/i18n/languages.json", {credentials: "omit"}).then((answer) => answer.json()).then((names) => {
-			if (ctx.signal.aborted) return;
-			language_select.replaceChildren(...API_LANGUAGES.map((code) => el("option", {value: code, text: names[code] || code})));
-			language_select.value = language_from_browser(navigator.languages);
+		// the language of the account and of the screen, the first thing asked: the one in use (the browser's if we have it, else EN), each language
+		// under its own name. A choice changes the language of the screen at once, and the form carries it to POST /register.
+		attach_language_select({
+			root,
+			select: by_id(root, "i_language"),
+			signal: ctx.signal,
+			after: () => { fill_bands(); document.title = screen.title(); },
 		});
-		language_select.addEventListener("change", async () => {
-			await set_language(language_select.value.toLowerCase());
-			if (ctx.signal.aborted) return;
-			apply(root);
-			fill_bands();
-			document.title = screen.title();
-		}, listen);
 
 		// the terms of service are a page of the server's choice (TERMS_OF_SERVICE_URL, told by server_info): shown here in a frame, and in a tab of
 		// their own from the link below it. None told: no frame and no link, the box stays.

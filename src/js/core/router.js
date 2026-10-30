@@ -94,6 +94,12 @@ export function go(address, replace = false) {
 	return show(url, replace);
 }
 
+// Draws the screen on view again, from its markup: the language changed, and what its script wrote is still in the old one. No screen on view
+// (the start of the app): nothing to do.
+export function refresh() {
+	return current ? show(new URL(location.href), true) : Promise.resolve();
+}
+
 // A click on a link of the app is a change of screen; everything else (an export, another site, a modified click) is left to the browser.
 function on_click(event) {
 	if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;

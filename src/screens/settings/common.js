@@ -55,7 +55,7 @@ export function settings_leave_if_signed_out(failure) {
 	}
 }
 
-// What went wrong, in French, for any failed request: the page's own words for the error (`own_map`, keyed like moncycle_store.error_pick),
+// What went wrong, in the language of the interface, for any failed request: the page's own words for the error (`own_map`, keyed like moncycle_store.error_pick),
 // then the common ones, then no answer at all, then a server that did not speak the API's JSON, and at last the server's own message (English)
 // with every problem of a validation_failed. Never empty, and without a final full stop: the caller adds its own punctuation.
 export function settings_error(failure, own_map = {}) {

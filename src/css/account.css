@@ -216,3 +216,12 @@
 :where([data-screen="auth"], [data-screen="register"], [data-screen="verify_email"]) [hidden] {
 	display: none !important;
 }
+
+/* the language select at the bottom of the screens of someone not signed in */
+:where([data-screen="auth"], [data-screen="verify_email"]) .language_footer {
+	margin: 10px 0 40px;
+}
+
+:where([data-screen="auth"], [data-screen="verify_email"]) .language_footer select {
+	width: auto;
+}

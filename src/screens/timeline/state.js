@@ -49,7 +49,7 @@ export function reset_state() {
 	cycle_columns : 35,
 
 	mini_maxi : "mini",
-	// The news banner: the French item of the news file (js/news.js), once per page. "OK merci" hides the article whose link it was
+	// The news banner: the item of the news file in the language of the interface (js/news.js), once per page. "OK merci" hides the article whose link it was
 	// clicked on, so a new article shows again.
 	news_requested : false,
 	// a save less than this long ago reads "maintenant"

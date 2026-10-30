@@ -3,7 +3,7 @@
 Working notes for coding agents (and for people) changing the moncycle.app web app. The README says how to run it; the API it talks to
 (MCA-backend-and-API) has its own AGENT.md, and its OpenAPI file is the contract: this repository keeps no copy. The calls of the app
 are built with `moncycle_config.api_url(path)` from `src/config.json`; every path must be a path of that contract. Text a user reads
-stays French, code and comments English. The app is a **wellbeing** application: no "health" wording, no identity.
+comes from the catalogs of `src/i18n/` (English, the default, and French), code and comments are English. The app is a **wellbeing** application: no "health" wording, no identity.
 
 ## jQuery is deprecated
 
@@ -28,7 +28,7 @@ jQuery (`src/vendor/jquery.min.js`) stays in the project only until the existing
   is `document.createTextNode()`. The terms of service (`TERMS_OF_SERVICE_URL`, `termsOfServiceUrl`) come from outside and are never read by
   the page: a sandboxed iframe (`sandbox` without `allow-scripts`, `referrerpolicy="no-referrer"`), and the CSP's `frame-src` names its
   origin. The news banner is a JSON file (`NEWS_URL`, the `newsUrl` of `GET /api/v2/server_info`): `js/news.js` (`moncycle_news.load`) fetches it
-  (no cookie, no referrer), checks type, size, shape and the https link, and gives the French item, drawn with `.text()` only, by the
+  (no cookie, no referrer), checks type, size, shape and the https link, and gives the item of the interface's language (the French one when the file has none), drawn with `.text()` only, by the
   timeline's banner and the settings' "Tech 4 Fertility actualités" panel; on any problem there is no item and the details go to the console. "OK merci" hides the article (its link) it was clicked on.
 - **Forms carry the data, the script only submits it.** Every value sent to the remote API lives in an HTML `<form>` of the page: a
   visible field for what the user fills in, a hidden one (`<input type="hidden">`) for what the user need not know. The script catches

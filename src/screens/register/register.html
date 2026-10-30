@@ -12,6 +12,9 @@
 <div class="contennu" id="register_form">
 	<h2 data-i18n="register.form_title"></h2>
 	<form action="api/v2/register" method="post" id="f_registration"><br />
+	<label data-i18n="register.language_label" for="i_language"></label><br />
+	<select name="language" id="i_language"></select><br />
+	<br />
 	<label data-i18n="register.nickname_label" for="i_nickname"></label><br />
 	<input data-i18n-attr="placeholder:register.nickname_placeholder" name="nickname" type="text" maxlength="255" id="i_nickname" required /><br />
 	<span data-i18n="register.nickname_hint" class="label_info"></span><br />
@@ -65,9 +68,6 @@
 	<select name="birth_year" id="i_anaissance" required>
 		<option data-i18n="register.birth_year_title" disabled selected class="placeholder"></option>
 	</select><br />
-	<br />
-	<label data-i18n="register.language_label" for="i_language"></label><br />
-	<select name="language" id="i_language"></select><br />
 	<br />
 	<label data-i18n="register.captcha_label" for="i_captcha"></label><br />
 	<input data-i18n-attr="placeholder:register.captcha_placeholder" name="captcha" id="i_captcha" type="text" maxlength="6" required autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" /><br />
