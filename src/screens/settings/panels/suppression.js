@@ -11,32 +11,30 @@
 ** https://www.moncycle.app
 ** https://github.com/moncycle-app/backend-api-web-app
 */
-
 import { moncycle_store } from "/js/model/store.js";
+import { by_id } from "/js/core/dom.js";
 import { settings_api, settings_error, settings_read, settings_state } from "/screens/settings/common.js";
 import { settings_text } from "/screens/settings/text.js";
-
-const $ = globalThis.$;
 
 /* ===========================================================================
 ** 5h. SUPPRIMER MON COMPTE
 ** ======================================================================== */
 
 export function settings_setup_deletion() {
-	$("#f_suppr_user_account").on("submit", function (event) {
+	const form = by_id("f_suppr_user_account");
+	form.addEventListener("submit", function (event) {
 		event.preventDefault();
-		const form = $(this);
 		const nickname = settings_state.account.nickname;
 		if (!confirm(settings_text.delete_confirm(nickname))) return;
 		const payload = {password: settings_read(form, "pw_before_deletion")};
 		const code = settings_read(form, "code");
 		if (code) payload.code = code;
-		settings_api("POST", form.attr("action"), payload).done(function () {
+		settings_api("POST", form.getAttribute("action"), payload).then(function () {
 			moncycle_store.clear_storage();
 			alert(settings_text.delete_done(nickname));
 			window.location.replace("auth");
-		}).fail(function (jqXHR) {
-			alert(settings_text.delete_failed(nickname, settings_error(jqXHR)));
+		}, function (failure) {
+			alert(settings_text.delete_failed(nickname, settings_error(failure)));
 		});
 	});
 }

@@ -11,34 +11,32 @@
 ** https://www.moncycle.app
 ** https://github.com/moncycle-app/backend-api-web-app
 */
-
 import { t } from "/js/core/i18n.js";
+import { by_id } from "/js/core/dom.js";
 import { settings_api, settings_confirmed_change, settings_error, settings_form_say, settings_is_checked, settings_read, settings_say, settings_state } from "/screens/settings/common.js";
-
-const $ = globalThis.$;
 
 /* ===========================================================================
 ** 5e. CONNEXION ET SÉCURITÉ: login address, password, double authentication
 ** ======================================================================== */
 
 export function settings_fill_connexion(account) {
-	$("#login_email_shown").text(account.loginEmail);
-	$("#i_token_new_email").val(account.loginEmail);
+	by_id("login_email_shown").textContent = account.loginEmail;
+	by_id("i_token_new_email").value = account.loginEmail ?? "";
 	settings_show_totp_state(account.totpState == "active");
 }
 
-// the login address changes by a link sent to the NEW one: the change happens when it is used (verify_email.html)
+// the login address changes by a link sent to the NEW one: the change happens when it is used (the verify_email screen)
 export function settings_setup_login_email() {
-	const form = $("#form_login_email");
+	const form = by_id("form_login_email");
 	settings_confirmed_change(form, function () {
 		const payload = {loginEmail: settings_read(form, "new_login_email"), password: settings_read(form, "password")};
 		const code = settings_read(form, "code");
 		if (code) payload.code = code;
 		return payload;
 	}, function (ret) {
-		form.find("[type=password], [type=number]").val("");
+		form.querySelectorAll("[type=password], [type=number]").forEach(function (input) { input.value = ""; });
 		if ((ret.meta || {}).loginEmailLinkSent) {
-			form.find("[name=new_login_email]").val("");
+			form.elements["new_login_email"].value = "";
 			settings_form_say(form, "ok", t("settings.email_link_sent"));
 		}
 		else {
@@ -48,12 +46,12 @@ export function settings_setup_login_email() {
 }
 
 export function settings_setup_password() {
-	const form = $("#form_mdp_change");
+	const form = by_id("form_mdp_change");
 	settings_confirmed_change(form, function () {
 		return {password: settings_read(form, "old_pw"), newPassword: settings_read(form, "pw1"), logoutOtherDevices: settings_is_checked(form, "logout_other_devices")};
 	}, function () {
-		form.find("[type=password]").val("");
-		form.find("[name=logout_other_devices]").prop("checked", false);
+		form.querySelectorAll("[type=password]").forEach(function (input) { input.value = ""; });
+		form.elements["logout_other_devices"].checked = false;
 		settings_form_say(form, "ok", t("settings.password_changed"));
 	}, function () {
 		// the confirmation is checked here, before anything is sent
@@ -64,74 +62,78 @@ export function settings_setup_password() {
 /* --- the double authentication (TOTP): off -> set-up (QR code, then a code and the password) -> on -> off ---- */
 
 export function settings_show_totp_state(active) {
-	$("#totp_explications").prop("hidden", active);
-	$("#totp_miseenpalce").prop("hidden", true);
-	$("#totp_state").prop("hidden", !active);
+	by_id("totp_explications").hidden = active;
+	by_id("totp_miseenpalce").hidden = true;
+	by_id("totp_state").hidden = !active;
 	// the forms that sign in again ask for the code only when the account has one
-	$("#login_email_code_field, #token_new_code_wrapper, #deletion_code_field").prop("hidden", !active);
+	["login_email_code_field", "token_new_code_wrapper", "deletion_code_field"].forEach(function (id) { by_id(id).hidden = !active; });
 }
 
 export function settings_setup_totp() {
-	const error_line = $("#totp_err_msg");
+	const error_line = by_id("totp_err_msg");
 	let secret = "";
 
-	$("#f_totp_start").on("submit", function (event) {
+	by_id("f_totp_start").addEventListener("submit", function (event) {
 		event.preventDefault();
-		const button = $("#i_activate_otp").prop("disabled", true);
-		error_line.empty();
-		settings_api("POST", $(this).attr("action")).done(function (ret) {
+		const button = by_id("i_activate_otp");
+		button.disabled = true;
+		error_line.replaceChildren();
+		settings_api("POST", event.currentTarget.getAttribute("action")).then(function (ret) {
 			secret = ret.data.initSecret;
-			$("#totp_explications").prop("hidden", true);
-			$("#totp_miseenpalce").prop("hidden", false);
-			$("#totp_auto_conf").attr("href", ret.data.otpauth);
-			// the QR code is an image the server draws, not text a user stored
-			$("#totp_qrcode").html(ret.data.qrcode);
-			$("#totp_copy_secret_ok").text("");
-		}).fail(function (jqXHR) {
-			settings_say(error_line, "error", settings_error(jqXHR));
-		}).always(function () {
-			button.prop("disabled", false);
+			by_id("totp_explications").hidden = true;
+			by_id("totp_miseenpalce").hidden = false;
+			by_id("totp_auto_conf").setAttribute("href", ret.data.otpauth);
+			// the QR code is a picture the server draws (an SVG document): shown as an image, so that nothing in it is ever run
+			const picture = document.createElement("img");
+			picture.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(ret.data.qrcode);
+			picture.alt = t("settings.totp_qr_alt");
+			by_id("totp_qrcode").replaceChildren(picture);
+			by_id("totp_copy_secret_ok").textContent = "";
+		}, function (failure) {
+			settings_say(error_line, "error", settings_error(failure));
+		}).finally(function () {
+			button.disabled = false;
 		});
 	});
 
-	$("#totp_copy_secret").on("click", function () {
+	by_id("totp_copy_secret").addEventListener("click", function () {
 		navigator.clipboard.writeText(secret).then(function () {
-			$("#totp_copy_secret_ok").text(t("settings.token_copied"));
+			by_id("totp_copy_secret_ok").textContent = t("settings.token_copied");
 		}, function () {
-			$("#totp_copy_secret_ok").text(t("settings.totp_copy_failed"));
+			by_id("totp_copy_secret_ok").textContent = t("settings.totp_copy_failed");
 		});
 	});
 
 	// the code the application shows, and the password, confirm the set-up
-	$("#f_totp_validation").on("submit", function (event) {
+	by_id("f_totp_validation").addEventListener("submit", function (event) {
 		event.preventDefault();
-		const form = $(this);
+		const form = event.currentTarget;
 		const body = {code: settings_read(form, "tmp_code"), password: settings_read(form, "password")};
-		error_line.empty();
-		form[0].reset();
-		settings_api("POST", form.attr("action"), body).done(function (ret) {
+		error_line.replaceChildren();
+		form.reset();
+		settings_api("POST", form.getAttribute("action"), body).then(function (ret) {
 			if (ret.data.totpState == "active") {
 				settings_state.account.totpState = "active";
 				settings_show_totp_state(true);
 			}
-		}).fail(function (jqXHR) {
-			settings_say(error_line, "error", settings_error(jqXHR));
+		}, function (failure) {
+			settings_say(error_line, "error", settings_error(failure));
 		});
 	});
 
-	$("#f_totp_desac").on("submit", function (event) {
+	by_id("f_totp_desac").addEventListener("submit", function (event) {
 		event.preventDefault();
-		const form = $(this);
+		const form = event.currentTarget;
 		const body = {code: settings_read(form, "tmp_code")};
-		error_line.empty();
-		form[0].reset();
-		settings_api("POST", form.attr("action"), body).done(function (ret) {
+		error_line.replaceChildren();
+		form.reset();
+		settings_api("POST", form.getAttribute("action"), body).then(function (ret) {
 			if (ret.data.totpState == "disabled") {
 				settings_state.account.totpState = "disabled";
 				settings_show_totp_state(false);
 			}
-		}).fail(function (jqXHR) {
-			settings_say(error_line, "error", settings_error(jqXHR));
+		}, function (failure) {
+			settings_say(error_line, "error", settings_error(failure));
 		});
 	});
 }

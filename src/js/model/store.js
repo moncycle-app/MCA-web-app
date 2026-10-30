@@ -16,10 +16,10 @@ import { moncycle_config } from "/js/core/config.js";
 import { moncycle_compat } from "/js/core/compat.js";
 import { show_notice } from "/js/core/compat_notice.js";
 import { t } from "/js/core/i18n.js";
+import { send } from "/js/core/api.js";
 import { blank_day, is_blank, day_from_body, day_meta, codified_fields } from "/js/model/day.js";
 import { day_number, cycle_of, set_member, place_days } from "/js/model/cycles.js";
 
-const $ = globalThis.$;
 
 /* ===========================================================================
 ** THE LOCAL COPY OF THE ACCOUNT
@@ -239,9 +239,6 @@ export const moncycle_store = {
 			if (stamp !== null) localStorage.setItem(moncycle_store.keys.version, stamp);
 		}
 
-		$(document).ajaxError(function (event, jqXHR) {
-			if (moncycle_store.is_unauthorized(jqXHR)) moncycle_store.expire_session();
-		});
 		window.addEventListener("online", function () { moncycle_store.wake(true); });
 		window.addEventListener("focus", function () { moncycle_store.wake(false); });
 		document.addEventListener("visibilitychange", function () { if (!document.hidden) moncycle_store.wake(false); });
@@ -264,16 +261,13 @@ export const moncycle_store = {
 	/* -----------------------------------------------------------------------
 	** THE API
 	** ====================================================================== */
-	request : function (method, url, body) {
-		return new Promise(function (resolve, reject) {
-			$.ajax({
-				type : method,
-				url : url,
-				contentType : "application/json",
-				data : body === undefined ? undefined : JSON.stringify(body),
-				dataType : "json",
-				timeout : moncycle_store.request_timeout,
-			}).done(function (ret) { resolve(ret); }).fail(function (jqXHR) { reject(jqXHR); });
+	// A 401 `unauthorized` from any call of the store ends the session.
+	request : function (method, url, body, headers) {
+		return send(method, url, {body : body, headers : headers, timeout : moncycle_store.request_timeout}).then(function (answer) {
+			return answer.json;
+		}, function (failure) {
+			if (moncycle_store.is_unauthorized(failure)) moncycle_store.expire_session();
+			throw failure;
 		});
 	},
 	// A failure that a later try can mend: no answer, a server in trouble, or an answer that is not the
@@ -776,30 +770,29 @@ export const moncycle_store = {
 	// The account (GET /api/v2/account) before the timeline: the settings, and the ETag that makes the next time a 304 when nothing changed.
 	// The copy keeps the lists the timeline brings (merge) and the address of the news.
 	pull_account : function () {
-		return new Promise(function (resolve, reject) {
-			let known = moncycle_store.account && moncycle_store.account_etag;
-			$.ajax({
-				type : "GET",
-				url : moncycle_config.api_url("/account"),
-				dataType : "json",
-				headers : known ? {"If-None-Match" : moncycle_store.account_etag} : {},
-				timeout : moncycle_store.request_timeout,
-			}).done(function (ret, status, jqXHR) {
-				if (status == "notmodified" || !ret || !ret.data) return resolve(false);
-				let before = JSON.stringify(moncycle_store.account);
-				let old = moncycle_store.account || {};
-				moncycle_store.account = Object.assign({}, ret.data, {
-					allCyclesFirstDay : old.allCyclesFirstDay || [],
-					allObservationPausedDates : old.allObservationPausedDates || [],
-					newsUrl : moncycle_store.news_url,
-				});
-				moncycle_store.account_etag = jqXHR.getResponseHeader("ETag");
-				moncycle_store.write(moncycle_store.keys.account, moncycle_store.account);
-				moncycle_store.write(moncycle_store.keys.account_etag, moncycle_store.account_etag);
-				let changed = before !== JSON.stringify(moncycle_store.account);
-				if (changed) moncycle_store.emit("changed", {days : [], descriptions : false, account : true, source : "sync"});
-				resolve(changed);
-			}).fail(function (jqXHR) { reject(jqXHR); });
+		let known = moncycle_store.account && moncycle_store.account_etag;
+		return send("GET", moncycle_config.api_url("/account"), {
+			headers : known ? {"If-None-Match" : moncycle_store.account_etag} : {},
+			timeout : moncycle_store.request_timeout,
+		}).then(function (answer) {
+			let ret = answer.json;
+			if (answer.status == 304 || !ret || !ret.data) return false;
+			let before = JSON.stringify(moncycle_store.account);
+			let old = moncycle_store.account || {};
+			moncycle_store.account = Object.assign({}, ret.data, {
+				allCyclesFirstDay : old.allCyclesFirstDay || [],
+				allObservationPausedDates : old.allObservationPausedDates || [],
+				newsUrl : moncycle_store.news_url,
+			});
+			moncycle_store.account_etag = answer.headers.get("ETag");
+			moncycle_store.write(moncycle_store.keys.account, moncycle_store.account);
+			moncycle_store.write(moncycle_store.keys.account_etag, moncycle_store.account_etag);
+			let changed = before !== JSON.stringify(moncycle_store.account);
+			if (changed) moncycle_store.emit("changed", {days : [], descriptions : false, account : true, source : "sync"});
+			return changed;
+		}, function (failure) {
+			if (moncycle_store.is_unauthorized(failure)) moncycle_store.expire_session();
+			throw failure;
 		});
 	},
 	// The timeline since the cursor kept (none: from the start), in one answer.

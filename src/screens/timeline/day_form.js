@@ -11,24 +11,37 @@
 ** https://www.moncycle.app
 ** https://github.com/moncycle-app/backend-api-web-app
 */
-
 import { moncycle_store } from "/js/model/store.js";
 import * as dates from "/js/model/dates.js";
 import { t, date_short, date_long, clock } from "/js/core/i18n.js";
+import { by_id, el, display, is_hidden } from "/js/core/dom.js";
 import { day_to_api } from "/js/model/day.js";
 import { fc_note_regex } from "/js/model/fc_notation.js";
 import { type_from_int, unsent_description } from "/js/model/descriptions.js";
 import { day_timeline2recap } from "/screens/timeline/recap_view.js";
-import { day_timeline2timeline, trois_jours } from "/screens/timeline/cycle_view.js";
+import { day_timeline2timeline, hide_method_parts, trois_jours } from "/screens/timeline/cycle_view.js";
 import { graph_preparation_data } from "/screens/timeline/chart_view.js";
 import { rebuild, track_day, view_day } from "/screens/timeline/timeline.js";
 import { state } from "/screens/timeline/state.js";
 
-const $ = globalThis.$;
+// the siblings of a node that match a selector
+function siblings(node, selector) {
+	return [...node.parentElement.children].filter((other) => other !== node && other.matches(selector));
+}
+
+// check or uncheck the box of that id, if the page has one
+function check(id, checked = true) {
+	const box = by_id(id);
+	if (box) box.checked = checked;
+}
+
+// the values of the boxes ticked
+function checked_values(selector) {
+	return [...document.querySelectorAll(selector)].filter((box) => box.checked).map((box) => box.value);
+}
 
 export function bulk_show_hide() {
-	if ($("#bulk_form").is(":hidden")) $("#bulk_form").show();
-	else $("#bulk_form").hide();
+	display(by_id("bulk_form"), is_hidden(by_id("bulk_form")));
 }
 
 // The moment of the last save of the open day, at the foot of its form (empty for a day never saved).
@@ -36,13 +49,15 @@ export function bulk_show_hide() {
 export function show_last_write(day) {
 	clearTimeout(state.last_write_timer);
 	let moment = day.last_write ? new Date(day.last_write) : null;
-	let box = $("#jour_form_last_write").empty().attr("title", null);
+	let box = by_id("jour_form_last_write");
+	box.replaceChildren();
+	box.removeAttribute("title");
 	if (moment === null || isNaN(moment)) return;
 	let age = Date.now() - moment.getTime();
 	let recent = Math.abs(age) < state.last_write_recent_ms;
-	box.attr("title", t("timeline.last_write_title", {date: date_long(moment), clock: clock(moment)}));
-	box.append($("<span>").text(t("timeline.last_write_label")));
-	box.append($("<b>").text(recent ? t("timeline.last_write_now") : t("timeline.last_write", {date: date_short(moment), year: moment.getFullYear(), clock: clock(moment)})));
+	box.setAttribute("title", t("timeline.last_write_title", {date: date_long(moment), clock: clock(moment)}));
+	box.append(el("span", {text: t("timeline.last_write_label")}));
+	box.append(el("b", {text: recent ? t("timeline.last_write_now") : t("timeline.last_write", {date: date_short(moment), year: moment.getFullYear(), clock: clock(moment)})}));
 	if (recent) state.last_write_timer = setTimeout(() => show_last_write(day), state.last_write_recent_ms - age);
 }
 
@@ -53,120 +68,130 @@ export function refresh_day(date) {
 	let data = view_day(date, shown.cycle, shown.pos);
 	state.day_timeline[date] = data;
 	if (date == state.menu_opened_date) show_last_write(data);
-	$(`#o-${date}`).replaceWith(day_timeline2timeline(data));
-	$(`#ro-${date}`).replaceWith(day_timeline2recap(data));
+	by_id(`o-${date}`)?.replaceWith(day_timeline2timeline(data));
+	by_id(`ro-${date}`)?.replaceWith(day_timeline2recap(data));
 	track_day(date, data);
-	$(`.pas_${state.constante.nfp_method_name}`).css("display", "none");
+	hide_method_parts();
 	trois_jours();
 	graph_preparation_data({[date]: data});
 }
 
 export function go_blank_or_empty() {
-	if ($("#go_baby")[0].checked) $("#blank_or_empty").text(t("timeline.target_blank"));
-	else $("#blank_or_empty").text(t("timeline.target_empty"));
+	by_id("blank_or_empty").textContent = by_id("go_baby").checked ? t("timeline.target_blank") : t("timeline.target_empty");
 }
 
-// A chip is the description's name (see day_to_api); its id only ties the label to the box.
+// A chip is the description's name (see day_to_api); its id only ties the label to the box. A change of the box saves the day.
 export function render_desc_chip(sdesc, active) {
 	let id = "i_desc_" + state.desc_chip_count++;
-	return $("<span>", {"class": "desc_chip"})
-		.append($("<input>", {type: "checkbox", name: "description[]", value: sdesc.name, id: id, "class": "i_desc"}).prop("checked", !!active))
-		.append($("<label>", {"for": id}).text(sdesc.name));
+	const box = el("input", {type: "checkbox", name: "description[]", value: sdesc.name, id: id, class: "i_desc"});
+	box.checked = !!active;
+	box.addEventListener("change", submit_menu);
+	return el("span", {class: "desc_chip"}, box, el("label", {for: id, text: sdesc.name}));
 }
 
 // wires the "+ nouvelle sensation/observation" affordances in jour_form; there is no
 // equivalent for "autre" since that legacy type can't be created or converted to (see open_menu)
 export function bind_desc_add_forms() {
-	$(".desc_add_toggle").on("click", function () {
-		$(this).hide();
-		$(this).siblings(".desc_add_form").show().find(".desc_add_input").val("").focus();
+	document.querySelectorAll(".desc_add_toggle").forEach(function (toggle) {
+		toggle.addEventListener("click", function () {
+			display(toggle, false);
+			siblings(toggle, ".desc_add_form").forEach(function (form) {
+				display(form, true);
+				const input = form.querySelector(".desc_add_input");
+				input.value = "";
+				input.focus();
+			});
+		});
 	});
-	$(".desc_add_cancel").on("click", function () {
-		let form = $(this).closest(".desc_add_form");
-		form.hide().find(".desc_add_status").empty();
-		form.siblings(".desc_add_toggle").show();
+	document.querySelectorAll(".desc_add_cancel").forEach(function (cancel) {
+		cancel.addEventListener("click", function () {
+			const form = cancel.closest(".desc_add_form");
+			display(form, false);
+			form.querySelector(".desc_add_status").replaceChildren();
+			siblings(form, ".desc_add_toggle").forEach((toggle) => display(toggle, true));
+		});
 	});
-	$(".desc_add_submit").on("click", function () {
-		desc_add_submit($(this).closest(".desc_add_form"));
+	document.querySelectorAll(".desc_add_submit").forEach(function (submit) {
+		submit.addEventListener("click", function () { desc_add_submit(submit.closest(".desc_add_form")); });
 	});
-	$(".desc_add_input").on("keydown", function (event) {
-		if (event.key !== "Enter") return;
-		event.preventDefault();
-		desc_add_submit($(this).closest(".desc_add_form"));
+	document.querySelectorAll(".desc_add_input").forEach(function (input) {
+		input.addEventListener("keydown", function (event) {
+			if (event.key !== "Enter") return;
+			event.preventDefault();
+			desc_add_submit(input.closest(".desc_add_form"));
+		});
 	});
 }
 
 export function desc_add_submit(form) {
-	let desc_type = parseInt(form.data("desc-type"));
-	let name = form.find(".desc_add_input").val().trim().toLowerCase();
-	let status = form.find(".desc_add_status");
+	let desc_type = parseInt(form.dataset.descType);
+	const input = form.querySelector(".desc_add_input");
+	let name = input.value.trim().toLowerCase();
+	let status = form.querySelector(".desc_add_status");
 	if (name == "") return;
 	let duplicate = state.description.some(d => d.name.toLowerCase() == name);
 	if (duplicate) {
-		status.text(t("timeline.desc_add_duplicate", {name: name}));
+		status.textContent = t("timeline.desc_add_duplicate", {name: name});
 		return;
 	}
 	// kept here and sent when the server can be reached (js/store.js): the chip is there at once, offline too
 	moncycle_store.queue_description(name, type_from_int[desc_type], dates.now_in_utc());
 	let desc = state.description.find(d => d.name == name) || unsent_description(name, desc_type);
-	let chip = render_desc_chip(desc, false);
-	$(state.desc_container_id[desc_type]).append(chip);
-	chip.find(".i_desc").on("change", submit_menu);
-	form.find(".desc_add_input").val("").focus();
-	status.text(t("timeline.desc_add_saved"));
+	document.querySelector(state.desc_container_id[desc_type]).append(render_desc_chip(desc, false));
+	input.value = "";
+	input.focus();
+	status.textContent = t("timeline.desc_add_saved");
 }
 
 export function open_menu(e, date = null) {
 	let o_date;
 	if (date) o_date = dates.parse(date);
-	else o_date = dates.parse($(this).attr('date'));
+	else o_date = dates.parse(e.currentTarget.getAttribute('date'));
 	date = dates.str(o_date);
 	state.menu_opened_date = date;
 	let j = state.day_timeline[state.menu_opened_date];
 	let stamp = j.stamp? j.stamp : "";
-	$("#jour_form_titre").empty().append(document.createTextNode(date_long(o_date) + " "), $("<span>").text(t("timeline.day_number", {n: j.pos})));
+	by_id("jour_form_titre").replaceChildren(document.createTextNode(date_long(o_date) + " "), el("span", {text: t("timeline.day_number", {n: j.pos})}));
 	let arrow = {"next" : t("timeline.arrow_up"), "prev" : t("timeline.arrow_down")};
 	if (!state.timeline_asc) arrow = {"next" : t("timeline.arrow_down"), "prev" : t("timeline.arrow_up")};
-	$("#jour_form_prev").text(t("timeline.but_day_step", {arrow: arrow["prev"], day: t("timeline.day_number", {n: j.pos-1})}));
-	$("#jour_form_next").text(t("timeline.but_day_step", {arrow: arrow["next"], day: t("timeline.day_number", {n: j.pos+1})}));
+	by_id("jour_form_prev").textContent = t("timeline.but_day_step", {arrow: arrow["prev"], day: t("timeline.day_number", {n: j.pos-1})});
+	by_id("jour_form_next").textContent = t("timeline.but_day_step", {arrow: arrow["next"], day: t("timeline.day_number", {n: j.pos+1})});
 	let date_cursor = new Date(j.date_obs);
 	date_cursor.setDate(date_cursor.getDate()+1);
 	let str_date_cursor = dates.str(date_cursor);
 	if (state.day_timeline[str_date_cursor] && !state.day_timeline[str_date_cursor].cycle_1st_day) {
-		$("#jour_form_next").attr("date", str_date_cursor);
-		$("#jour_form_next").show();
+		by_id("jour_form_next").setAttribute("date", str_date_cursor);
+		display(by_id("jour_form_next"), true);
 	}
-	else $("#jour_form_next").hide();
+	else display(by_id("jour_form_next"), false);
 	date_cursor.setDate(date_cursor.getDate()-2);
 	str_date_cursor = dates.str(date_cursor);
 	if (j.pos-1 > 0 && state.day_timeline[str_date_cursor]) {
-		$("#jour_form_prev").attr("date", str_date_cursor);
-		$("#jour_form_prev").show();
+		by_id("jour_form_prev").setAttribute("date", str_date_cursor);
+		display(by_id("jour_form_prev"), true);
 	}
-	else $("#jour_form_prev").hide();
-	$("#jour_form #form_data")[0].reset();
-	$("#fc_msg").empty();
-	$("#jour_form_saving").hide();
-	$("#jour_form_saved").hide();
-	$("#jour_form_unsent").toggle(!!moncycle_store.pending[date]);
-	$("#form_date").val(j.date_obs);
+	else display(by_id("jour_form_prev"), false);
+	by_id("form_data").reset();
+	by_id("fc_msg").replaceChildren();
+	display(by_id("jour_form_saving"), false);
+	display(by_id("jour_form_saved"), false);
+	display(by_id("jour_form_unsent"), !!moncycle_store.pending[date]);
+	by_id("form_date").value = j.date_obs;
 	if (j.fc_score && (state.constante.nfp_method==3 || state.constante.nfp_method==4)) {
-		$("#form_fc").val(j.fc_score);
+		by_id("form_fc").value = j.fc_score;
 		fc_note2form();
 		fc_test_note();
 	}
-	if (j.fc_arrow && (state.constante.nfp_method==3 || state.constante.nfp_method==4)) $("#fc_f" + state.arrow_id[j.fc_arrow]).prop('checked', true);
+	if (j.fc_arrow && (state.constante.nfp_method==3 || state.constante.nfp_method==4)) check("fc_f" + state.arrow_id[j.fc_arrow]);
 	if (stamp.includes("BB") && stamp.length>2) {
-		$("#go_" + state.stamp_class["BB"]).prop('checked', true);
+		check("go_" + state.stamp_class["BB"]);
 		stamp = stamp.replace("BB", "");
 	}
-	if (state.stamp_class[stamp]) $("#go_" + state.stamp_class[stamp]).prop('checked', true);
+	if (state.stamp_class[stamp]) check("go_" + state.stamp_class[stamp]);
 	go_blank_or_empty();
-	$("#form_temp").val(j.temperature);
-	$("#form_time_temp_taken").val(j.time_temp_taken);
-	$("#menu_observation_container").empty();
-	$("#menu_sensation_container").empty();
-	$("#menu_autre_container").empty();
+	by_id("form_temp").value = j.temperature ?? "";
+	by_id("form_time_temp_taken").value = j.time_temp_taken ?? "";
+	Object.values(state.desc_container_id).forEach((selector) => document.querySelector(selector).replaceChildren());
 	let active_desc = [];
 	for (const adesc of j.description) active_desc.push(adesc.name);
 	let has_autre = false;
@@ -175,96 +200,101 @@ export function open_menu(e, date = null) {
 		let container_id = state.desc_container_id[sdesc.type];
 		if (!container_id) continue;
 		if (sdesc.type == 0) has_autre = true;
-		$(container_id).append(render_desc_chip(sdesc, active));
+		document.querySelector(container_id).append(render_desc_chip(sdesc, active));
 	}
 	// "autre" is a legacy type new descriptions can't be created as or converted to;
 	// only show the category when a legacy description of that type still exists
-	$("#desc_category_other").toggle(has_autre);
-	$(".i_desc").on("change", submit_menu);
-	$(".desc_add_form").hide().find(".desc_add_status").empty();
-	$(".desc_add_toggle").show();
-	if (j.cycle_1st_day) $("#ev_cycle_1st_day").prop('checked', true);
-	if (j.union_sex) $("#ev_union").prop('checked', true);
-	if (j.is_peak) $("#ev_is_peak").prop('checked', true);
-	if (j.counter_start && j.counter_start > 0) {
-		$("#ev_counter_start_actif").prop('checked', true);
-		$("#ev_counter_start_nb").val(j.counter_start);
-		$("#ev_hidden_counter_start").val(j.counter_start)
-	}
-	if (j.day_not_observed) $("#ev_jesaispas").prop('checked', true);
-	if (j.observation_paused) $("#ev_observation_paused").prop('checked', true);
-	$("#from_com").val(j.comment);
-	show_last_write(j);
-	$("html, body").css({
-		"overflow": "hidden",
-		"touch-action": "none"
+	display(by_id("desc_category_other"), has_autre);
+	document.querySelectorAll(".desc_add_form").forEach(function (form) {
+		display(form, false);
+		form.querySelector(".desc_add_status").replaceChildren();
 	});
-	$("#jour_form").show();
-	$("#jour_form").scrollTop(0);
-	$("#timeline").addClass("flou");
-	$("#recap").addClass("flou");
+	document.querySelectorAll(".desc_add_toggle").forEach((toggle) => display(toggle, true));
+	if (j.cycle_1st_day) check("ev_cycle_1st_day");
+	if (j.union_sex) check("ev_union");
+	if (j.is_peak) check("ev_is_peak");
+	if (j.counter_start && j.counter_start > 0) {
+		check("ev_counter_start_actif");
+		by_id("ev_counter_start_nb").value = j.counter_start;
+		by_id("ev_hidden_counter_start").value = j.counter_start;
+	}
+	if (j.day_not_observed) check("ev_jesaispas");
+	if (j.observation_paused) check("ev_observation_paused");
+	by_id("from_com").value = j.comment ?? "";
+	show_last_write(j);
+	[document.documentElement, document.body].forEach((page) => {
+		page.style.overflow = "hidden";
+		page.style.touchAction = "none";
+	});
+	display(by_id("jour_form"), true);
+	by_id("jour_form").scrollTop = 0;
+	by_id("timeline").classList.add("flou");
+	by_id("recap").classList.add("flou");
 }
 
 export function close_menu(e) {
-	$("html, body").css({
-		"overflow": "visible",
-		"touch-action": "auto"
+	[document.documentElement, document.body].forEach((page) => {
+		page.style.overflow = "visible";
+		page.style.touchAction = "auto";
 	});
-	$("#timeline").removeClass("flou");
-	$("#recap").removeClass("flou");
-	$("#bulk_form").hide();
-	$("#jour_form").hide();
+	by_id("timeline").classList.remove("flou");
+	by_id("recap").classList.remove("flou");
+	display(by_id("bulk_form"), false);
+	display(by_id("jour_form"), false);
 	state.menu_opened_date = null;
 	// the cycles moved while the form was open: draw them again from the copy
 	if (state.page_a_recharger) rebuild();
 }
 
+// The fields of the day form as {name, value}: what is ticked, filled or chosen, as a form sends them (a line break of a comment is CRLF)
+function day_form_fields(form) {
+	return Array.from(new FormData(form), ([name, value]) => ({name: name, value: typeof value === "string" ? value.replace(/\r?\n/g, "\r\n") : value}));
+}
+
 // The form is the full state of the day: it goes into the local copy at once and the page draws it
 // (store_changed), then the store sends it; day_sent / day_failed / show_sync_status say how it went.
-export function submit_menu() {
-	$("#jour_form_saving").show();
-	$("#jour_form_saved").hide();
-	$("#jour_form_unsent").hide();
-	$("#form_save_time").val(dates.now_in_utc());
-	if (this && this.id == "form_fc") fc_note2form();
+export function submit_menu(event) {
+	display(by_id("jour_form_saving"), true);
+	display(by_id("jour_form_saved"), false);
+	display(by_id("jour_form_unsent"), false);
+	by_id("form_save_time").value = dates.now_in_utc();
+	if (event && event.currentTarget && event.currentTarget.id == "form_fc") fc_note2form();
 	else fc_form2note();
 	fc_test_note();
-	if ($("#ev_counter_start_actif")[0].checked) $("#ev_hidden_counter_start").val($("#ev_counter_start_nb").val());
-	else $("#ev_hidden_counter_start").val(0);
-	let d = $("#jour_form #form_data").serializeArray();
+	if (by_id("ev_counter_start_actif").checked) by_id("ev_hidden_counter_start").value = by_id("ev_counter_start_nb").value;
+	else by_id("ev_hidden_counter_start").value = 0;
+	let d = day_form_fields(by_id("form_data"));
 	if (state.menu_opened_date != null) {
-		let j = 0;
-		while (j<d.length && d[j]["name"]!="date") j += 1;
-		if (j == d.length) d.push({"date" : state.menu_opened_date});
-		else d[j]["value"] = state.menu_opened_date;
+		let j = d.findIndex((field) => field.name == "date");
+		if (j < 0) d.push({name: "date", value: state.menu_opened_date});
+		else d[j].value = state.menu_opened_date;
 	}
 	moncycle_store.queue_day(day_to_api(d, state.description));
 }
 
 export function bulk_submit_menu() {
-	let nb_of_days = $("#i_bulk_count").val();
+	let nb_of_days = by_id("i_bulk_count").value;
 	if (nb_of_days > 365) {
 		alert(t("timeline.bulk_too_many_days", {max: 365}));
 		return;
 	}
 	let menu_current_date = state.menu_opened_date;
-	let menu_current_1st_day = $("#ev_cycle_1st_day").is(':checked');
+	let menu_current_1st_day = by_id("ev_cycle_1st_day").checked;
 	let date_cursor = dates.parse(menu_current_date);
 	let j = 1;
 	while (j <= nb_of_days && state.menu_opened_date!=state.day_timeline[menu_current_date]["cycle"]) {
 		date_cursor.setDate(date_cursor.getDate()-1);
 		state.menu_opened_date = dates.str(date_cursor);
-		if (state.menu_opened_date==state.day_timeline[menu_current_date]["cycle"]) $("#ev_cycle_1st_day").prop('checked', true);
-		else $("#ev_cycle_1st_day").prop('checked', false);
+		by_id("ev_cycle_1st_day").checked = state.menu_opened_date==state.day_timeline[menu_current_date]["cycle"];
 		submit_menu();
 		j += 1;
 	}
 	state.menu_opened_date = menu_current_date;
-	if (menu_current_1st_day) $("#ev_cycle_1st_day").prop('checked', true);
+	if (menu_current_1st_day) by_id("ev_cycle_1st_day").checked = true;
 }
 
 export function suppr_day_timeline() {
-	let date = dates.parse($("#form_date").val());
+	let date = dates.parse(by_id("form_date").value);
 	date.setHours(9);
 	if (confirm(t("timeline.confirm_delete_day", {date: date_long(date)}))) {
 		moncycle_store.queue_delete(dates.str(date), dates.now_in_utc());
@@ -273,52 +303,54 @@ export function suppr_day_timeline() {
 }
 
 export function fc_test_note() {
-	if (!$("#form_fc").val()) {
-		$("#fc_msg").empty();
+	const note = by_id("form_fc").value;
+	const message = by_id("fc_msg");
+	if (!note) {
+		message.replaceChildren();
 	}
-	else if (fc_note_regex.test($("#form_fc").val().toUpperCase())) {
-		$("#fc_msg").text(t("timeline.fc_syntax_valid"));
-		$("#fc_msg").addClass("vert");
-		$("#fc_msg").removeClass("rouge");
+	else if (fc_note_regex.test(note.toUpperCase())) {
+		message.textContent = t("timeline.fc_syntax_valid");
+		message.classList.add("vert");
+		message.classList.remove("rouge");
 	}
 	else {
-		$("#fc_msg").text(t("timeline.fc_syntax_invalid"));
-		$("#fc_msg").addClass("rouge");
-		$("#fc_msg").removeClass("vert");
+		message.textContent = t("timeline.fc_syntax_invalid");
+		message.classList.add("rouge");
+		message.classList.remove("vert");
 	}
 }
 
 export function fc_form2note() {
-	let note = $('input[name="fc_regles"]:checked').map(function(){ return this.value }).get().join("");
+	let note = checked_values('input[name="fc_regles"]').join("");
 	if (note.length && !note.endsWith(' ')) note += " ";
-	note += $('.fc_sens:checked').map(function(){ return this.value }).get().join("");
-	note += $(".fc_obs:checked").map(function(){ return this.value }).get().join("");
-	note += $('.fc_sens_L:checked').val() ? $('.fc_sens_L:checked').val() : "";
+	note += checked_values('.fc_sens').join("");
+	note += checked_values(".fc_obs").join("");
+	note += checked_values('.fc_sens_L')[0] || "";
 	if (note.length && !note.endsWith(' ')) note += " ";
-	note += $('input[name="fc_rec"]:checked').map(function(){ return this.value }).get().join("");
+	note += checked_values('input[name="fc_rec"]').join("");
 	if (note.length && !note.endsWith(' ')) note += " ";
-	note += $('input[name="fc_dou"]:checked').map(function(){ return this.value }).get().join("");
-	$("#form_fc").val(note.trim());
+	note += checked_values('input[name="fc_dou"]').join("");
+	by_id("form_fc").value = note.trim();
 	return note;
 }
 
 export function fc_note2form() {
-	let note = $("#form_fc").val().trim().toUpperCase();
+	let note = by_id("form_fc").value.trim().toUpperCase();
 	if (note.startsWith('L') && !note.startsWith('LAP')) {
-		$("#fc_rl").prop("checked", true);
+		check("fc_rl");
 		note = note.slice(1);
 	}
 	else {
-		$("#fc_rl").prop("checked", false);
+		check("fc_rl", false);
 	}
 	['10DL', '10SL', '10WL', 'RAP', 'LAP', 'X1', 'X2', 'X3', 'AD', 'AP', 'VL', 'VH', '2W', '10', 'H', 'M', 'L', 'B', '0', '2', '4', '6', '8', 'C', 'G', 'K', 'P', 'Y', 'R'].forEach(c => {
 		if (note.includes(c)) {
-			$("#fc_" + c.toLowerCase()).prop("checked", true);
+			check("fc_" + c.toLowerCase());
 			note = note.replace(c,'');
 		}
-		else $("#fc_" + c.toLowerCase()).prop("checked", false);
+		else check("fc_" + c.toLowerCase(), false);
 	});
-	note = $("#form_fc").val().trim().toUpperCase();
+	note = by_id("form_fc").value.trim().toUpperCase();
 	['10DL', '10SL', '10WL', '10', '2W'].forEach(c => {
 		note = note.replace(c,'');
 	});

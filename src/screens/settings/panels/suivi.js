@@ -11,14 +11,12 @@
 ** https://www.moncycle.app
 ** https://github.com/moncycle-app/backend-api-web-app
 */
-
 import { moncycle_config } from "/js/core/config.js";
 import { t } from "/js/core/i18n.js";
+import { by_id, delegate } from "/js/core/dom.js";
 import { settings_account_error, settings_api, settings_is_checked, settings_read, settings_say, settings_state, settings_sync_later } from "/screens/settings/common.js";
 import { settings_fill_notifications } from "/screens/settings/panels/notifications.js";
 import { settings_show_method_entries } from "/screens/settings/settings.js";
-
-const $ = globalThis.$;
 
 /* ===========================================================================
 ** 5a. MON SUIVI: nickname, method, temperature, display, birth year, research. Each control saves by itself.
@@ -44,50 +42,54 @@ export function settings_save(payload, line) {
 		return settings_api("POST", moncycle_config.api_url("/account"), payload).then(function (ret) {
 			settings_say(line, "ok", t("settings.saved"), true);
 			Object.assign(settings_state.account, ret.data || {});
-			if (ret.data && ret.data.nickname) $("#name").text(ret.data.nickname);
+			if (ret.data && ret.data.nickname && by_id("name")) by_id("name").textContent = ret.data.nickname;
 			settings_show_method_entries();
 			settings_sync_later();
-		}, function (jqXHR) {
-			console.error(jqXHR);
-			settings_say(line, "error", t("settings.not_saved") + settings_account_error(jqXHR));
+		}, function (failure) {
+			console.error(failure);
+			settings_say(line, "error", t("settings.not_saved") + settings_account_error(failure));
 			// the controls show what is saved, not what was refused
-			settings_fill_suivi(settings_state.account);
-			settings_fill_notifications(settings_state.account);
+			if (by_id("f_suivi")) {
+				settings_fill_suivi(settings_state.account);
+				settings_fill_notifications(settings_state.account);
+			}
 		});
 	});
 }
 
 export function settings_autosave_changed(event) {
 	const field = event.target;
-	const form = $(field.form);
+	const form = field.form;
 	// a nickname being typed is not saved while it is empty
 	if (!field.checkValidity()) return;
 	const build_payload = settings_autosave[field.name];
 	// its answer goes in the line of its own group (the nearest fieldset, field or form that has one)
-	if (build_payload) settings_save(build_payload(form), $(field).closest("fieldset, .field, form").find(".form_msg").first());
+	if (build_payload) settings_save(build_payload(form), field.closest("fieldset, .field, form").querySelector(".form_msg"));
 }
 
 export function settings_setup_autosave() {
-	const forms = $("#f_suivi, #f_auto_mail");
-	// (the nickname is saved as it is typed, below, not again when the field is left)
-	forms.on("change", "input:not([name=nickname]), select", settings_autosave_changed);
+	const forms = [by_id("f_suivi"), by_id("f_auto_mail")];
+	forms.forEach(function (form) {
+		// (the nickname is saved as it is typed, below, not again when the field is left)
+		delegate(form, "change", "input:not([name=nickname]), select", settings_autosave_changed);
+		form.addEventListener("submit", function (event) { event.preventDefault(); });
+	});
 	// the nickname is saved as it is typed, once the typing pauses
 	let timer = null;
-	$("#i_nickname").on("input", function (event) {
+	by_id("i_nickname").addEventListener("input", function (event) {
 		clearTimeout(timer);
 		timer = setTimeout(function () { settings_autosave_changed(event); }, 600);
 	});
-	forms.on("submit", function (event) { event.preventDefault(); });
 }
 
 export function settings_fill_suivi(account) {
-	const form = $("#f_suivi");
-	form.find("[name=nickname]").val(account.nickname);
-	form.find("[name=method]").each(function () { this.checked = this.value == account.method; });
-	form.find("[name=temperature_tracking]").prop("checked", !!account.temperatureTracking);
-	form.find("[name=timeline_asc]").prop("checked", !!account.timelineAscending);
-	form.find("[name=research]").prop("checked", !!account.research);
-	settings_fill_birth_years(form.find("[name=age]"), account.birthYear);
+	const form = by_id("f_suivi");
+	form.elements["nickname"].value = account.nickname ?? "";
+	form.querySelectorAll("[name=method]").forEach(function (radio) { radio.checked = radio.value == account.method; });
+	form.elements["temperature_tracking"].checked = !!account.temperatureTracking;
+	form.elements["timeline_asc"].checked = !!account.timelineAscending;
+	form.elements["research"].checked = !!account.research;
+	settings_fill_birth_years(form.elements["age"], account.birthYear);
 }
 
 // The years are asked in blocks of five: "entre 1985 et 1989", saved as 1985. The stored year can be any year (1992): it selects the block
@@ -100,9 +102,12 @@ export function settings_fill_birth_years(select, birth_year) {
 	if (own_block !== null && !blocks.includes(own_block)) blocks.push(own_block);
 	blocks.sort(function (a, b) { return a - b; });
 
-	select.empty();
-	if (own_block === null) select.append(new Option(t("settings.birth_year_choose"), "", true, true)).find("option:first").prop("disabled", true);
+	select.replaceChildren();
+	if (own_block === null) {
+		select.append(new Option(t("settings.birth_year_choose"), "", true, true));
+		select.firstElementChild.disabled = true;
+	}
 	blocks.forEach(function (year) {
-		select.append(new Option(`entre ${year} et ${year + 4}`, year, false, year == own_block));
+		select.append(new Option(t("settings.birth_band", {from: year, to: year + 4}), year, false, year == own_block));
 	});
 }

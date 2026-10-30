@@ -16,16 +16,15 @@ import { moncycle_store } from "/js/model/store.js";
 import { moncycle_news } from "/js/services/news.js";
 import * as dates from "/js/model/dates.js";
 import { t, t_map } from "/js/core/i18n.js";
+import { by_id, delegate, display, el } from "/js/core/dom.js";
 import { blank_day, day_from_api } from "/js/model/day.js";
 import { constante_from_api, cycle_line_length, cycle_of, cycle_span, structure_of } from "/js/model/cycles.js";
 import { description_from_api } from "/js/model/descriptions.js";
 import { bind_desc_add_forms, bulk_show_hide, bulk_submit_menu, close_menu, fc_note2form, go_blank_or_empty, open_menu, refresh_day, submit_menu, suppr_day_timeline } from "/screens/timeline/day_form.js";
 import { cycle2graph, graph_preparation_data, graph_update } from "/screens/timeline/chart_view.js";
 import { cycle2recap, day_timeline2recap } from "/screens/timeline/recap_view.js";
-import { cycle2timeline, day_timeline2timeline, form_nouveau_cycle, trois_jours } from "/screens/timeline/cycle_view.js";
+import { cycle2timeline, day_timeline2timeline, form_nouveau_cycle, hide_method_parts, trois_jours } from "/screens/timeline/cycle_view.js";
 import { state, reset_state } from "/screens/timeline/state.js";
-
-const $ = globalThis.$;
 
 // the sentence of a refused or failed export (the API's own words are English)
 function export_failed_text(failure) {
@@ -43,8 +42,8 @@ function export_failed_text(failure) {
 ** that follows brings what changed elsewhere. A change of the user is applied to the copy first,
 ** then sent: the page shows an error when the server could not take it.
 ** ====================================================================== */
-// What lives as long as the screen: the store's listeners (each gives back its way to stop) and the handlers on the window and the document,
-// all under the namespace .timeline
+// What lives as long as the screen: the store's listeners (each gives back its way to stop). The handlers on the window and the document
+// end with the screen's signal.
 let stop_listening = [];
 
 function start_timeline(ctx) {
@@ -57,56 +56,56 @@ function start_timeline(ctx) {
 		moncycle_store.on("sent", day_sent),
 		moncycle_store.on("failed", day_failed),
 	];
-	$(document).on("click.timeline", ".cycle_options a", download_export);
-	$("#charger_cycle").click(charger_cycle);
-	$("#jour_form_close").click(close_menu);
-	$("#jour_form_submit").click(submit_menu);
-	$("#jour_form_next").click(open_menu);
-	$("#jour_form_prev").click(open_menu);
-	$("#bulk_but_submit").click(bulk_submit_menu);
-	$("#jour_form_bulk_but").click(bulk_show_hide);
-	$("#jour_form #form_data input:not(.desc_add_input), #jour_form textarea").on("change", submit_menu);
-	$("#form_fc").on("keyup", fc_note2form);
-	$("#jour_form_suppr").click(suppr_day_timeline);
-	$("#sync_status").on("click", "#sync_retry", function () { moncycle_store.sync().catch(function () { }); });
-	$("#sync_status").on("click", "#sync_dismiss", moncycle_store.dismiss_error);
+	const signal = ctx.signal;
+	delegate(document, "click", ".cycle_options a", download_export, {signal});
+	by_id("charger_cycle").addEventListener("click", charger_cycle);
+	by_id("jour_form_close").addEventListener("click", close_menu);
+	by_id("jour_form_submit").addEventListener("click", submit_menu);
+	by_id("jour_form_next").addEventListener("click", open_menu);
+	by_id("jour_form_prev").addEventListener("click", open_menu);
+	by_id("bulk_but_submit").addEventListener("click", bulk_submit_menu);
+	by_id("jour_form_bulk_but").addEventListener("click", bulk_show_hide);
+	document.querySelectorAll("#jour_form #form_data input:not(.desc_add_input), #jour_form textarea").forEach(function (field) {
+		field.addEventListener("change", submit_menu);
+	});
+	by_id("form_fc").addEventListener("keyup", fc_note2form);
+	by_id("jour_form_suppr").addEventListener("click", suppr_day_timeline);
+	delegate(by_id("sync_status"), "click", "#sync_retry", function () { moncycle_store.sync().catch(function () { }); });
+	delegate(by_id("sync_status"), "click", "#sync_dismiss", moncycle_store.dismiss_error);
 	bind_desc_add_forms();
-	$("#but_mini_maxi").click(mini_maxi_switch);
-	$("#go_baby").click(go_blank_or_empty);
+	by_id("but_mini_maxi").addEventListener("click", mini_maxi_switch);
+	by_id("go_baby").addEventListener("click", go_blank_or_empty);
 	if (localStorage.mini_maxi == "mini") state.mini_maxi = "maxi";
 	else state.mini_maxi = "mini";
 	mini_maxi_switch();
-	$("#form_time_temp_taken").focus(function () {
-		if($("#form_time_temp_taken").val().trim().length==0) {
+	by_id("form_time_temp_taken").addEventListener("focus", function (event) {
+		if (event.currentTarget.value.trim().length==0) {
 			let d  = new Date();
 			let h = d.getHours();
 			let m = d.getMinutes();
-			$("#form_time_temp_taken").val((h<10 ? "0"+h : h) + ":" + (m<10 ? "0"+m : m));
+			event.currentTarget.value = (h<10 ? "0"+h : h) + ":" + (m<10 ? "0"+m : m);
 			submit_menu();
 		}
 	});
-	$(window).on("scroll.timeline", function() {
-		if(state.timeline_asc && $(window).scrollTop() + $(window).height() +50 >= $(document).height()){
+	window.addEventListener("scroll", function () {
+		if (state.timeline_asc && window.scrollY + window.innerHeight + 50 >= page_height()) {
 			charger_cycle();
 		}
-	});
-	$(window).on("focus.timeline", function() {
-		if (dates.str(dates.now()) != state.date_loaded) location.reload(false);
-		return false;
-	});
+	}, {signal});
+	window.addEventListener("focus", function () {
+		if (dates.str(dates.now()) != state.date_loaded) location.reload();
+	}, {signal});
 	// another tab wrote its copy: nothing to do. It logged out, or logged in as someone else: leave.
 	window.addEventListener("storage", function (event) {
 		if (event.key !== null && event.key != "auth") return;
 		if (localStorage.auth != state.constante.no_user_account) window.location.href = window.location.href;
-	}, {signal: ctx.signal});
+	}, {signal});
 	if (moncycle_store.account) show_account();
 }
 
 function stop_timeline() {
 	stop_listening.forEach((stop) => stop());
 	stop_listening = [];
-	$(document).off(".timeline");
-	$(window).off(".timeline");
 	clearTimeout(state.last_write_timer);
 	Object.values(state.graphs).forEach((graph) => graph.destroy && graph.destroy());
 }
@@ -137,18 +136,17 @@ export function show_header() {
 	state.description = moncycle_store.all_descriptions().map(description_from_api);
 	document.title = t("timeline.page_title", {name: state.constante.nickname});
 	// the name is free text: text first, then the badge (markup of ours)
-	$("#name").text(state.constante.nickname);
-	if (state.constante.sponsor) $("#name").append(document.createTextNode(t("timeline.sponsor_badge")));
+	by_id("name").textContent = state.constante.nickname;
+	if (state.constante.sponsor) by_id("name").append(document.createTextNode(t("timeline.sponsor_badge")));
 	charger_actu();
-	$(".main_button").css("display","inline-block");
-	if (state.timeline_asc) $("#charger_cycle").hide();
-	else $("#charger_cycle").show();
+	document.querySelectorAll(".main_button").forEach(function (button) { button.style.display = "inline-block"; });
+	display(by_id("charger_cycle"), !state.timeline_asc);
 }
 
 // Draws every cycle again from the copy (the cycles changed, or the way they are laid out).
 export function rebuild() {
 	state.page_a_recharger = false;
-	$.each(state.graphs, function (id, graph) { graph.destroy(); });
+	Object.values(state.graphs).forEach(function (graph) { graph.destroy(); });
 	state.graphs = {};
 	state.graph_data = {};
 	state.sommets = [];
@@ -157,9 +155,9 @@ export function rebuild() {
 	state.cycle_curseur = 0;
 	state.form_nouveau_cycle_active = false;
 	state.cycle_title_opened = null;
-	$("#timeline").empty();
-	$("#recap").empty();
-	$("#charger_cycle").prop("disabled", false);
+	by_id("timeline").replaceChildren();
+	by_id("recap").replaceChildren();
+	by_id("charger_cycle").disabled = false;
 	show_account();
 }
 
@@ -189,15 +187,15 @@ export function day_sent(detail) {
 	if (state.menu_opened_date === null || moncycle_store.pending[state.menu_opened_date]) return;
 	// the bulk form saves the days before the open one: nothing of the open day is waiting once the queue is empty
 	if (detail.date != state.menu_opened_date && Object.keys(moncycle_store.pending).length > 0) return;
-	$("#jour_form_saving").hide();
-	$("#jour_form_unsent").hide();
-	$("#jour_form_saved").show();
+	display(by_id("jour_form_saving"), false);
+	display(by_id("jour_form_unsent"), false);
+	display(by_id("jour_form_saved"), true);
 }
 
 export function day_failed(detail) {
 	if (detail.date != state.menu_opened_date && Object.keys(moncycle_store.pending).length > 0) return;
-	$("#jour_form_saving").hide();
-	$("#jour_form_unsent").hide();
+	display(by_id("jour_form_saving"), false);
+	display(by_id("jour_form_unsent"), false);
 }
 
 // The bar at the bottom of the page, and the indicator of the day form. Silent unless something needs the user.
@@ -210,44 +208,53 @@ export function show_sync_status(status) {
 		text = status.error.kind == "network" ? t("timeline.sync_offline") : t("timeline.sync_server_error");
 		css = "sync_warning";
 	}
-	$("#sync_status").empty().attr("class", "sync_status " + css).toggle(text != "");
+	const bar = by_id("sync_status");
+	bar.replaceChildren();
+	bar.className = "sync_status " + css;
+	display(bar, text != "");
 	if (text != "") {
-		$("#sync_status").append($("<span>").text(text));
-		if (status.error && status.error.kind == "rejected") $("#sync_status").append(" ").append($("<button>", {type: "button", id: "sync_dismiss"}).text(t("timeline.sync_dismiss")));
-		else $("#sync_status").append(" ").append($("<button>", {type: "button", id: "sync_retry"}).text(t("timeline.sync_retry")));
+		bar.append(el("span", {text: text}), " ");
+		if (status.error && status.error.kind == "rejected") bar.append(el("button", {type: "button", id: "sync_dismiss", text: t("timeline.sync_dismiss")}));
+		else bar.append(el("button", {type: "button", id: "sync_retry", text: t("timeline.sync_retry")}));
 	}
 	let unsent = status.pending > 0 && status.error && status.error.kind != "rejected";
-	if (unsent) $("#jour_form_saving").hide();
-	$("#jour_form_unsent").toggle(!!(unsent && state.menu_opened_date !== null && moncycle_store.pending[state.menu_opened_date]));
+	if (unsent) display(by_id("jour_form_saving"), false);
+	display(by_id("jour_form_unsent"), !!(unsent && state.menu_opened_date !== null && moncycle_store.pending[state.menu_opened_date]));
+}
+
+// the height of the whole page, as the browser lays it out
+function page_height() {
+	const page = document.documentElement;
+	return Math.max(document.body.scrollHeight, page.scrollHeight, document.body.offsetHeight, page.offsetHeight, page.clientHeight);
 }
 
 export function mini_maxi_switch() {
 	if (state.mini_maxi=="maxi"){
-		$("#timeline").hide();
-		$("#recap").show();
-		$("#but_mini_maxi").text(t("timeline.but_view_maxi"));
+		display(by_id("timeline"), false);
+		display(by_id("recap"), true);
+		by_id("but_mini_maxi").textContent = t("timeline.but_view_maxi");
 		state.mini_maxi="mini";
 		localStorage.mini_maxi="mini";
 	}
 	else {
-		$("#timeline").show();
-		$("#recap").hide();
-		$("#but_mini_maxi").text(t("timeline.but_view_mini"));
+		display(by_id("timeline"), true);
+		display(by_id("recap"), false);
+		by_id("but_mini_maxi").textContent = t("timeline.but_view_mini");
 		state.mini_maxi="maxi";
 		localStorage.mini_maxi="maxi";
 	}
 	if (state.cycle_curseur == 0) remplir_page_de_cycle();
-	if (state.timeline_asc && $(document).height()<=$(window).height()) remplir_page_de_cycle();
+	if (state.timeline_asc && page_height()<=document.documentElement.clientHeight) remplir_page_de_cycle();
 }
 
 export function remplir_page_de_cycle() {
 	if (!state.constante || !state.constante.all_cycles_1st_day) return;
 	if (state.timeline_asc) {
-		while ($(window).height() == $(document).height() && state.cycle_curseur < state.constante.all_cycles_1st_day.length) {
+		while (document.documentElement.clientHeight == page_height() && state.cycle_curseur < state.constante.all_cycles_1st_day.length) {
 			charger_cycle();
 		}
 		charger_cycle();
-		if ($(window).height() == $(document).height()) form_nouveau_cycle();
+		if (document.documentElement.clientHeight == page_height()) form_nouveau_cycle();
 	}
 	else charger_cycle();
 }
@@ -263,16 +270,16 @@ export function charger_actu() {
 
 export function show_actu(item) {
 	if (localStorage.actu_hidden === item.url) return;
-	$("#actu_title").text(item.title);
-	$("#actu_text").text(item.description);
-	$("#lire_actu").off("click").click(function () {
+	by_id("actu_title").textContent = item.title;
+	by_id("actu_text").textContent = item.description;
+	by_id("lire_actu").onclick = function () {
 		window.open(item.url, "_blank", "noopener,noreferrer");
-	});
-	$("#fermer_actu").off("click").click(function () {
+	};
+	by_id("fermer_actu").onclick = function () {
 		localStorage.actu_hidden = item.url;
-		$("#actu").hide();
-	});
-	$("#actu").show();
+		display(by_id("actu"), false);
+	};
+	display(by_id("actu"), true);
 }
 
 export function charger_cycle() {
@@ -290,12 +297,12 @@ export function charger_cycle() {
 	if (form_nouv_cycle && state.timeline_asc) form_nouveau_cycle(false);
 	let nb_jours = span.days;
 	if (state.timeline_asc) {
-		$("#timeline").append(cycle2timeline(date_cycle_str, nb_jours, date_fin));
-		$("#recap").append(cycle2recap(date_cycle_str, nb_jours, date_fin));
+		by_id("timeline").append(cycle2timeline(date_cycle_str, nb_jours, date_fin));
+		by_id("recap").append(cycle2recap(date_cycle_str, nb_jours, date_fin));
 	}
 	else {
-		$("#timeline").prepend(cycle2timeline(date_cycle_str, nb_jours, date_fin));
-		$("#recap").prepend(cycle2recap(date_cycle_str, nb_jours, date_fin));
+		by_id("timeline").prepend(cycle2timeline(date_cycle_str, nb_jours, date_fin));
+		by_id("recap").prepend(cycle2recap(date_cycle_str, nb_jours, date_fin));
 	}
 	let dates_data_holder = {};
 	for (let pas = 0; pas < nb_jours; pas++) {
@@ -305,18 +312,16 @@ export function charger_cycle() {
 		let data = view_day(date_obs_str, date_cycle_str, pas+1);
 		dates_data_holder[date_obs_str] = data;
 		state.day_timeline[date_obs_str] = data;
-		if (state.timeline_asc) $(`#c-${date_cycle_str} .contenu`).prepend(day_timeline2timeline(data));
-		else $(`#c-${date_cycle_str} .contenu`).append(day_timeline2timeline(data));
-		$(`#rc-${date_cycle_str} .contenu`).append(day_timeline2recap(data));
+		const timeline_days = document.querySelector(`#c-${date_cycle_str} .contenu`);
+		if (state.timeline_asc) timeline_days.prepend(day_timeline2timeline(data));
+		else timeline_days.append(day_timeline2timeline(data));
+		document.querySelector(`#rc-${date_cycle_str} .contenu`).append(day_timeline2recap(data));
 		track_day(date_obs_str, data);
 	}
-	$(`.pas_${state.constante.nfp_method_name}`).css("display", "none");
+	hide_method_parts();
 	trois_jours();
 	graph_preparation_data(dates_data_holder);
-	if (state.constante.nfp_method == 1 || state.constante.nfp_method == 4) {
-		cycle2graph(date_cycle_str);
-		graph_update(date_cycle_str);
-	}
+	if (state.constante.nfp_method == 1 || state.constante.nfp_method == 4) cycle2graph(date_cycle_str);
 	if (form_nouv_cycle && !state.timeline_asc) form_nouveau_cycle(false);
 }
 
@@ -333,16 +338,17 @@ export function view_day(date, cycle, pos) {
 
 // the peak days and the counters the "+1 +2 +3" marks of the other days come from
 export function track_day(date, data) {
-	if (data.is_peak && $.inArray(date, state.sommets)<0) state.sommets.push(date);
-	else if (!data.is_peak && $.inArray(date, state.sommets)>=0) state.sommets.splice($.inArray(date, state.sommets), 1);
+	const known = state.sommets.indexOf(date);
+	if (data.is_peak && known<0) state.sommets.push(date);
+	else if (!data.is_peak && known>=0) state.sommets.splice(known, 1);
 	if (data.counter_start) state.counter_starts[date] = data.counter_start;
 	else if (date in state.counter_starts) delete state.counter_starts[date];
 }
 
 // A click on an export of a cycle: the file is fetched and saved, a failure is told (the API answers it in JSON, in English).
-export function download_export(event) {
+export function download_export(event, link) {
 	event.preventDefault();
-	moncycle_store.download($(this).attr("href")).catch(function (failure) {
+	moncycle_store.download(link.getAttribute("href")).catch(function (failure) {
 		alert(export_failed_text(failure));
 	});
 }

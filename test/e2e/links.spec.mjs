@@ -47,20 +47,31 @@ test("a link of the app changes the screen without loading the page again, and B
 });
 
 test("a screen that goes away leaves no handler on the window or the document", async ({ page, signed_in }) => {
+	// every listener added to the window or the document, with the signal it ends with (none: it lives as long as the page)
+	await page.addInitScript(() => {
+		globalThis.listeners = [];
+		for (const target of [window, document]) {
+			const add = target.addEventListener;
+			target.addEventListener = function (type, handler, options) {
+				globalThis.listeners.push({ target: target === window ? "window" : "document", type, signal: options && options.signal });
+				return add.call(this, type, handler, options);
+			};
+		}
+	});
 	await signed_in.goto("/");
 	await expect(page.locator("#but_mini_maxi")).toBeVisible();
-	// the handlers the screen added through jQuery (its own namespace); jQuery's internal ones for focus are not the screen's
-	const own = () => page.evaluate(() => {
-		const found = [];
-		for (const target of [window, document]) {
-			const events = globalThis.$._data(target, "events") || {};
-			for (const [name, handlers] of Object.entries(events)) handlers.forEach((handler) => { if (handler.namespace) found.push(name + "." + handler.namespace); });
-		}
-		return found.sort();
-	});
-	expect(await own()).toEqual(expect.arrayContaining(["scroll.timeline", "focus.timeline", "click.timeline"]));
+	const read = () => page.evaluate(() => ({
+		ended: globalThis.listeners.filter((one) => one.signal && one.signal.aborted).length,
+		with_signal: globalThis.listeners.filter((one) => one.signal).map((one) => one.target + "." + one.type).sort(),
+		without_signal: globalThis.listeners.filter((one) => !one.signal).length,
+	}));
+	const on_timeline = await read();
+	expect(on_timeline.with_signal).toEqual(expect.arrayContaining(["window.scroll", "window.focus", "window.storage", "document.click"]));
+	expect(on_timeline.ended).toBe(0);
 	await page.locator('a[href="/settings"]').click();
 	await expect(page.locator("#menu")).toBeVisible();
-	const on_settings = await own();
-	expect(on_settings.filter((name) => name.endsWith(".timeline"))).toEqual([]);
+	const on_settings = await read();
+	// all of the timeline's have ended, and the screens added nothing that lives as long as the page
+	expect(on_settings.ended).toBe(on_timeline.with_signal.length);
+	expect(on_settings.without_signal).toBe(on_timeline.without_signal);
 });

@@ -462,6 +462,7 @@
 	"settings.desc_type_sensation_option": "🧠 Sensation",
 	"settings.desc_type_observation_option": "👀 Observation",
 	"settings.birth_year_choose": "Choisir…",
+	"settings.birth_band": "entre {from} et {to}",
 	"settings.token_create_button": "🔑 Créer le jeton",
 	"settings.logout_failed": "Déconnexion impossible : {reason}",
 	"settings.export_failed_default": "export impossible.",

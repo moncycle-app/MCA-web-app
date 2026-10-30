@@ -13,40 +13,43 @@
 */
 
 import { moncycle_config } from "/js/core/config.js";
+import { send } from "/js/core/api.js";
+import { say } from "/js/core/dom.js";
 import { moncycle_store } from "/js/model/store.js";
 import * as dates from "/js/model/dates.js";
 import { t, t_map, locale } from "/js/core/i18n.js";
 import { settings_text } from "/screens/settings/text.js";
 
-const $ = globalThis.$;
-
 /* ===========================================================================
 ** 2. SMALL HELPERS
 ** ======================================================================== */
 
-// The API takes and gives JSON: this is the one place a request is made. `body` is sent as JSON when there is one.
+// The API takes and gives JSON: this is the one place a request is made. `body` is sent as JSON when there is one. Resolves with the parsed
+// answer. A session that is over (401 `unauthorized`), whichever request it was, goes back to the sign-in page. (A 401 with another code is
+// a wrong password or code on a form: the session goes on.)
 export function settings_api(method, url, body) {
-	const options = {type: method, url: url};
-	if (body !== undefined) {
-		options.contentType = "application/json";
-		options.data = JSON.stringify(body);
-	}
-	return $.ajax(options);
+	return send(method, url, {body: body}).then(function (answer) {
+		return answer.json;
+	}, function (failure) {
+		if (((failure.responseJSON || {}).error || {}).code == "unauthorized") settings_leave_if_signed_out(failure);
+		throw failure;
+	});
 }
 
 // The value of a field of a form by its name (the checked one of a group of radios).
 export function settings_read(form, name) {
-	return form.find(`[name="${name}"]:not([type=radio]), [name="${name}"][type=radio]:checked`).val();
+	const field = form.querySelector(`[name="${name}"]:not([type=radio]), [name="${name}"][type=radio]:checked`);
+	return field ? field.value : undefined;
 }
 
 export function settings_is_checked(form, name) {
-	return form.find(`[name="${name}"]`).is(":checked");
+	return form.querySelector(`[name="${name}"]:checked`) !== null;
 }
 
 // A session that is over (401) goes back to the sign-in page. Only for what the page loads by itself: a 401 `invalid_password` on a form
 // is a wrong password, not the end of the session.
-export function settings_leave_if_signed_out(jqXHR) {
-	if (jqXHR.status == 401) {
+export function settings_leave_if_signed_out(failure) {
+	if (failure.status == 401) {
 		moncycle_store.clear_storage();
 		window.location.replace("/auth");
 	}
@@ -55,41 +58,28 @@ export function settings_leave_if_signed_out(jqXHR) {
 // What went wrong, in French, for any failed request: the page's own words for the error (`own_map`, keyed like moncycle_store.error_pick),
 // then the common ones, then no answer at all, then a server that did not speak the API's JSON, and at last the server's own message (English)
 // with every problem of a validation_failed. Never empty, and without a final full stop: the caller adds its own punctuation.
-export function settings_error(jqXHR, own_map = {}) {
-	const known = moncycle_store.error_pick(jqXHR, own_map) || moncycle_store.error_pick(jqXHR, t_map("settings.common_errors"));
+export function settings_error(failure, own_map = {}) {
+	const known = moncycle_store.error_pick(failure, own_map) || moncycle_store.error_pick(failure, t_map("settings.common_errors"));
 	if (known) return known.replace(/\.$/, "");
-	if (jqXHR.status === 0) return t("settings.error_network");
-	if (!(jqXHR.responseJSON || {}).error) return settings_text.error_server(jqXHR.status);
-	return moncycle_store.error_text(jqXHR).replace(/\.$/, "");
+	if (failure.status === 0) return t("settings.error_network");
+	if (!(failure.responseJSON || {}).error) return settings_text.error_server(failure.status);
+	return moncycle_store.error_text(failure).replace(/\.$/, "");
 }
 
 // The same for what a refusal of POST /api/v2/account says.
-export function settings_account_error(jqXHR) {
-	return settings_error(jqXHR, t_map("settings.account_errors"));
-}
-
-// Report lines from /api/v2/import quote what was in the file -- a sensation name, the app that wrote it -- so they are never dropped
-// into HTML as they come.
-export function settings_escape_html(text) {
-	return $("<span>").text(text === null || text === undefined ? "" : text).html();
+export function settings_account_error(failure) {
+	return settings_error(failure, t_map("settings.account_errors"));
 }
 
 // Every answer of the page -- a refusal, a success, "in progress" -- goes in a line of class form_msg, next to what it is about: under a
 // form's button, under a control that saves by itself, in a keyword's row. kind: "busy", "ok" (green), "error" (red, with its ❌); "" empties
 // the line. The message is text: the server's words can quote what the user typed (duplicate_name echoes the label), and are never read as
 // HTML. A success of a control that saves by itself is not left there for good: it goes after a moment (`fades`).
-export function settings_say(line, kind, message, fades = false) {
-	clearTimeout(line.data("fade"));
-	line.removeClass("vert rouge").empty();
-	if (kind === "busy") line.text(message);
-	if (kind === "ok") line.addClass("vert").text(message);
-	if (kind === "error") line.addClass("rouge").text("❌ " + message);
-	if (kind === "ok" && fades) line.data("fade", setTimeout(function () { line.empty(); }, 2500));
-}
+export const settings_say = say;
 
 // The line of a form.
 export function settings_form_say(form, kind, message) {
-	settings_say(form.find(".form_msg").last(), kind, message);
+	settings_say([...form.querySelectorAll(".form_msg")].pop(), kind, message);
 }
 
 // Something changed on the server that the local copy (js/store.js) shows: the copy is brought up to date once the changes stop coming
@@ -118,23 +108,24 @@ export function settings_local_time(iso) {
 // button. `build_payload(form)` reads the form when it is submitted; `on_done(ret)` says what went well; the server's refusal is said
 // here. `check(form)` (optional) answers a text when the form must not be sent at all.
 export function settings_confirmed_change(form, build_payload, on_done, check) {
-	form.on("submit", function (event) {
+	form.addEventListener("submit", function (event) {
 		event.preventDefault();
-		const button = form.find("button[type=submit]");
+		const button = form.querySelector("button[type=submit]");
 		settings_form_say(form, "", "");
 		const problem = check ? check(form) : "";
 		if (problem) return settings_form_say(form, "error", problem);
-		button.prop("disabled", true);
-		settings_api("POST", moncycle_config.api_url("/account"), build_payload(form)).done(function (ret) {
+		button.disabled = true;
+		settings_api("POST", moncycle_config.api_url("/account"), build_payload(form)).then(function (ret) {
 			on_done(ret);
-		}).fail(function (jqXHR) {
-			console.error(jqXHR);
-			settings_form_say(form, "error", settings_account_error(jqXHR));
-		}).always(function () {
-			button.prop("disabled", false);
+		}, function (failure) {
+			console.error(failure);
+			settings_form_say(form, "error", settings_account_error(failure));
+		}).finally(function () {
+			button.disabled = false;
 		});
 	});
 }
 
 // The account of the screen, read once and kept up to date by what the panels save. One object, so that every module sees the same.
-export const settings_state = {account: {}};
+// `signal` is the screen's: what is listened to outside the screen's own markup ends with it.
+export const settings_state = {account: {}, signal: undefined};

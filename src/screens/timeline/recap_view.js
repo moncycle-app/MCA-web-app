@@ -11,35 +11,31 @@
 ** https://www.moncycle.app
 ** https://github.com/moncycle-app/backend-api-web-app
 */
-
 import * as dates from "/js/model/dates.js";
 import { t, t_map } from "/js/core/i18n.js";
+import { el } from "/js/core/dom.js";
 import { cycle_option, cycle_title_click, cycle_title_node } from "/screens/timeline/cycle_view.js";
 import { open_menu } from "/screens/timeline/day_form.js";
 import { state } from "/screens/timeline/state.js";
 
-const $ = globalThis.$;
-
 export function cycle2recap(c, nb, fin) {
 	let c_id = "rc-" + c;
-	let cycle = $("<div>", {id: c_id, class: "cycle_recap"});
 	let c_date = dates.parse(c);
 	let c_fin = new Date(fin);
-	let c_title = $(`<h5 class='title title_${c}' for='${c}'></h5>`).append(cycle_title_node("timeline.cycle_title_recap", "timeline.cycle_title_recap_end", c_date, c_fin, nb));
-	c_title.click(cycle_title_click);
-	cycle.append(c_title);
-	cycle.append(cycle_option(c, dates.str(fin), "recap"));
-	let c_ruler = $("<div>", {id: "ruler_" + c, class: "mini_ruler", style: "display:none"});
+	let c_title = el("h5", {class: `title title_${c}`, for: c}, cycle_title_node("timeline.cycle_title_recap", "timeline.cycle_title_recap_end", c_date, c_fin, nb));
+	c_title.addEventListener("click", cycle_title_click);
+	let c_ruler = el("div", {id: "ruler_" + c, class: "mini_ruler"});
+	c_ruler.style.display = "none";
 	let odd = true;
 	for (let n=1; n<=state.cycle_columns; n++) {
-		let ruler_num = $(`<span>${n}</span>`);
-		if (odd) ruler_num.addClass("odd");
-		c_ruler.append(ruler_num);
+		c_ruler.append(el("span", {class: odd ? "odd" : null, text: String(n)}));
 		odd = !odd;
 	}
-	cycle.append(c_ruler);
-	cycle.append($("<div>", {id: "rc_contenu_" + c, class: "contenu"}));
-	return cycle;
+	return el("div", {id: c_id, class: "cycle_recap"},
+		c_title,
+		cycle_option(c, dates.str(fin), "recap"),
+		c_ruler,
+		el("div", {id: "rc_contenu_" + c, class: "contenu"}));
 }
 
 export function day_timeline2recap(j) {
@@ -47,8 +43,8 @@ export function day_timeline2recap(j) {
 	let o_id = "ro-" + dates.str(o_date);
 	let o_class = "obs";
 	if (j.observation_paused) o_class += " o_paused";
-	let day_timeline = $("<div>", {id: o_id, class: o_class, date: dates.str(o_date)});
-	day_timeline.click(open_menu);
+	let day_timeline = el("div", {id: o_id, class: o_class, date: dates.str(o_date)});
+	day_timeline.addEventListener("click", open_menu);
 	let color = "vide";
 	let index_couleur = j.stamp;
 	let baby = (j.stamp == "BB");
@@ -87,38 +83,37 @@ export function day_timeline2recap(j) {
 		color = "jcpas";
 	}
 	if (car_du_milieu=="" && j.stamp=="") car_du_milieu = t("timeline.to_fill_in_glyph");
-	day_timeline.append(`<span class='s'>${j.is_peak ? t("timeline.peak_mucus") : ""}</span>`);
-	if (state.constante.nfp_method==1 || state.constante.nfp_method==2) day_timeline.append(`<span class='n'></span>`);
-	day_timeline.append(`<span class='g ${color}'>${car_du_milieu}</span>`);
+	day_timeline.append(el("span", {class: "s", text: j.is_peak ? t("timeline.peak_mucus") : ""}));
+	if (state.constante.nfp_method==1 || state.constante.nfp_method==2) day_timeline.append(el("span", {class: "n"}));
+	day_timeline.append(el("span", {class: `g ${color}`, text: car_du_milieu}));
 	if ((state.constante.nfp_method==3 || state.constante.nfp_method==4) && !j.observation_paused && !j.day_not_observed && j.fc_score){
 		recap_note = recap_note.replace('X1','').replace('X2','').replace('X3','');
 		let fc_glaire = recap_note.match(/\d+/);
 		if (fc_glaire) recap_note = recap_note.replace(fc_glaire[0], '');
-		day_timeline.append($("<span>", {class: "fc"}).text(fc_glaire? fc_glaire[0] : ""));
+		day_timeline.append(el("span", {class: "fc", text: fc_glaire? fc_glaire[0] : ""}));
 		recap_note = recap_note.trim().replace(/\s+/g, '')
 		if (recap_note.length>2) recap_note = t("timeline.fc_note_overflow");
-		day_timeline.append($("<span>", {class: "fc"}).text(recap_note));
+		day_timeline.append(el("span", {class: "fc", text: recap_note}));
 	}
 	else if (state.constante.nfp_method==3 || state.constante.nfp_method==4) {
-		day_timeline.append(`<span class='fc'></span>`);
-		day_timeline.append(`<span class='fc'></span>`);
+		day_timeline.append(el("span", {class: "fc"}));
+		day_timeline.append(el("span", {class: "fc"}));
 	}
-	day_timeline.append(`<span class='c'>${car_du_bas}</span>`);
+	day_timeline.append(el("span", {class: "c", text: car_du_bas}));
 	return day_timeline;
 }
 
 // The "o" cell of a cervical mucus day: observations as they are, sensations in bold, then the
-// descriptions with no type yet, struck through (css/tableau.css). Built with the DOM, never as
-// HTML: a name is free text. <b> and <s> and text nodes on purpose, `.day span` styles every span
-// as a cell and `.day span:empty` hides it, so a day with no description keeps an empty cell.
+// descriptions with no type yet, struck through (timeline.css). Built with the DOM: a name is free text. <b> and <s> and text nodes on
+// purpose, `.day span` styles every span as a cell and `.day span:empty` hides it, so a day with no description keeps an empty cell.
 export function description_cell(descriptions) {
 	let names_of = (type) => descriptions.filter(d => d.type == type).map(d => d.name);
 	let parts = [
 		...names_of(1).map(name => document.createTextNode(name)),
-		...names_of(2).map(name => $("<b>", {class: "o_sens"}).text(name)[0]),
-		...names_of(0).map(name => $("<s>", {class: "o_other", title: t("timeline.desc_legacy_title")}).text(name)[0]),
+		...names_of(2).map(name => el("b", {class: "o_sens", text: name})),
+		...names_of(0).map(name => el("s", {class: "o_other", title: t("timeline.desc_legacy_title"), text: name})),
 	];
-	let cell = $("<span>", {class: "o pas_fc pas_fc_temp"});
+	let cell = el("span", {class: "o pas_fc pas_fc_temp"});
 	parts.forEach((part, i) => {
 		if (i > 0) cell.append(document.createTextNode(", "));
 		cell.append(part);

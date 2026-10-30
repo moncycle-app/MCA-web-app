@@ -192,7 +192,7 @@ export function clock(d) {
 	return t("calendar.clock", {hh: String(d.getHours()).padStart(2, "0"), mm: String(d.getMinutes()).padStart(2, "0")});
 }
 
-// The catalog is read when a page loads (no jQuery in the unit tests): a page's module starts with `await i18n_ready`, so that its own code
+// The catalog is read when a page loads: a page's module starts with `await i18n_ready`, so that its own code
 // runs once the catalog is there and the static markup is filled.
 export let ready = Promise.resolve();
 if (typeof document !== "undefined" && document.documentElement && globalThis.location) {

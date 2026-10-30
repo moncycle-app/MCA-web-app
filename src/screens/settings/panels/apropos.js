@@ -11,40 +11,42 @@
 ** https://www.moncycle.app
 ** https://github.com/moncycle-app/backend-api-web-app
 */
-
 import { moncycle_config } from "/js/core/config.js";
 import { moncycle_store } from "/js/model/store.js";
 import { t, locale } from "/js/core/i18n.js";
-import { settings_leave_if_signed_out, settings_say } from "/screens/settings/common.js";
+import { by_id } from "/js/core/dom.js";
+import { settings_api, settings_say } from "/screens/settings/common.js";
 import { settings_load_news } from "/screens/settings/panels/actualites.js";
-
-const $ = globalThis.$;
 
 /* ===========================================================================
 ** 5g. À PROPOS: the application, the terms, the numbers of the account
 ** ======================================================================== */
 
 export function settings_fill_about(account) {
-	$("#tech_info_no").text(account.userId);
-	$("#tech_info_id").text(account.loginEmail);
+	by_id("tech_info_no").textContent = account.userId;
+	by_id("tech_info_id").textContent = account.loginEmail;
 	const since = new Date(account.inscriptionDate);
-	$("#tech_info_insc").text(since.toLocaleDateString(locale(), {day: "2-digit", month: "2-digit", year: "numeric"}));
+	by_id("tech_info_insc").textContent = since.toLocaleDateString(locale(), {day: "2-digit", month: "2-digit", year: "numeric"});
 }
 
 // The version, and the terms of service: their page is a setting of the server (TERMS_OF_SERVICE_URL, told by server_info). None told: the
 // paragraph that sums them up is not shown.
 export function settings_load_server_info() {
-	moncycle_store.load_webapp().then(function (webapp) { $("#tech_info_webapp").text(webapp ? webapp.version : "?"); });
-	$.get(moncycle_config.api_url("/server_info")).done(function (ret) {
+	moncycle_store.load_webapp().then(function (webapp) {
+		const shown = by_id("tech_info_webapp");
+		if (shown) shown.textContent = webapp ? webapp.version : "?";
+	});
+	settings_api("GET", moncycle_config.api_url("/server_info")).then(function (ret) {
+		if (!by_id("tech_info_ver")) return;
 		const info = (ret || {}).data || {};
-		$("#tech_info_ver").text(info.appVersion ?? "?");
-		if (info.passwordPolicyRegex) $("#i_pw1, #i_pw2").attr("pattern", info.passwordPolicyRegex);
+		by_id("tech_info_ver").textContent = info.appVersion ?? "?";
+		if (info.passwordPolicyRegex) document.querySelectorAll("#i_pw1, #i_pw2").forEach(function (input) { input.setAttribute("pattern", info.passwordPolicyRegex); });
 		if (info.newsUrl) settings_load_news(info.newsUrl);
 		else console.info("news: server_info tells no newsUrl (NEWS_URL is empty or not https), no news entry");
 		if (!/^https:\/\//i.test(info.termsOfServiceUrl || "")) return;
-		$("#a_terms").attr("href", info.termsOfServiceUrl);
-		$("#terms_about").prop("hidden", false);
-	}).fail(settings_leave_if_signed_out);
+		by_id("a_terms").setAttribute("href", info.termsOfServiceUrl);
+		by_id("terms_about").hidden = false;
+	}, function () { });
 }
 
 /* ===========================================================================
@@ -52,22 +54,22 @@ export function settings_load_server_info() {
 ** ======================================================================== */
 
 export function settings_setup_local_copy() {
-	const line = $("#local_msg");
-	const buttons = $("#but_local_reset, #but_local_sync");
+	const line = by_id("local_msg");
+	const buttons = [by_id("but_local_reset"), by_id("but_local_sync")];
 	const run = function (busy, done, before) {
-		buttons.prop("disabled", true);
+		buttons.forEach(function (button) { button.disabled = true; });
 		settings_say(line, "busy", busy);
 		if (before) before();
 		moncycle_store.sync().then(function () {
 			settings_say(line, "ok", done, true);
-		}, function (jqXHR) {
+		}, function (failure) {
 			// a session that is over has already left the page
-			if (jqXHR && jqXHR.status !== undefined) console.error(jqXHR);
+			if (failure && failure.status !== undefined) console.error(failure);
 			settings_say(line, "error", t("settings.local_failed"));
-		}).finally(function () { buttons.prop("disabled", false); });
+		}).finally(function () { buttons.forEach(function (button) { button.disabled = false; }); });
 	};
-	$("#but_local_sync").on("click", function () { run(t("settings.local_sync_running"), t("settings.local_sync_done")); });
-	$("#but_local_reset").on("click", function () {
+	by_id("but_local_sync").addEventListener("click", function () { run(t("settings.local_sync_running"), t("settings.local_sync_done")); });
+	by_id("but_local_reset").addEventListener("click", function () {
 		if (!confirm(t("settings.local_reset_confirm"))) return;
 		run(t("settings.local_reset_running"), t("settings.local_reset_done"), moncycle_store.reset_local);
 	});

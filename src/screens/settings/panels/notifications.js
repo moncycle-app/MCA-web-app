@@ -11,28 +11,26 @@
 ** https://www.moncycle.app
 ** https://github.com/moncycle-app/backend-api-web-app
 */
-
 import { t } from "/js/core/i18n.js";
+import { by_id } from "/js/core/dom.js";
 import { settings_confirmed_change, settings_form_say, settings_read, settings_sync_later } from "/screens/settings/common.js";
-
-const $ = globalThis.$;
 
 /* ===========================================================================
 ** 5c. CYCLES PAR E-MAIL: the automatic mail of each cycle, and who gets it
 ** ======================================================================== */
 
 export function settings_fill_notifications(account) {
-	$("#i_auto_mail_export").prop("checked", !!account.autoMailExport);
-	$("#i_notification_emails").val(account.notificationEmails);
+	by_id("i_auto_mail_export").checked = !!account.autoMailExport;
+	by_id("i_notification_emails").value = account.notificationEmails ?? "";
 }
 
 // The cycles are the owner's, so the password confirms a change of who receives them.
 export function settings_setup_notifications() {
-	const form = $("#form_notification_emails");
+	const form = by_id("form_notification_emails");
 	settings_confirmed_change(form, function () {
 		return {notificationEmails: settings_read(form, "notification_emails"), password: settings_read(form, "password")};
 	}, function () {
-		form.find("[name=password]").val("");
+		form.elements["password"].value = "";
 		settings_form_say(form, "ok", t("settings.notification_emails_saved"));
 		settings_sync_later();
 	});

@@ -11,15 +11,19 @@
 ** https://www.moncycle.app
 ** https://github.com/moncycle-app/backend-api-web-app
 */
-
 import * as dates from "/js/model/dates.js";
 import { date_short } from "/js/core/i18n.js";
+import { by_id, display, is_hidden } from "/js/core/dom.js";
+import { load_chart } from "/js/vendor/chart.js";
 import { state } from "/screens/timeline/state.js";
 
-const $ = globalThis.$;
-
-export function cycle2graph(id) {
-	const temp_chart = new Chart($(`#canvas-c-${id}`), {
+// The chart of a cycle, once Chart.js is there (it is loaded when the first one is asked for); then it is drawn from the data held.
+export async function cycle2graph(id) {
+	const Chart = await load_chart();
+	// the cycles can have been drawn again, or the screen left, while the library came
+	const canvas = by_id(`canvas-c-${id}`);
+	if (!canvas || state.graphs[id]) return;
+	state.graphs[id] = new Chart(canvas, {
 		type: 'line',
 		data: {
 			datasets: [{
@@ -39,16 +43,19 @@ export function cycle2graph(id) {
 			}
 		}
 	});
-	state.graphs[id] = temp_chart;
+	graph_update(id);
 }
 
 export function graph_update(id) {
+	// the chart is made when the library has come; it is updated from the data then
+	if (!state.graphs[id]) return;
 	let vide = true;
 	for (let k in state.graph_data[id]) if (vide && !isNaN(state.graph_data[id][k])) vide = false;
-	$("#graph-c-" + id).attr("vide", vide ? 1 : 0);
-	if (vide) $("#graph-c-" + id).hide();
+	const box = by_id("graph-c-" + id);
+	box.setAttribute("vide", vide ? 1 : 0);
+	if (vide) display(box, false);
 	else {
-		if (!$("#contenu-c-" + id).is(":hidden")) $("#graph-c-" + id).show();
+		if (!is_hidden(by_id("contenu-c-" + id))) display(box, true);
 		state.graphs[id].data.datasets[0].data = state.graph_data[id];
 		state.graphs[id].update();
 	}
@@ -59,7 +66,7 @@ export function graph_update(id) {
 }
 
 export function graph_preparation_data(data) {
-	$.each(data, function(o_date, o_data) {
+	Object.entries(data).forEach(function ([o_date, o_data]) {
 		if (state.graph_data[o_data.cycle] == undefined) state.graph_data[o_data.cycle] = {};
 		let date = dates.parse(o_date);
 		let label = date_short(date);

@@ -21,21 +21,33 @@ import { moncycle_config } from "/js/core/config.js";
 let on_session_end = () => { };
 export function set_session_end_handler(fn) { on_session_end = fn; }
 
+// send("GET", url, {body, headers, timeout, signal}) -> {status, json, headers}; 304 gives json undefined. A failure is rejected as
+// {status, statusText, responseJSON} (status 0: no answer, or the timeout). `url` is a whole address built with config.api_url(path).
+export async function send(method, url, options = {}) {
+	const request = {method: method, headers: Object.assign({}, options.headers)};
+	if (options.body !== undefined) {
+		request.headers["Content-Type"] = "application/json";
+		request.body = typeof options.body === "string" ? options.body : JSON.stringify(options.body);
+	}
+	const timer = options.timeout ? new AbortController() : null;
+	const timeout = timer ? setTimeout(() => timer.abort(), options.timeout) : null;
+	request.signal = options.signal && timer ? AbortSignal.any([options.signal, timer.signal]) : (options.signal || (timer && timer.signal) || undefined);
+	let response, json;
+	try {
+		response = await moncycle_config.fetch(url, request);
+		try { json = response.status === 304 ? undefined : await response.json(); } catch (e) { json = undefined; }
+	} catch (e) { throw {status: 0, statusText: "error", responseJSON: undefined}; }
+	finally { clearTimeout(timeout); }
+	if (response.ok || response.status === 304) return {status: response.status, json: json, headers: response.headers};
+	throw {status: response.status, statusText: response.statusText, responseJSON: json};
+}
+
 // api("POST", "/token", {email, password}) -> the parsed answer, or a rejection {status, responseJSON, statusText}. `path` is a path of the contract.
 export async function api(method, path, body, options = {}) {
-	const request = {method: method, headers: {}};
-	if (body !== undefined) {
-		request.headers["Content-Type"] = "application/json";
-		request.body = JSON.stringify(body);
+	try {
+		return (await send(method, moncycle_config.api_url(path), {body: body, signal: options.signal})).json;
+	} catch (failure) {
+		if (failure.status === 401 && (((failure.responseJSON || {}).error || {}).code === undefined || failure.responseJSON.error.code === "unauthorized")) on_session_end(failure);
+		throw failure;
 	}
-	if (options.signal) request.signal = options.signal;
-	let response;
-	try { response = await moncycle_config.fetch(moncycle_config.api_url(path), request); }
-	catch (e) { throw {status: 0, statusText: "error", responseJSON: undefined}; }
-	let json;
-	try { json = await response.json(); } catch (e) { json = undefined; }
-	if (response.ok) return json;
-	const failure = {status: response.status, statusText: response.statusText, responseJSON: json};
-	if (response.status === 401 && (((json || {}).error || {}).code === undefined || json.error.code === "unauthorized")) on_session_end(failure);
-	throw failure;
 }
