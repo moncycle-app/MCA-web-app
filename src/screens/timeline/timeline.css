@@ -12,336 +12,42 @@
 ** https://github.com/moncycle-app/backend-api-web-app
 */
 
+/* --- the timeline and the mini view ---------------------------------------------------------------------------------------------
+   One square per day, in the colour of its stamp; in the timeline the stamp also tints the whole row and its day number, so each
+   day reads in one colour. Sized for a phone: a row is 22px high (a 20px square), so a cycle of 30 days fits on one screen; in the
+   mini view a cycle is one line of squares (--cycle-cols of them, js cycle_line_length), aligned by day of cycle. */
+:where([data-screen="timeline"]) {
+	--tl-bg: white;
+	--tl-ink: #141414;
+	--tl-muted: #6b6f6c;
+	--tl-line: #e3e5e3;
+	--tl-card: #f5f6f5;
+	--tl-tint: 11%;
+	--tl-red: #ac2433;
+	--tl-red-ink: #ac2433;
+	--tl-green: #1e824c;
+	--tl-green-ink: #1e824c;
+	--tl-yellow: #fbca0b;
+	--tl-yellow-ink: #8f7000;
+	--tl-white: white;
+	--tl-white-edge: #d2d2d2;
+	--tl-red-edge: #5e0f19;
+	--tl-green-edge: #0f4a2a;
+	--tl-yellow-edge: #a67c00;
+	--tl-blue-edge: #4f8cc8;
+	--tl-hatch-edge: #b08800;
+	--tl-pause-edge: #c04a5a;
+	--tl-blue-ink: #3b78b8;
+	--tl-blue-hatch: repeating-linear-gradient(45deg, #edf6ff 0 3px, #d3eaff 3px 6px);
+	--tl-yellow-hatch: repeating-linear-gradient(45deg, #fffae7 0 3px, #ffeda8 3px 6px);
+	--tl-pause: #ffd9de;
+	--tl-pause-ink: #821521;
+	--tl-peak: #8b4513;
+}
+
 .flou {
 	filter: blur(5px);
 	pointer-events: none;
-}
-
-.day {
-	cursor: pointer;
-	padding-left: 3px;
-}
-
-.day span {
-	display: inline-block;
-	vertical-align: middle;
-	margin-right: 5px;
-}
-
-.day span:empty {
-	display: none;
-}
-
-.day .d {
-	font-family: monospace;
-	height: 25px;
-	line-height: 25px;
-	text-align: center;
-	font-size: .7em;
-	float: right;
-	text-transform: uppercase;
-}
-
-.day .j {
-	color: gray;
-	font-family: monospace;
-	text-align: right;
-	width: 20px;
-	height: 25px;
-	line-height: 25px;
-}
-
-.day .g {
-	width: 25px;
-	height: 25px;
-	line-height: 25px;
-	padding-top: 0px;
-	text-align: center;
-	border-right: 1px solid black;
-	border-left: 1px solid black;
-	margin-right: 5px;
-	overflow: hidden;
-}
-
-.day:first-child .g {
-	border-top-left-radius: 5px;
-	border-top-right-radius: 5px;
-	border-top-width: 1px;
-	border-top-style: solid;
-}
-
-.day:last-child .g {
-	border-bottom-left-radius: 5px;
-	border-bottom-right-radius: 5px;
-	border-bottom-width: 1px;
-	border-bottom-style: solid;
-}
-
-/* soft glow of the bar in the colour of each day; clip-path keeps it to the two sides (and the two ends of the bar), so that
-   neighbouring days leave no seam */
-.day .g {
-	--glow: transparent;
-	box-shadow: 0 0 7px 0 color-mix(in srgb, var(--glow) var(--glow-pct, 55%), transparent);
-	clip-path: inset(0 -10px);
-}
-
-/* the sticky title (opaque, above everything) would hide the glow of the first day: leave it room below the title */
-.cycle .contenu {
-	padding-top: 8px;
-}
-
-.day:first-child .g {
-	clip-path: inset(-10px -10px 0);
-}
-
-.day:last-child .g {
-	clip-path: inset(0 -10px -10px);
-}
-
-.day:first-child:last-child .g {
-	clip-path: inset(-10px);
-}
-
-.day .g.rouge {
-	--glow: #ac2433;
-}
-
-.day .g.vert {
-	--glow: #1e824c;
-	--glow-pct: 80%;
-}
-
-.day .g.jaune {
-	--glow: #fbca0b;
-}
-
-.day .g.jcpas {
-	--glow: #5a9ee0;
-}
-
-.day .g.ar {
-	--glow: #f0be1e;
-}
-
-.day .g.g_loading {
-	--glow: #808080;
-}
-
-.day .g.baby {
-	--glow: #8c8c8c;
-}
-
-.day .u {
-	font-size: .9em;
-}
-
-.day .e {
-	font-weight: light;
-	text-transform: uppercase;
-	font-family: "Montserrat";
-}
-
-.day .r {
-	color: #fbca0b;
-}
-
-.day .p {
-	color: gray;
-	font-size: .8em;
-	font-style: italic;
-}
-
-.day .fc {
-	font-family: "Montserrat";
-	font-weight: bold;
-	font-size: .8em;
-}
-
-.day .fc .note_not_imp {
-	vertical-align: top;
-	font-weight: normal;
-	margin: 0;
-}
-
-.day .fc .note_rouge {
-	color: #ac2433;
-	vertical-align: top;
-	font-weight: normal;
-	margin: 0;
-}
-
-.day .fle {
-	font-size: .9em;
-}
-
-.day .rouge,
-.obs .rouge {
-	background-color: #ac2433;
-	border-color: #821521;
-	color: #ac2433;
-}
-
-.day .vert,
-.obs .vert {
-	background-color: #1e824c;
-	border-color: #16683c;
-	color: #1e824c;
-}
-
-.day .jaune,
-.obs .jaune {
-	background-color: #fbca0b;
-	border-color: #e3b607;
-	color: #fbca0b;
-}
-
-.day .jcpas,
-.obs .jcpas {
-	border-color: #c3e2ff;
-	background: repeating-linear-gradient(45deg, #edf6ff, #edf6ff 3px, #d3eaff 3px, #d3eaff 6px);
-	font-weight: bold;
-	font-family: "Montserrat";
-	font-size: .9em;
-}
-
-.obs .jcpas,
-.day .jcpas,
-.day .j_jcpas {
-	color: #366392;
-}
-
-.day .ar,
-.obs .vide {
-	border-color: #ffe88b;
-	background: repeating-linear-gradient(45deg, #fffae7, #fffae7 3px, #ffeda8 3px, #ffeda8 6px);
-}
-
-.day .ar,
-.day .j_ar {
-	color: #a39040;
-}
-
-/* day numbers take the dominant colour of the day's cell (these sit after the shared rules above) */
-.day .j.j_jcpas {
-	color: #3b78b8;
-}
-
-.day .j.j_ar {
-	color: #b8920f;
-}
-
-.day .j.j_jaune {
-	color: #d4a300;
-}
-
-.day .g_loading,
-.obs .g_loading {
-	border-color: #f1f1f1;
-	background-color: #f1f1f1;
-}
-
-.day .baby {
-	border-color: #d2d2d2;
-	background-color: #fbfbfb;
-}
-
-.obs .baby  {
-	border-color: #e4e4e4;
-	background-color: #fbfbfb;
-}
-
-/* .obs .jcpas {
-	background-color: #00200e;
-	border-color: #00200e;
-	color: white;
-} */
-
-.day .jesaispas {
-	border-style: dashed;
-	font-family: Montserrat;
-	font-weight: 600;
-}
-
-.o_fc .s {
-	font-family: "Montserrat";
-	font-size: .8em;
-}
-
-.obs .n,
-.day .n,
-.day .s,
-.obs .s {
-	font-family: monospace;
-	font-size: .9em;
-}
-
-.day .s,
-.day .n {
-	font-weight: bold;
-}
-
-.day .n,
-.obs .n,
-.day .j_vert {
-	color: #1e824c;
-}
-
-.day .j_rouge {
-	color: #ac2433;
-}
-
-.day .j_jaune {
-	color: #fbca0b;
-}
-
-.popup label.yellow,
-.popup label.red,
-.popup label.green {
-	font-weight: bold;
-}
-
-.day .s,
-.obs .s {
-	color: #8B4513;
-}
-
-.day .j_pic {
-	font-family: "Montserrat";
-}
-
-.day .o {
-	font-size: .9em;
-}
-
-.day .o_sens {
-	font-weight: bold;
-}
-
-.day .o_other {
-	text-decoration: line-through;
-}
-
-.day .c {
-	font-size: .7em;
-	font-style: italic;
-	display: inline-flex;
-	position: relative;
-}
-
-.day .t:not(:empty) {
-	background-color: gray;
-	font-size: .75em;
-	border-radius: 10px;
-	color: white;
-	padding: 2px 5px;
-}
-
-.day .t:not(:empty)::after {
-	content: '°';
-}
-
-.day .th {
-	font-size: .7em;
 }
 
 .bold {
@@ -352,20 +58,117 @@
 	text-transform: uppercase;
 }
 
-#jour_form, #temp_graph {
-	display: block;
-	position: fixed;
-	top: 0;
-	bottom: 0;
-	left: 0;
-	right: 0;
-	overflow-y: scroll;
-	padding: 0 10px;
-	border-radius: 3px;
-}
-
 .err {
 	color: red;
+}
+
+/* the colour of each stamp: --stamp fills the square, --ink is its text (day number, marks), --wash tints the row */
+:is(.stamp_rouge, .g.rouge) {
+	--stamp: var(--tl-red);
+	--ink: var(--tl-red-ink);
+	--edge: var(--tl-red-edge);
+}
+
+:is(.stamp_vert, .g.vert) {
+	--stamp: var(--tl-green);
+	--ink: var(--tl-green-ink);
+	--edge: var(--tl-green-edge);
+}
+
+:is(.stamp_jaune, .g.jaune) {
+	--stamp: var(--tl-yellow);
+	--ink: var(--tl-yellow-ink);
+	--edge: var(--tl-yellow-edge);
+	--tint-boost: 5%;
+}
+
+:is(.stamp_baby, .g.baby) {
+	--stamp: var(--tl-white);
+	--ink: var(--tl-muted);
+	--edge: var(--tl-white-edge);
+	--wash: #8a8a8a;
+}
+
+:is(.stamp_jcpas, .g.jcpas) {
+	--stamp: var(--tl-blue-hatch);
+	--ink: var(--tl-blue-ink);
+	--edge: var(--tl-blue-edge);
+	--wash: #5a9ee0;
+}
+
+:is(.stamp_ar, .g.ar, .g.vide) {
+	--stamp: var(--tl-yellow-hatch);
+	--ink: var(--tl-yellow-ink);
+	--edge: var(--tl-hatch-edge);
+	--wash: #f0be1e;
+}
+
+:is(.o_paused, .g.pink) {
+	--stamp: var(--tl-pause);
+	--ink: var(--tl-pause-ink);
+	--edge: var(--tl-pause-edge);
+	--wash: #e06a7a;
+}
+
+/* --- the page around the cycles --------------------------------------------------------------------------------------------- */
+:where([data-screen="timeline"]) :is(#timeline, #recap) {
+	padding-left: 8px;
+	padding-right: 8px;
+	font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+:where([data-screen="timeline"]) center .nav_button {
+	margin: 6px 1px 0;
+	padding: 5px 10px;
+	border-radius: 999px;
+	font-size: 11px;
+	letter-spacing: .03em;
+}
+
+/* the news: text from another site, drawn as text */
+.actu {
+	box-sizing: border-box;
+	width: calc(100% - 16px);
+	max-width: 584px;
+	margin: 18px auto 0;
+	padding: 10px 12px;
+	border: 1px solid color-mix(in srgb, var(--tl-green) 28%, transparent);
+	border-radius: 12px;
+	background-color: color-mix(in srgb, var(--tl-green) 6%, var(--tl-bg));
+	font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+	font-size: 14px;
+	line-height: 1.35;
+}
+
+.actu .tag {
+	padding: 1px 7px;
+	border-radius: 999px;
+	background-color: var(--tl-green);
+	color: white;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: .06em;
+	text-transform: uppercase;
+	vertical-align: 2px;
+}
+
+.actu .actu_title {
+	display: block;
+	margin: 6px 0 2px;
+}
+
+.actu .actu_text {
+	margin: 0 0 8px;
+	max-height: 10em;
+	overflow-y: auto;
+	color: var(--tl-muted);
+}
+
+.actu button {
+	margin: 0 4px 0 0;
+	padding: 4px 10px;
+	border-radius: 999px;
+	font-size: 11px;
 }
 
 /* the bar at the bottom of the page that says a change could not be sent (above the day form) */
@@ -395,27 +198,558 @@
 	font-size: 1em;
 }
 
-:where([data-screen="timeline"]) h2 {
+/* --- a cycle: its title (sticky, a tap opens the exports), its exports, its chart, its days ------------------------------------- */
+.cycle {
+	margin-top: 16px;
+}
+
+:where([data-screen="timeline"]) .cycle > h2 {
 	position: sticky;
-	top: 0px;
-	margin: 0;
-	margin-top: 30px;
-	padding: 5px 10px;
+	top: 0;
 	z-index: 100000;
+	margin: 0 -8px;
+	padding: 9px 34px 9px 8px;
+	border-bottom: 1px solid var(--tl-line);
+	background-color: color-mix(in srgb, var(--tl-bg) 88%, transparent);
+	-webkit-backdrop-filter: blur(10px);
+	backdrop-filter: blur(10px);
+	font-size: 15px;
+	font-weight: 600;
+	letter-spacing: 0;
+}
+
+:where([data-screen="timeline"]) .cycle > h2[for] {
 	cursor: pointer;
 }
 
+/* what a tap on the title opens */
+:where([data-screen="timeline"]) :is(.cycle > h2, .cycle_recap > h5)[for]::after {
+	content: "⋯";
+	content: "⋯" / "";
+	position: absolute;
+	top: 50%;
+	right: 10px;
+	translate: 0 -50%;
+	color: var(--tl-muted);
+	font-weight: 700;
+}
+
+.title .nb_jours {
+	color: var(--tl-green-ink);
+	font-weight: 800;
+}
+
+.title .cycle_fin {
+	color: var(--tl-muted);
+}
+
 .cycle_options {
-	padding: 3px;
-	padding-left: 10px;
+	margin: 6px 0;
+	padding: 8px 10px;
+	border-radius: 10px;
+	background-color: var(--tl-card);
+	font-size: 13px;
+	line-height: 1.4;
 }
 
 .cycle_options button {
-	font-size: .6em;
+	margin: 2px 0;
+	padding: 4px 10px;
+	border-radius: 999px;
+	font-size: 11px;
 }
 
+.label_anonymous_export {
+	font-size: 12px;
+	vertical-align: middle;
+	color: var(--tl-muted);
+}
+
+.unknown_type_note {
+	margin: 6px 0 0;
+	font-size: .85em;
+}
+
+.cycle .graph {
+	width: 100%;
+	height: 240px;
+	margin: 6px 0;
+}
+
+.cycle .contenu {
+	padding-top: 6px;
+}
+
+/* the form of a new cycle */
 .nouveau_cycle_form {
-	margin-left: 10px;
+	margin-top: 8px;
+	padding: 10px 12px;
+	border-radius: 10px;
+	background-color: var(--tl-card);
+	font-size: 14px;
+	line-height: 1.8;
+}
+
+#nocycle {
+	margin-top: 20px;
+	color: var(--tl-muted);
+	font-family: 'Montserrat';
+	font-size: 13px;
+	text-align: center;
+}
+
+/* --- a day of the timeline: day number, square, marks, notes ... date on the right ------------------------------------------- */
+.day {
+	--stamp: transparent;
+	--ink: var(--tl-muted);
+	display: grid;
+	grid-template-columns: 22px 20px minmax(0, 1fr) auto;
+	align-items: start;
+	column-gap: 6px;
+	min-height: 20px;
+	margin-bottom: 2px;
+	padding: 0 8px 0 0;
+	border-radius: 6px;
+	background-color: color-mix(in srgb, var(--wash, var(--stamp)) calc(var(--tl-tint) + var(--tint-boost, 0%)), transparent);
+	font-size: 13px;
+	line-height: 1.2;
+	cursor: pointer;
+	-webkit-tap-highlight-color: transparent;
+}
+
+.day:hover {
+	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 40%, transparent);
+}
+
+.day span {
+	flex: none;
+}
+
+.day span:empty:not(.g, .b) {
+	display: none;
+}
+
+/* what the day holds: the marks and keywords (.m) on the first line, then the comment, under them when it does not fit beside */
+.day .b {
+	grid-column: 3;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 2px 6px;
+	min-height: 20px;
+	min-width: 0;
+}
+
+.day .b > .m {
+	flex: 0 1 auto;
+	display: flex;
+	align-items: baseline;
+	gap: 6px;
+	padding-top: 2px;
+	min-width: 0;
+}
+
+.day .j {
+	grid-column: 1;
+	line-height: 20px;
+	color: var(--ink);
+	font-size: 12px;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+	text-align: right;
+}
+
+/* the stamp: a square; the letter of a coloured stamp is not shown (its colour says it), a symbol is */
+.day .g {
+	grid-column: 2;
+	box-sizing: border-box;
+	width: 20px;
+	height: 20px;
+	border-radius: 5px;
+	background: var(--stamp);
+	box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .08);
+	color: transparent;
+	font-size: 12px;
+	font-weight: 700;
+	line-height: 20px;
+	text-align: center;
+	overflow: hidden;
+}
+
+.day .g:is(.baby, .jcpas, .ar, .pink) {
+	color: var(--ink);
+}
+
+.day .g.baby {
+	box-shadow: inset 0 0 0 1px var(--tl-white-edge);
+}
+
+.day .g.g_none {
+	border: 1px dashed color-mix(in srgb, var(--tl-muted) 45%, transparent);
+	background: none;
+	box-shadow: none;
+}
+
+/* the date: last, on the right; Sunday in bold ends a week */
+.day .d {
+	grid-column: 4;
+	grid-row: 1;
+	line-height: 20px;
+	color: var(--tl-muted);
+	font-size: 10.5px;
+	font-variant-numeric: tabular-nums;
+	letter-spacing: .03em;
+	text-transform: uppercase;
+	white-space: nowrap;
+}
+
+.day .d.bold {
+	color: var(--tl-ink);
+}
+
+/* the peak and the days after it (.s), the days of a counter (.n): small tags */
+.day :is(.s, .n) {
+	padding: 0 5px;
+	border-radius: 4px;
+	font-size: 11px;
+	font-weight: 700;
+	line-height: 16px;
+	font-variant-numeric: tabular-nums;
+}
+
+.day .s {
+	background-color: color-mix(in srgb, var(--tl-peak) 14%, transparent);
+	color: var(--tl-peak);
+}
+
+.day .n {
+	background-color: color-mix(in srgb, var(--tl-green) 14%, transparent);
+	color: var(--tl-green-ink);
+}
+
+/* descriptions: observations as they are, sensations in bold, the ones with no type struck through */
+/* long keywords wrap inside their cell: the row grows a line */
+.day .o {
+	flex: 0 1 auto;
+	min-width: 0;
+	overflow-wrap: break-word;
+}
+
+.day .o_sens {
+	font-weight: 700;
+}
+
+.day .o_other {
+	text-decoration: line-through;
+}
+
+.day .fc {
+	font-family: "Montserrat";
+	font-size: 13px;
+	font-weight: 700;
+}
+
+.day .fc .note_not_imp {
+	font-weight: 400;
+}
+
+.day .fc .note_rouge {
+	color: var(--tl-red-ink);
+	font-weight: 400;
+}
+
+/* the temperature: a pill coloured by its value (js), then the time it was taken in the same colour */
+.day .t {
+	padding: 0 6px;
+	border-radius: 999px;
+	background-color: gray;
+	color: white;
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 16px;
+	font-variant-numeric: tabular-nums;
+}
+
+.day .t::after {
+	content: '°';
+}
+
+.day .th {
+	font-size: 11px;
+	font-variant-numeric: tabular-nums;
+}
+
+.day :is(.u, .fle) {
+	font-size: 12px;
+}
+
+.day .e {
+	color: var(--ink);
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: .05em;
+	text-transform: uppercase;
+}
+
+.day .r {
+	color: var(--ink);
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.day .p {
+	color: var(--tl-muted);
+	font-size: 12px;
+	font-style: italic;
+}
+
+/* the comment: free text, one line per line typed */
+.day .c {
+	flex: 0 1 auto;
+	min-width: 0;
+	padding: 1px 0 2px;
+	color: var(--tl-muted);
+	font-size: 11px;
+	font-style: italic;
+	line-height: 1.15;
+	overflow-wrap: anywhere;
+}
+
+.day .c.c_lines {
+	flex-basis: 100%;
+}
+
+/* --- the mini view: a cycle per line, a column per day of cycle: the peak mark, the square, the FertilityCare note, the union --- */
+.cycle_recap {
+	margin-top: 12px;
+}
+
+.cycle_recap:first-child {
+	padding-top: 10px;
+}
+
+.cycle_recap h5 {
+	position: relative;
+	margin: 0 0 3px;
+	padding-right: 24px;
+	color: var(--tl-muted);
+	font-family: 'Montserrat';
+	font-size: 12px;
+	font-weight: 400;
+	line-height: 1.3;
+	cursor: pointer;
+}
+
+.cycle_recap h5::after {
+	right: 2px;
+}
+
+.cycle_recap .contenu,
+.mini_ruler {
+	display: grid;
+	grid-template-columns: repeat(var(--cycle-cols, 35), minmax(0, 1fr)); /* days per line: cycle_line_length */
+	column-gap: 1px;
+}
+
+.cycle_recap .contenu {
+	row-gap: 4px;
+}
+
+.cycle_recap .obs {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	container-type: inline-size;
+	cursor: pointer;
+	-webkit-tap-highlight-color: transparent;
+}
+
+.cycle_recap .obs span {
+	display: block;
+	height: 9px;
+	overflow: hidden;
+	font-size: 7px;
+	font-size: clamp(6.5px, 62cqw, 9px);
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	letter-spacing: -.03em;
+	line-height: 9px;
+	text-align: center;
+	white-space: nowrap;
+}
+
+.cycle_recap .obs span.g {
+	display: grid;
+	place-items: center;
+	height: auto;
+	aspect-ratio: 1;
+	margin: 1px 0;
+	border-radius: 22%;
+	background: var(--stamp, var(--tl-yellow-hatch));
+	box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .07);
+	color: var(--ink);
+	font-size: 7px;
+	font-size: clamp(6px, 58cqw, 11px);
+	line-height: 1;
+}
+
+/* the FertilityCare bleeding (H, M, L) on a coloured square */
+.cycle_recap .obs span.g:is(.rouge, .vert) {
+	color: rgba(255, 255, 255, .92);
+}
+
+.cycle_recap .obs span.g.jaune {
+	color: #2b2100;
+}
+
+.cycle_recap .obs span.g.baby {
+	box-shadow: inset 0 0 0 1px var(--tl-white-edge);
+}
+
+.cycle_recap .obs:hover span.g.baby {
+	box-shadow: inset 0 0 0 1px #8a8a8a;
+}
+
+.cycle_recap .obs span.g:is(.jcpas, .vide) {
+	background-size: 6px 6px;
+}
+
+/* the day under the pointer: its edge takes a darker shade of its stamp */
+.cycle_recap .obs:hover span.g {
+	box-shadow: inset 0 0 0 1px var(--edge);
+}
+
+.cycle_recap .obs :is(.s, .n) {
+	color: var(--tl-peak);
+}
+
+.cycle_recap .obs .n {
+	color: var(--tl-green-ink);
+}
+
+.cycle_recap .obs .fc {
+	color: var(--tl-ink);
+}
+
+.cycle_recap .obs .c {
+	font-weight: 400;
+}
+
+/* the day numbers over a cycle, under its title when it is open */
+.mini_ruler {
+	margin: 2px 0 4px;
+	padding: 0;
+}
+
+.mini_ruler span {
+	height: 11px;
+	border-radius: 2px;
+	color: color-mix(in srgb, var(--tl-ink) 80%, transparent);
+	font-size: 7px;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+	line-height: 11px;
+	text-align: center;
+	overflow: hidden;
+}
+
+.mini_ruler span.odd {
+	background-color: color-mix(in srgb, var(--tl-ink) 11%, transparent);
+}
+
+@media (min-width: 601px) {
+
+	.cycle_recap .contenu,
+	.mini_ruler {
+		column-gap: 2px;
+	}
+
+	.mini_ruler span {
+		font-size: 9px;
+	}
+
+}
+
+@media (prefers-color-scheme: dark) {
+
+	:where([data-screen="timeline"]) {
+		--tl-bg: black;
+		--tl-ink: #ececec;
+		--tl-muted: #9a9e9b;
+		--tl-line: #2c2c2c;
+		--tl-card: #121212;
+		--tl-tint: 19%;
+		--tl-red: #c7303f;
+		--tl-red-ink: #f0707c;
+		--tl-green: #23955a;
+		--tl-green-ink: #3fc47c;
+		--tl-yellow: #fbca0b;
+		--tl-yellow-ink: #fbca0b;
+		--tl-white: #fbfbfb;
+		--tl-white-edge: #fbfbfb;
+		--tl-red-edge: #ff8a98;
+		--tl-green-edge: #7fe0aa;
+		--tl-yellow-edge: #fff0a8;
+		--tl-blue-edge: #8cc0f0;
+		--tl-hatch-edge: #fbca0b;
+		--tl-pause-edge: #ffaab4;
+		--tl-blue-ink: #8cc0f0;
+		--tl-blue-hatch: repeating-linear-gradient(45deg, #00284f 0 3px, #001e3c 3px 6px);
+		--tl-yellow-hatch: repeating-linear-gradient(45deg, #493b00 0 3px, #332900 3px 6px);
+		--tl-pause: #5a0a14;
+		--tl-pause-ink: #ffaab4;
+		--tl-peak: #e0a070;
+	}
+
+	:is(.stamp_jaune, .g.jaune) {
+		--tint-boost: -4%;
+	}
+
+	/* 6% of green on black does not show: the news keeps its light green box */
+	.actu {
+		border-color: color-mix(in srgb, var(--tl-green) 45%, transparent);
+		background-color: color-mix(in srgb, var(--tl-green) 16%, var(--tl-bg));
+	}
+
+	:is(.stamp_baby, .g.baby) {
+		--ink: #ececec;
+	}
+
+	.day .g {
+		box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08);
+	}
+
+	.cycle_recap .obs span.g {
+		box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .07);
+	}
+
+	.mini_ruler span {
+		color: var(--tl-ink);
+	}
+
+	.mini_ruler span.odd {
+		background-color: color-mix(in srgb, var(--tl-ink) 22%, transparent);
+	}
+
+}
+
+/* --- the day form's popup and its leftovers -------------------------------------------------------------------------------- */
+#jour_form, #temp_graph {
+	display: block;
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	overflow-y: scroll;
+	padding: 0 10px;
+	border-radius: 3px;
+}
+
+.popup label.yellow,
+.popup label.red,
+.popup label.green {
+	font-weight: bold;
 }
 
 .note {
@@ -443,434 +777,6 @@
 	position: relative;
 	height: calc(100% - 20px);
 	width: 100%;
-}
-
-.actu {
-	width: 90%;
-	margin: 0 auto;
-	margin-top: 30px;
-	max-width: 550px;
-	padding: 5px;
-	border: 1px dotted #1e824c;
-	border-radius: 8px;
-}
-
-.cycle .graph {
-	width: 100%;
-	height: 250px;
-}
-
-.actu .tag {
-	color: #1e824c;
-	text-transform: uppercase;
-	font-weight: bold;
-	font-size: .7em;
-	vertical-align: top;
-}
-
-/* the news item: text from another site, drawn as text */
-.actu .actu_title {
-	display: block;
-	margin: 5px 0;
-}
-
-.actu .actu_text {
-	margin: 5px 0;
-	max-height: 10em;
-	overflow-y: auto;
-}
-
-.cycle_recap:first-child {
-	padding-top: 25px;
-}
-
-.cycle_recap .obs {
-	display: inline-block;
-	cursor: pointer;
-	line-height: 10px;
-}
-
-.cycle_recap .obs,
-.mini_ruler span {
-	width: calc(100% / var(--cycle-cols, 35)); /* days per line: js/tableau.js cycle_line_length */
-}
-
-.cycle_recap .obs span {
-	display: inline-block;
-	height: 9px;
-	width: 100%;
-	font-size: 6.5px;
-	text-align: center;
-	font-family: monospace;
-	overflow: hidden;
-}
-
-.cycle_recap .obs span.g {
-	border-width: 1px 0;
-	border-style: solid;
-	color: #370006;
-	height: 9px;
-	padding-top: 1px;
-	vertical-align: sub;
-}
-
-.cycle_recap .obs:last-child span.g {
-	border-top-right-radius: 2px;
-	border-bottom-right-radius: 2px;
-}
-
-/* same glow as the day bar, turned sideways: kept to the top and bottom edges (and the two ends of the bar). The cells are
-   2.857% wide, so their edges fall between pixels: the clip overshoots by 1px on the right only (the next cell paints over it;
-   on the left the glow would draw a light line over the previous cell), or a seam shows */
-.cycle_recap .obs span.g {
-	--glow: transparent;
-	box-shadow: 0 0 4px 0 color-mix(in srgb, var(--glow) 55%, transparent);
-	clip-path: inset(-6px -1px -6px 0);
-}
-
-.cycle_recap .obs:first-child span.g {
-	clip-path: inset(-6px -1px -6px -6px);
-}
-
-.cycle_recap .obs:last-child span.g {
-	clip-path: inset(-6px -6px -6px 0);
-}
-
-.cycle_recap .obs span.g.rouge {
-	--glow: #ac2433;
-}
-
-.cycle_recap .obs span.g.vert {
-	--glow: #1e824c;
-}
-
-.cycle_recap .obs span.g.jaune {
-	--glow: #fbca0b;
-}
-
-.cycle_recap .obs span.g.jcpas {
-	--glow: #5a9ee0;
-}
-
-.cycle_recap .obs span.g.pink {
-	--glow: #e06a7a;
-}
-
-.cycle_recap .obs span.g.baby {
-	--glow: #8c8c8c;
-}
-
-.cycle_recap .obs span.vide {
-	--glow: #f0be1e;
-	box-shadow: 0 0 4px 0 color-mix(in srgb, var(--glow) 55%, transparent);
-	clip-path: inset(-6px -1px -6px 0);
-}
-
-.cycle_recap .obs span.jcpas {
-	padding: 0;
-	height: 10px;
-}
-
-.cycle_recap .obs span.vide {
-	border-width: 1px 0;
-	border-style: solid;
-	border-color: #ffeda8;
-	background-color: #fff6d4;
-}
-
-.cycle_recap .obs span.rouge {
-	font-weight: bold;
-}
-
-.cycle_recap .obs:first-child span.g {
-	border-left-style: solid;
-	border-left-width: 1px;
-}
-
-.cycle_recap .obs:last-child span.g {
-	border-right-style: solid;
-	border-right-width: 1px;
-}
-
-.cycle_recap .obs span.fc {
-	font-weight: bold;
-}
-
-.cycle_recap h5 {
-	display: block;
-	margin: 0;
-	margin-left: 10px;
-	margin-top: 3px;
-	padding-top: 8px;
-	font-weight: normal;
-	font-family: 'Montserrat';
-	font-size: 13px;
-	cursor: pointer;
-}
-
-#nocycle {
-	text-align: center;
-	margin-top: 25px;
-	font-family: 'Montserrat';
-}
-
-.o_paused,
-.o_paused .j,
-.cycle_recap .obs span.pink,
-.o_paused .s,
-.o_paused .n {
-	color: #821521;
-}
-
-.o_paused,
-.cycle_recap .obs span.pink {
-	background-color: #ffecee;
-	border-color: #ffecee;
-}
-
-.cycle_recap .obs:last-child span.pink {
-	border-right-width: 0;
-	border-right: 0;
-	font-weight: bold;
-	height: 10px;
-	padding-top: 0;
-}
-
-.cycle_recap .o_paused {
-	border-radius: 3px;
-}
-
-#timeline .o_paused {
-	padding-top: 2px;
-}
-
-.mini_ruler {
-	display: block;
-	height: 10px;
-	line-height: 10px;
-	padding: 0;
-	top: 0;
-	left: 0;
-	right: 0;
-	margin: 3px 0;
-	background-color: white;
-}
-
-.mini_ruler span {
-	display: inline-block;
-	height: 10px;
-	font-size: 7px;
-	text-align: center;
-	font-family: monospace;
-	overflow: hidden;
-	background-color: #f1f1f1;
-	vertical-align: middle;
-	padding-top: 1px;
-}
-
-.mini_ruler span.odd {
-	background-color: #d2d2d2;
-}
-
-.label_anonymous_export {
-	font-size: .8em;
-	vertical-align: middle;
-	color: gray;
-}
-
-@media (min-width: 601px) {
-
-	.o_paused {
-		border-radius: 3px;
-	}
-
-	.cycle_recap h5 {
-		margin-left: 0;
-	}
-
-	.cycle_recap .obs:first-child span.g {
-		border-top-left-radius: 2px;
-		border-bottom-left-radius: 2px;
-	}
-
-	.cycle_options,
-	h2 {
-		padding-left: 0;
-	}
-
-	.day {
-		padding-left: 0;
-	}
-
-	.nouveau_cycle_form {
-		margin-left: 0;
-	}
-
-}
-
-@media (prefers-color-scheme: dark) {
-
-	.day .g {
-		box-shadow: 0 0 9px 1px color-mix(in srgb, var(--glow) var(--glow-pct, 55%), transparent);
-	}
-
-	.day .g.rouge {
-		--glow: #eb465a;
-	}
-
-	.day .g.vert {
-		--glow: #32be73;
-		--glow-pct: 85%;
-	}
-
-	.day .g.jaune,
-	.day .g.ar {
-		--glow: #fbca0b;
-	}
-
-	.day .g.jcpas {
-		--glow: #5096eb;
-	}
-
-	.mini_ruler {
-		background-color: black;
-	}
-
-	.day .g.g_loading {
-		--glow: #c8c8c8;
-	}
-
-	.day .g.baby,
-	.cycle_recap .obs span.g.baby {
-		--glow: #ffffff;
-	}
-
-	.day .g.baby {
-		--glow-pct: 22%;
-	}
-
-	.cycle_recap .obs span.g {
-		box-shadow: 0 0 5px 0 color-mix(in srgb, var(--glow) 55%, transparent);
-	}
-
-	.cycle_recap .obs span.g.rouge {
-		--glow: #eb465a;
-	}
-
-	.cycle_recap .obs span.g.vert {
-		--glow: #32be73;
-	}
-
-	.cycle_recap .obs span.g.jcpas {
-		--glow: #5096eb;
-	}
-
-	.cycle_recap .obs span.g.pink {
-		--glow: #ff8a9a;
-	}
-
-	.cycle_recap .obs span.vide {
-		--glow: #fbca0b;
-		box-shadow: 0 0 5px 0 color-mix(in srgb, var(--glow) 55%, transparent);
-	}
-
-	/* day numbers: the dominant colour of the day's cell, lightened to read on black */
-	.day .j.j_vert {
-		color: #3bb273;
-	}
-
-	.day .j.j_rouge {
-		color: #e0566a;
-	}
-
-	.day .j.j_jaune {
-		color: #fbca0b;
-	}
-
-	.day .j.j_jcpas {
-		color: #5b9bd8;
-	}
-
-	.day .j.j_ar {
-		color: #e0b020;
-	}
-
-	:where([data-screen="timeline"]) h2 a {
-		background-color: white;
-		color: black;
-	}
-
-
-
-	.day .baby,
-	.obs .baby  {
-		border-color: #dedede;
-	}
-
-
-	.cycle_recap .obs span.j {
-		color:#343434;
-	}
-
-	.day .ar,
-	.cycle_recap .obs span.vide {
-		border-color: #332900;
-		background: repeating-linear-gradient(45deg, #493b00, #493b00 3px, #332900 3px, #332900 6px);
-	}
-
-	.day .ar,
-	.day .j_ar {
-		color: #ffeda8;
-	}
-
-	.mini_ruler span {
-		background-color: #4c4c4c;
-	}
-
-	.mini_ruler span.odd {
-		background-color: #292929;
-	}
-
-	.cycle_recap .obs span.g {
-		color: white;
-	}
-
-	.o_paused,
-	.o_paused .j,
-	.cycle_recap .obs span.pink,
-	.o_paused .s,
-	.o_paused .n {
-		color: #faa;
-	}
-
-	.o_paused,
-	.cycle_recap .obs span.pink {
-		background-color: #3c0006;
-		border-color: #3c0006;
-	}
-
-	.day .j_baby {
-		color: #fbfbfb;
-	}
-
-	.day .jcpas,
-	.obs .jcpas {
-		border-color: #001e3c;
-		color: #dfefff;
-		background: repeating-linear-gradient(45deg, #00284f, #00284f 3px, #001e3c 3px, #001e3c 6px);
-	}
-
-	.day .g_loading,
-	.obs .g_loading {
-		border-color: #2c2c2c;
-		background-color: #2c2c2c;
-	}
-
-}
-
-.unknown_type_note {
-	margin: 6px 0 0;
-	font-size: .85em;
 }
 
 /* --- the day form (#jour_form): one card per part, a sticky header, chips for every choice --------------------------------------- */

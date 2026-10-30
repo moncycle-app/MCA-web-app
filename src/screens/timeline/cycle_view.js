@@ -184,6 +184,8 @@ export function day_timeline2timeline(j) {
 	else o_class += " o_mucus";
 	if (j.observation_paused) o_class += " o_paused";
 	let day_timeline = el("div", {id: o_id, class: o_class, date: dates.str(o_date)});
+	// the stamp of the day colours its whole row (timeline.css, .stamp_*): its square, its tint, its day number
+	const tint = (name) => day_timeline.classList.add("stamp_" + name);
 	let d_bold = o_date.getDay()==0 ? "bold" : "";
 	day_timeline.append(el("span", {class: `d ${d_bold}`.trim(), text: date_row(o_date)}));
 	let pos = el("span", {class: "j", text: String(j.pos)});
@@ -191,6 +193,7 @@ export function day_timeline2timeline(j) {
 	day_timeline.addEventListener("click", open_menu);
 	let tbd = true;
 	if (j.observation_paused) {
+		day_timeline.append(el("span", {class: "g pink"}));
 		day_timeline.append(el("span", {class: "e", text: t("timeline.observation_paused")}));
 		day_timeline.append(el("span", {class: "s"}));
 		day_timeline.append(el("span", {class: "n"}));
@@ -200,6 +203,7 @@ export function day_timeline2timeline(j) {
 		if (j.day_not_observed) {
 			day_timeline.append(el("span", {class: "g jcpas", text: t("timeline.not_observed_glyph")}));
 			pos.classList.add("j_jcpas");
+			tint("jcpas");
 			tbd = false;
 		}
 		else {
@@ -215,8 +219,11 @@ export function day_timeline2timeline(j) {
 				}
 				day_timeline.append(el("span", {class: `g ${state.stamp_class[color]}`, text: contenu}));
 				pos.classList.add("j_" + state.stamp_class[color]);
+				tint(state.stamp_class[color]);
 				tbd = false;
 			}
+			// no stamp (a note or a temperature only): an empty square, so that the squares stay in one column
+			else day_timeline.append(el("span", {class: "g g_none"}));
 			day_timeline.append(el("span", {class: "fc pas_mucus pas_mucus_temp"}, ...fc_note2nodes(j.fc_score || "")));
 			if ((state.constante.nfp_method==1 || state.constante.nfp_method==4) && j.temperature) {
 				let temp = parseFloat(j.temperature);
@@ -240,31 +247,47 @@ export function day_timeline2timeline(j) {
 			if ((state.constante.nfp_method==3 || state.constante.nfp_method==4) && j.fc_score) tbd = false;
 		}
 		if (tbd) {
+			day_timeline.querySelector(".g_none")?.remove();
 			day_timeline.append(el("span", {class: "g ar", text: t("timeline.to_fill_in_glyph")}));
+			tint("ar");
 			day_timeline.append(el("span", {class: "s"}));
 			day_timeline.append(el("span", {class: "r", text: t("timeline.to_fill_in")}));
 			pos.classList.add("j_ar");
-			return day_timeline;
+			return with_body(day_timeline);
 		}
 		day_timeline.append(el("span", {class: "s", text: j.is_peak ? t("timeline.peak_mucus") : ""}));
 		day_timeline.append(el("span", {class: "n"}));
+		day_timeline.append(el("span", {class: "u", text: j.union_sex ? t("timeline.union") : ""}));
 		if (!j.day_not_observed) {
 			day_timeline.append(description_cell(j.description));
 			if (state.arrow_id[j.fc_arrow]) day_timeline.append(el("span", {class: "fle pas_mucus pas_mucus_temp", text: t_map("timeline.arrow_glyph")[j.fc_arrow] || ""}));
 		}
 		else day_timeline.append(el("span", {class: "p", text: t("timeline.not_observed")}));
-		day_timeline.append(el("span", {class: "u", text: j.union_sex ? t("timeline.union") : ""}));
 	}
 	if (j.comment) {
-		// free text: one text node per line, a <br> between, never HTML
-		let cell = el("span", {class: "c"});
+		// free text: one text node per line, a <br> between, never HTML. A comment of several lines goes under the rest (timeline.css).
+		let cell = el("span", {class: j.comment.trim().includes("\n") ? "c c_lines" : "c"});
 		j.comment.trim().split("\n").forEach((line, i) => {
 			if (i > 0) cell.append(el("br"));
 			cell.append(document.createTextNode(line));
 		});
 		day_timeline.append(cell);
 	}
-	return day_timeline;
+	return with_body(day_timeline);
+}
+
+// The row is a grid: day number, square, what the day holds, date (timeline.css). What it holds is one cell: its marks and keywords
+// in a block that stays on the first line (long keywords wrap inside it), then the comment, which moves under them when it does not
+// fit beside them. The date stays on the first line.
+function with_body(row) {
+	const main = el("span", {class: "m"});
+	const body = el("span", {class: "b"}, main);
+	[...row.children].forEach((cell) => {
+		if (cell.matches(".c")) body.append(cell);
+		else if (!cell.matches(".d, .j, .g")) main.append(cell);
+	});
+	row.append(body);
+	return row;
 }
 
 // A FertilityCare note for the page: its codes in colour, the rest as it is. The server only stores notes made of the notation's codes, but
