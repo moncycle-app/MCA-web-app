@@ -138,8 +138,9 @@
 		"one": "{count} day",
 		"other": "{count} days"
 	},
-	"timeline.stats_day_range": "Day {first}–{last}",
-	"timeline.stats_day_range._comment": "a run of days of the cycle; one day alone is timeline.day_number",
+	"timeline.stats_day_range": "D{first}–D{last}",
+	"timeline.stats_day_range._comment": "a run of days of the cycle, short form for the stats panel; one day alone is timeline.stats_day",
+	"timeline.stats_day": "D{n}",
 	"timeline.stats_range": "{min}–{max}",
 	"timeline.stats_list_cut": "{list}, …",
 	"timeline.stats_list_cut._comment": "a list of days cut short: the first ones, then an ellipsis (the figure before it says how many there are)",

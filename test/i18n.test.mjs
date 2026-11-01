@@ -15,7 +15,7 @@ const i18n = await import("/js/core/i18n.js");
 i18n.use_catalog(catalog, "fr");
 
 test("t: variables, missing keys", (t) => {
-	assert.equal(i18n.t("timeline.day_number", { n: 12 }), "J12");
+	assert.equal(i18n.t("timeline.day_number", { n: 12 }), "Jour 12");
 	assert.equal(i18n.t("timeline.but_day_step", { arrow: "↑", day: "J13" }), "↑ J13");
 	const warnings = [];
 	t.mock.method(console, "warn", (message) => warnings.push(message));

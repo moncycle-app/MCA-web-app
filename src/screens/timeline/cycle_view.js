@@ -155,12 +155,12 @@ export function cycle_option(c_date_str, c_date_fin_str, discri) {
 }
 
 // --- the figures of a cycle -----------------------------------------------------------------------------------------------------------
-// They read the same everywhere: a number, a share in percent, a number of days, a day of the cycle ("J12" as in the day form), a run of
+// They read the same everywhere: a number, a share in percent, a number of days, a day of the cycle (short: "J12", "D12"), a run of
 // days ("J12–J17"), and after a figure, in brackets and lighter, what goes with it (a share, a range, the days it is about).
 const number = (n) => format_number(n);
 const share = (n) => format_number(n / 100, {style: "percent"});
 const days_text = (count) => t("timeline.stats_days", {count: count});
-const day_text = (n) => t("timeline.day_number", {n: n});
+const day_text = (n) => t("timeline.stats_day", {n: n});
 const run_text = (first, last) => first == last ? day_text(first) : t("timeline.stats_day_range", {first: first, last: last});
 
 function aside_node(parts) {
