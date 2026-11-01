@@ -166,11 +166,9 @@
 
 /* --- A panel ---------------------------------------------------------------------------- */
 
-.back {
-	display: inline-block;
-	padding: 6px 0;
-	text-decoration: none;
-	font-weight: bold;
+/* "‹ Settings": a link of the header's kind, its text in line with the panel */
+.settings .back {
+	margin: 4px 0 0 -12px;
 }
 
 /* a block of a panel with its own title (the address, the password, the double authentication): a .card of common.css */

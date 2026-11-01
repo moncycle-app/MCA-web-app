@@ -80,21 +80,25 @@ export function structure_of(account) {
 	return JSON.stringify([account.allCyclesFirstDay, account.allObservationPausedDates, account.timelineAscending, account.method, account.temperatureTracking]);
 }
 
+// The lengths of the complete cycles, latest first: [{start, days}]. The latest cycle (still open) has none, and neither has a cycle that
+// ended with a pause of the observations.
+export function cycle_lengths(starts, pauses) {
+	starts = starts || [];
+	pauses = pauses || [];
+	const lengths = [];
+	// the starts come latest first: starts[c-1] is the day after the end of cycle c
+	for (let c = 1; c < starts.length; c++) {
+		if (pauses.some(d => d >= starts[c] && d < starts[c-1])) continue;
+		lengths.push({start: starts[c], days: dates.days_between(starts[c], starts[c-1])});
+	}
+	return lengths;
+}
+
 // Days per line of the recap: wide enough for 80% of the recent complete cycles (and the median + 5), in steps of 5 so that the
 // layout does not move with every new cycle. A cycle longer than that wraps; the bounds keep the days readable on a phone.
 export function cycle_line_length(starts, pauses) {
 	const DEFAULT = 35, MIN = 30, MAX = 45, STEP = 5, MARGIN = 5, RECENT = 12, MIN_CYCLES = 3, QUANTILE = 0.8;
-	starts = starts || [];
-	pauses = pauses || [];
-	const lengths = [];
-	// the starts come latest first: starts[c-1] is the day after the end of cycle c, which the latest cycle (still open) lacks
-	for (let c = 1; c < starts.length && lengths.length < RECENT; c++) {
-		const start = dates.parse(starts[c]);
-		const next = dates.parse(starts[c-1]);
-		// a cycle that ended with a pause of the observations is not a length
-		if (pauses.some(d => d >= starts[c] && d < starts[c-1])) continue;
-		lengths.push(Math.round((next - start) / dates.DAY_MS));
-	}
+	const lengths = cycle_lengths(starts, pauses).slice(0, RECENT).map(c => c.days);
 	if (lengths.length < MIN_CYCLES) return DEFAULT;
 	lengths.sort((x, y) => x - y);
 	const p80 = lengths[Math.ceil(QUANTILE * lengths.length) - 1];

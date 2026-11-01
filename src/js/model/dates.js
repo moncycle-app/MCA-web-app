@@ -41,3 +41,9 @@ export function now_in_utc() {
 export function days_between(from, to) {
 	return Math.round((Date.parse(to + "T00:00:00Z") - Date.parse(from + "T00:00:00Z")) / DAY_MS);
 }
+// the date `count` days after a date (before it when `count` is negative), both "YYYY-MM-DD"
+export function add_days(date, count) {
+	const day = parse(date);
+	day.setDate(day.getDate() + count);
+	return str(day);
+}

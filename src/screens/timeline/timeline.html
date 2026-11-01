@@ -33,11 +33,6 @@
 			<button data-i18n="timeline.bulk_apply" type="button" id="bulk_but_submit"></button>
 		</div>
 		<div id="jour_form_titre" class="uppercase"></div>
-		<div class="jf_status">
-			<span data-i18n="timeline.form_saving" class="popup_enregistratement_status" id="jour_form_saving"></span>
-			<span data-i18n="timeline.form_saved" class="popup_enregistratement_status vert" id="jour_form_saved"></span>
-			<span data-i18n="timeline.form_unsent" class="popup_enregistratement_status rouge" id="jour_form_unsent"></span>
-		</div>
 	</div>
 	<form id="form_data">
 		<input type="hidden" id="form_date" name="date" value="" />
@@ -177,5 +172,11 @@
 		</div>
 		<div id="form_err" class="err"></div>
 	</form>
+	<!-- how the save of the day went: a toast at the bottom of the screen ("saved" fades by itself) -->
+	<div class="jf_status" role="status">
+		<span data-i18n="timeline.form_saving" class="popup_enregistratement_status" id="jour_form_saving"></span>
+		<span data-i18n="timeline.form_saved" class="popup_enregistratement_status vert" id="jour_form_saved"></span>
+		<span data-i18n="timeline.form_unsent" class="popup_enregistratement_status rouge" id="jour_form_unsent"></span>
+	</div>
 </div>
 

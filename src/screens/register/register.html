@@ -6,8 +6,17 @@
 	<span class="rouge"></span>
 </header>
 
-<div class="contennu vert" id="register_ok" hidden>
-	<center data-i18n="register.sent_text"><br data-slot="br" /><br data-slot="br2" /><b data-i18n="register.almost_done" data-slot="b"></b><br data-slot="br3" /><b data-slot="b2"><span id="success_email"></span></b><br data-slot="br4" /><br data-slot="br5" /><br data-slot="br6" /><span data-i18n="register.no_message_hint" data-slot="span" class="label_info"></span></center>
+<div class="contennu welcome" id="register_ok" hidden>
+	<div class="welcome_icon" aria-hidden="true">💌</div>
+	<h2 data-i18n="register.almost_done"></h2>
+	<p data-i18n="register.sent_intro" class="welcome_lead"></p>
+	<p class="welcome_email" id="success_email"></p>
+	<ol class="welcome_steps">
+		<li data-i18n="register.sent_step_open"></li>
+		<li data-i18n="register.sent_step_click"></li>
+		<li data-i18n="register.sent_step_sign_in"></li>
+	</ol>
+	<p data-i18n="register.no_message_hint" class="label_info welcome_hint"></p>
 </div>
 <div class="contennu" id="register_form">
 	<h2 data-i18n="register.form_title"></h2>

@@ -23,7 +23,7 @@ import { description_from_api } from "../../js/model/descriptions.js";
 import { bind_desc_add_forms, bulk_show_hide, bulk_submit_menu, close_menu, fc_note2form, go_blank_or_empty, open_menu, refresh_day, submit_menu, suppr_day_timeline } from "./day_form.js";
 import { cycle2graph, graph_preparation_data, graph_update } from "./chart_view.js";
 import { cycle2recap, day_timeline2recap } from "./recap_view.js";
-import { cycle2timeline, day_timeline2timeline, form_nouveau_cycle, hide_method_parts, trois_jours } from "./cycle_view.js";
+import { close_cycle_options, cycle2timeline, day_timeline2timeline, form_nouveau_cycle, hide_method_parts, trois_jours } from "./cycle_view.js";
 import { state, reset_state } from "./state.js";
 
 // the sentence of a refused or failed export (the API's own words are English)
@@ -58,6 +58,13 @@ function start_timeline(ctx) {
 	];
 	const signal = ctx.signal;
 	delegate(document, "click", ".cycle_options a", download_export, {signal});
+	// the options of a cycle close on a tap anywhere but on its title and options, and on Escape
+	document.addEventListener("click", function (event) {
+		if (state.cycle_title_opened !== null && !event.target.closest(".cycle_head")) close_cycle_options();
+	}, {signal});
+	document.addEventListener("keydown", function (event) {
+		if (event.key === "Escape" && state.cycle_title_opened !== null) close_cycle_options();
+	}, {signal});
 	by_id("charger_cycle").addEventListener("click", charger_cycle);
 	by_id("jour_form_close").addEventListener("click", close_menu);
 	by_id("jour_form_submit").addEventListener("click", submit_menu);

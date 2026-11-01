@@ -14,9 +14,10 @@
 import { moncycle_config } from "../../js/core/config.js";
 import { moncycle_store } from "../../js/model/store.js";
 import * as dates from "../../js/model/dates.js";
-import { t, t_map, t_node, date_short, date_row } from "../../js/core/i18n.js";
+import { t, t_map, t_node, date_short, date_row, format_number } from "../../js/core/i18n.js";
 import { by_id, el, display } from "../../js/core/dom.js";
 import { counter_days, peak_follow_days } from "../../js/model/cycles.js";
+import { cycle_stats, fill_level, filled_percent, percent, previous_cycles, todo_runs } from "../../js/model/cycle_stats.js";
 import { description_cell } from "./recap_view.js";
 import { open_menu } from "./day_form.js";
 import { state } from "./state.js";
@@ -120,13 +121,15 @@ export function trois_jours() {
 
 export function cycle_option(c_date_str, c_date_fin_str, discri) {
 	let id_buts = c_date_str.replace("-", "_").replace("-", "_");
-	let c_action = el("div", {class: `cycle_options c_options_${c_date_str}`});
-	c_action.style.display = "none";
+	const options = el("div", {class: `cycle_options c_options_${c_date_str}`});
+	// the grid row of the options goes from 0 to its height (timeline.css), so what is inside sits in a block that can shrink to nothing
+	const c_action = el("div", {class: "cycle_options_inner"});
+	options.append(c_action);
 	// the address carries the format, the period and the option; a click fetches the file and saves it (download_export)
-	const nfp_link = el("a", {id: `nfp_but_${id_buts}_${discri}`, href: `${moncycle_config.api_url("/export/nfp")}?from=${c_date_str}&to=${c_date_fin_str}&anonymous=false`}, el("button", {text: t("timeline.but_export_nfp")}));
-	const csv_link = el("a", {href: `${moncycle_config.api_url("/export/csv")}?from=${c_date_str}&to=${c_date_fin_str}`}, el("button", {text: t("timeline.but_export_csv")}));
-	const pdf_link = el("a", {id: `pdf_but_${id_buts}_${discri}`, href: `${moncycle_config.api_url("/export/pdf")}?from=${c_date_str}&to=${c_date_fin_str}&anonymous=false`}, el("button", {text: t("timeline.but_export_pdf")}));
-	c_action.append(nfp_link, " ", csv_link, " ", pdf_link, " ");
+	const nfp_link = el("a", {id: `nfp_but_${id_buts}_${discri}`, class: "button", href: `${moncycle_config.api_url("/export/nfp")}?from=${c_date_str}&to=${c_date_fin_str}&anonymous=false`, text: t("timeline.but_export_nfp")});
+	const csv_link = el("a", {class: "button", href: `${moncycle_config.api_url("/export/csv")}?from=${c_date_str}&to=${c_date_fin_str}`, text: t("timeline.but_export_csv")});
+	const pdf_link = el("a", {id: `pdf_but_${id_buts}_${discri}`, class: "button", href: `${moncycle_config.api_url("/export/pdf")}?from=${c_date_str}&to=${c_date_fin_str}&anonymous=false`, text: t("timeline.but_export_pdf")});
+	c_action.append(el("div", {class: "cycle_exports"}, nfp_link, csv_link, pdf_link));
 	// the checkbox applies to every export that can carry the user's identity: the PDF
 	// (name on the chart) and the NFP file (userInformation block). The CSV never does.
 	let anonymous_checkbox = el("input", {type: "checkbox", value: "1", id: `anonymous_${id_buts}_${discri}`, name: "privacy"});
@@ -145,20 +148,172 @@ export function cycle_option(c_date_str, c_date_fin_str, discri) {
 		return date >= c_date_str && date <= c_date_fin_str && (moncycle_store.days[date].freeOther || []).length > 0;
 	});
 	if (has_untyped) c_action.append(el("p", {class: "unknown_type_note", text: t("timeline.unknown_type_note")}));
-	c_action.append(el("br"), anonymous_checkbox, el("label", {for: `anonymous_${id_buts}_${discri}`, class: "label_anonymous_export", text: t("timeline.label_anonymous_export")}));
-	return c_action;
+	c_action.append(el("div", {class: "cycle_anonymous"}, anonymous_checkbox, el("label", {for: `anonymous_${id_buts}_${discri}`, class: "label_anonymous_export", text: t("timeline.label_anonymous_export")})));
+	// the figures are drawn when the box opens (fill_cycle_stats), from the days as they are then
+	c_action.append(el("div", {class: "cycle_stats", "data-from": c_date_str, "data-to": c_date_fin_str}));
+	return options;
 }
 
+// --- the figures of a cycle -----------------------------------------------------------------------------------------------------------
+// They read the same everywhere: a number, a share in percent, a number of days, a day of the cycle ("J12" as in the day form), a run of
+// days ("J12–J17"), and after a figure, in brackets and lighter, what goes with it (a share, a range, the days it is about).
+const number = (n) => format_number(n);
+const share = (n) => format_number(n / 100, {style: "percent"});
+const days_text = (count) => t("timeline.stats_days", {count: count});
+const day_text = (n) => t("timeline.day_number", {n: n});
+const run_text = (first, last) => first == last ? day_text(first) : t("timeline.stats_day_range", {first: first, last: last});
+
+function aside_node(parts) {
+	return el("span", {class: "stats_aside", text: t("timeline.stats_aside", {text: parts.join(", ")})});
+}
+// a figure and what goes with it (the empty parts are left out), as nodes
+function figure(main, ...aside) {
+	const parts = aside.filter((part) => part);
+	return parts.length ? [main, " ", aside_node(parts)] : [main];
+}
+function stats_row(list, label, main, ...aside) {
+	list.append(el("dt", {text: label}), el("dd", {}, ...figure(main, ...aside)));
+}
+
+// The kinds of day (cycle_stats.js day_kind), the class of their colour (timeline.css) and their name. The order here is only the one of
+// kinds with as many days as each other.
+const DAY_KINDS = [
+	{kind: "R", css: "stamp_rouge", key: "timeline.stats_kind_red"},
+	{kind: "G", css: "stamp_vert", key: "timeline.stats_kind_green"},
+	{kind: "Y", css: "stamp_jaune", key: "timeline.stats_kind_yellow"},
+	{kind: "BB", css: "stamp_baby", key: "timeline.stats_kind_baby"},
+	{kind: "none", css: "stamp_none", key: "timeline.stats_kind_none"},
+	{kind: "not_observed", css: "stamp_jcpas", key: "timeline.stats_kind_not_observed"},
+	{kind: "to_fill", css: "stamp_ar", key: "timeline.stats_kind_to_fill"},
+	{kind: "paused", css: "stamp_pause", key: "timeline.stats_kind_paused"},
+];
+// the most intercourse days a cycle's row names: the number before them says how many there are
+const UNION_SHOWN = 5;
+
+// one bar, one segment per kind of day, as wide as its days and the largest first (the sort is stable: equals keep the order of DAY_KINDS);
+// the legend follows the bar and gives the days and their share of the cycle
+function kinds_nodes(stats) {
+	const days = (kind) => stats.kinds[kind.kind];
+	const bar = el("div", {class: "stats_bar", "aria-hidden": "true"});
+	const legend = el("ul", {class: "stats_legend"});
+	DAY_KINDS.filter((kind) => days(kind)).sort((a, b) => days(b) - days(a)).forEach((kind) => {
+		const segment = el("span", {class: `stats_seg ${kind.css}`});
+		segment.style.flexGrow = String(days(kind));
+		bar.append(segment);
+		legend.append(el("li", {class: "stats_key"}, el("span", {class: `stats_dot ${kind.css}`}),
+			el("span", {}, el("b", {text: number(days(kind))}), " " + t(kind.key, {count: days(kind)}) + " ", aside_node([share(percent(days(kind), stats.total))]))));
+	});
+	return [bar, legend];
+}
+
+// How much of the cycle is filled in and a word about it, then the days still to fill in: a tap on one opens it in the day form
+const FILL_MESSAGES = {"95": "timeline.stats_fill_95", "90": "timeline.stats_fill_90", "80": "timeline.stats_fill_80", "60": "timeline.stats_fill_60", "low": "timeline.stats_fill_low"};
+const TODO_SHOWN = 10;
+
+function fill_node(stats, from, ongoing) {
+	const left = stats.kinds.to_fill;
+	const filled = stats.total - left;
+	const rows = el("dl", {class: "stats_rows"});
+	stats_row(rows, t("timeline.stats_filled"), t("timeline.stats_fraction", {part: number(filled), whole: number(stats.total)}), share(filled_percent(stats)));
+	// the days filled in a row, when the cycle has a gap: up to today in the cycle under way, the most of them in another
+	const in_a_row = ongoing ? stats.streak : stats.longest;
+	if (in_a_row > 1 && in_a_row < filled) stats_row(rows, t(ongoing ? "timeline.stats_streak" : "timeline.stats_longest_run"), days_text(in_a_row));
+	let message;
+	if (!left) message = t(ongoing ? "timeline.stats_fill_full_ongoing" : "timeline.stats_fill_full");
+	else if (ongoing && left == 1 && stats.to_fill[0] == stats.total) message = t("timeline.stats_fill_today");
+	else message = t(FILL_MESSAGES[fill_level(filled_percent(stats))], {count: left});
+	const box = el("div", {class: left ? "stats_fill" : "stats_fill full"}, rows, el("p", {class: "stats_message", text: message}));
+	if (!left) return box;
+	const runs = todo_runs(stats.to_fill);
+	const todo = el("div", {class: "stats_todo", role: "group", "aria-label": t("timeline.stats_todo_label")});
+	runs.slice(0, TODO_SHOWN).forEach((run) => {
+		const button = el("button", {type: "button", text: run_text(run.first, run.last), title: t("timeline.stats_todo_open", {day: day_text(run.first)})});
+		button.addEventListener("click", () => open_menu(null, dates.add_days(from, run.first - 1)));
+		todo.append(button);
+	});
+	const more = runs.slice(TODO_SHOWN).reduce((sum, run) => sum + run.last - run.first + 1, 0);
+	if (more) todo.append(el("span", {class: "stats_aside", text: t("timeline.stats_todo_more", {count: more})}));
+	box.append(todo);
+	return box;
+}
+
+// This cycle beside the complete cycles before it (previous_cycles): its length, its peak day and the days after it; for the cycles before,
+// the mean, then the shortest and the longest, and how many of them have a peak when not all do. A cycle ended by a pause has no length.
+function compare_node(stats, from, fc) {
+	const account = moncycle_store.account || {};
+	const before = previous_cycles(account.allCyclesFirstDay, account.allObservationPausedDates, moncycle_store.days, from);
+	const has_peak = stats.peak !== null || before.peak !== null;
+	// nothing before it and no peak: the length alone, which the title gives
+	if (!before.cycles && !has_peak) return null;
+	const complete = !stats.kinds.paused;
+	const head = el("tr", {}, el("td"), el("th", {scope: "col", text: t("timeline.stats_this_cycle")}));
+	if (before.cycles) head.append(el("th", {scope: "col", text: t("timeline.stats_previous", {count: before.cycles})}));
+	const body = el("tbody");
+	const line = (label, mine, theirs, text, range) => {
+		const row = el("tr", {}, el("th", {scope: "row", text: label}), el("td", {text: mine === null ? t("timeline.stats_none") : text(mine)}));
+		if (before.cycles) {
+			const cell = el("td", {text: theirs ? null : t("timeline.stats_none")});
+			if (theirs) cell.append(...figure(text(Math.round(theirs.mean)), theirs.min != theirs.max ? range(theirs.min, theirs.max) : "", theirs.count < before.cycles ? t("timeline.stats_cycles", {count: theirs.count}) : ""));
+			row.append(cell);
+		}
+		body.append(row);
+	};
+	const days_range = (min, max) => t("timeline.stats_range", {min: number(min), max: number(max)});
+	line(t("timeline.stats_length"), complete ? stats.total : null, before.length, days_text, days_range);
+	if (has_peak) {
+		line(t(fc ? "timeline.stats_peak_fc" : "timeline.stats_peak_mucus"), stats.peak, before.peak, day_text, run_text);
+		line(t(fc ? "timeline.stats_after_peak_fc" : "timeline.stats_after_peak_mucus"), stats.peak !== null && complete ? stats.total - stats.peak : null, before.after_peak, days_text, days_range);
+	}
+	return el("table", {class: "stats_compare"}, el("thead", {}, head), body);
+}
+
+// The figures of one cycle (cycle_stats.js), from the local copy: its days by kind, how much of it is filled in, how it compares with the
+// cycles before it, its baby period, intercourse, temperatures and keywords. Every figure is text; the keywords are the user's own words
+// and go in as text.
+function cycle_stats_node(from, to) {
+	const nfp_method = state.constante.nfp_method;
+	const fc = nfp_method == 3 || nfp_method == 4;
+	const stats = cycle_stats(moncycle_store.days, from, to, {fc: fc, temperature: nfp_method == 1 || nfp_method == 4});
+	// the cycle under way: it ends today, and no pause closed it
+	const ongoing = to == dates.str(dates.now()) && !stats.kinds.paused;
+	const root = el("div", {class: "cycle_stats_body"}, ...kinds_nodes(stats), fill_node(stats, from, ongoing));
+	const compare = compare_node(stats, from, fc);
+	if (compare) root.append(compare);
+	const rows = el("dl", {class: "stats_rows"});
+	if (stats.baby) stats_row(rows, t("timeline.stats_baby_span"), run_text(stats.baby.first, stats.baby.last), days_text(stats.baby.days));
+	const union_days = stats.union.slice(0, UNION_SHOWN).map((n) => day_text(n)).join(", ");
+	stats_row(rows, t("timeline.stats_union"), number(stats.union.length), stats.union.length > UNION_SHOWN ? t("timeline.stats_list_cut", {list: union_days}) : union_days);
+	if (stats.temperature) {
+		const degrees = (value) => t("timeline.stats_degrees", {value: format_number(value, {minimumFractionDigits: 2, maximumFractionDigits: 2})});
+		const {count, mean, min, max} = stats.temperature;
+		stats_row(rows, t("timeline.stats_temperature", {count: count}), t("timeline.stats_mean", {value: degrees(mean)}), min != max ? t("timeline.stats_range", {min: degrees(min), max: degrees(max)}) : "");
+	}
+	if (stats.words.length) stats_row(rows, t("timeline.stats_words"), stats.words.map(([word, days]) => t("timeline.stats_word", {word: word, count: days})).join(", "));
+	root.append(rows);
+	return root;
+}
+
+function fill_cycle_stats(options) {
+	const box = options.querySelector(".cycle_stats");
+	if (box) box.replaceChildren(cycle_stats_node(box.dataset.from, box.dataset.to));
+}
+
+// A tap on a cycle's title opens its options (and its ruler in the mini view) under it; a second tap, a tap elsewhere or Escape closes them.
 export function cycle_title_click(event) {
 	let c = event.currentTarget.getAttribute("for");
-	each(".cycle_options", (options) => display(options, false));
-	each(".mini_ruler", (ruler) => display(ruler, false));
-	if (state.cycle_title_opened == null || state.cycle_title_opened != c) {
+	const was_open = state.cycle_title_opened == c;
+	close_cycle_options();
+	if (!was_open) {
 		each("#ruler_" + c, (ruler) => display(ruler, true));
-		each(`.c_options_${c}`, (options) => display(options, true));
+		each(`.c_options_${c}`, (options) => { fill_cycle_stats(options); options.classList.add("open"); });
 		state.cycle_title_opened = c;
 	}
-	else state.cycle_title_opened = null;
+}
+
+export function close_cycle_options() {
+	each(".cycle_options", (options) => options.classList.remove("open"));
+	each(".mini_ruler", (ruler) => display(ruler, false));
+	state.cycle_title_opened = null;
 }
 
 export function cycle2timeline(c, nb, fin) {
@@ -169,9 +324,9 @@ export function cycle2timeline(c, nb, fin) {
 	let c_graph = el("div", {class: "graph pas_mucus pas_fc", id: `graph-${c_id}`}, el("canvas", {id: `canvas-${c_id}`}));
 	c_graph.style.display = "none";
 	c_title.addEventListener("click", cycle_title_click);
+	// the title and its options stick together at the top of the page: they open where the title is, however far down the cycle
 	return el("div", {id: c_id, class: "cycle"},
-		c_title,
-		cycle_option(c, dates.str(fin), "timeline"),
+		el("div", {class: "cycle_head"}, c_title, cycle_option(c, dates.str(fin), "timeline")),
 		c_graph,
 		el("div", {class: "contenu", id: `contenu-${c_id}`}));
 }

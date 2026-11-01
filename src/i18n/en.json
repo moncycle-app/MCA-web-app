@@ -56,6 +56,105 @@
 	"timeline.but_export_csv": "🔢 export CSV",
 	"timeline.but_export_pdf": "📄 export PDF",
 	"timeline.label_anonymous_export": " anonymize PDF and NFP exports",
+	"timeline.stats_kind_red": {
+		"one": "red",
+		"other": "red"
+	},
+	"timeline.stats_kind_red._comment": "legend of the bar of the cycle's figures, after the number of days in bold: \"15 green (52%)\"",
+	"timeline.stats_kind_green": {
+		"one": "green",
+		"other": "green"
+	},
+	"timeline.stats_kind_yellow": {
+		"one": "yellow",
+		"other": "yellow"
+	},
+	"timeline.stats_kind_baby": {
+		"one": "baby",
+		"other": "baby"
+	},
+	"timeline.stats_kind_none": "no stamp",
+	"timeline.stats_kind_none._comment": "a day with a temperature or a FertilityCare note but no stamp",
+	"timeline.stats_kind_not_observed": {
+		"one": "not observed",
+		"other": "not observed"
+	},
+	"timeline.stats_kind_to_fill": "to fill in",
+	"timeline.stats_kind_paused": "paused",
+	"timeline.stats_filled": "Days charted",
+	"timeline.stats_fraction": "{part} / {whole}",
+	"timeline.stats_streak": "Current streak",
+	"timeline.stats_streak._comment": "the days filled in a row up to today, in the cycle under way",
+	"timeline.stats_longest_run": "Longest run charted",
+	"timeline.stats_fill_full": "🎉 Well done, every day of this cycle is charted!",
+	"timeline.stats_fill_full_ongoing": "🎉 Well done, your chart is up to date!",
+	"timeline.stats_fill_today": "✍️ All caught up: only today is left to fill in.",
+	"timeline.stats_fill_95": {
+		"one": "🌟 Almost complete: {count} more day to fill in.",
+		"other": "🌟 Almost complete: {count} more days to fill in."
+	},
+	"timeline.stats_fill_95._comment": "the cycle is filled in at 95% or more, but not all of it; {count} is the number of days left",
+	"timeline.stats_fill_90": {
+		"one": "👏 Very well charted: {count} more day to fill in.",
+		"other": "👏 Very well charted: {count} more days to fill in."
+	},
+	"timeline.stats_fill_80": {
+		"one": "👍 Good charting! Fill in the remaining day to complete the cycle.",
+		"other": "👍 Good charting! Fill in the {count} remaining days to complete the cycle."
+	},
+	"timeline.stats_fill_60": {
+		"one": "💪 You’re on your way: {count} more day to fill in.",
+		"other": "💪 You’re on your way: {count} more days to fill in."
+	},
+	"timeline.stats_fill_low": {
+		"one": "🌱 Every charted day counts: {count} more day to fill in. A day without an observation can be marked “day not observed”.",
+		"other": "🌱 Every charted day counts: {count} more days to fill in. A day without an observation can be marked “day not observed”."
+	},
+	"timeline.stats_fill_low._comment": "the cycle is filled in at less than 60%",
+	"timeline.stats_todo_label": "Days to fill in",
+	"timeline.stats_todo_open": "Open {day}",
+	"timeline.stats_todo_more": {
+		"one": "+{count} day",
+		"other": "+{count} days"
+	},
+	"timeline.stats_this_cycle": "This cycle",
+	"timeline.stats_previous": {
+		"one": "Previous cycle",
+		"other": "Avg of the {count} previous cycles"
+	},
+	"timeline.stats_length": "Length",
+	"timeline.stats_peak_mucus": "Peak day",
+	"timeline.stats_peak_fc": "Peak",
+	"timeline.stats_after_peak_mucus": "After the peak day",
+	"timeline.stats_after_peak_fc": "After Peak",
+	"timeline.stats_cycles": {
+		"one": "{count} cycle",
+		"other": "{count} cycles"
+	},
+	"timeline.stats_cycles._comment": "how many of the previous cycles an average is made of, when it is fewer than the column says (the ones with a peak)",
+	"timeline.stats_none": "–",
+	"timeline.stats_union": "Days with intercourse",
+	"timeline.stats_days": {
+		"one": "{count} day",
+		"other": "{count} days"
+	},
+	"timeline.stats_day_range": "Day {first}–{last}",
+	"timeline.stats_day_range._comment": "a run of days of the cycle; one day alone is timeline.day_number",
+	"timeline.stats_range": "{min}–{max}",
+	"timeline.stats_list_cut": "{list}, …",
+	"timeline.stats_list_cut._comment": "a list of days cut short: the first ones, then an ellipsis (the figure before it says how many there are)",
+	"timeline.stats_aside": "({text})",
+	"timeline.stats_aside._comment": "what goes with a figure, after it in a lighter text: a share, a range, the days it is about",
+	"timeline.stats_baby_span": "Baby period",
+	"timeline.stats_temperature": {
+		"one": "Temperature ({count} reading)",
+		"other": "Temperature ({count} readings)"
+	},
+	"timeline.stats_mean": "avg {value}",
+	"timeline.stats_degrees": "{value}°",
+	"timeline.stats_words": "Most used keywords",
+	"timeline.stats_word": "{word} ×{count}",
+	"timeline.stats_word._comment": "a keyword of the user and the number of days it is on",
 	"timeline.new_cycle_title": "Create a new cycle",
 	"timeline.new_cycle_ask_1st_day": "Enter the date of the first day of the new cycle.",
 	"timeline.new_cycle_ask_restart": "Enter the date you resumed charting your cycle.",
@@ -763,8 +862,11 @@
 	"register.page_title": "moncycle.app - sign up",
 	"register.sign_in": "Sign in 🔑",
 	"register.discover_app": "Discover moncycle.app 😍",
-	"register.sent_text": "{br}{br2}{b}{br3} An email has been sent to: {b2}{br4}{br5} Click the link in it to confirm your address and activate your account, then sign in with the password you have just chosen.{br6}{span}",
-	"register.almost_done": "Almost done! 📧",
+	"register.sent_intro": "We have just sent an email to:",
+	"register.sent_step_open": "Open the email we sent you",
+	"register.sent_step_click": "Click the link in it to confirm your address and activate your account",
+	"register.sent_step_sign_in": "Sign in with the password you have just chosen",
+	"register.almost_done": "Almost there, welcome! 🌿",
 	"register.no_message_hint": "No message? Check your spam folder. If you already had an account with this address, the message contains a link to choose a new password.",
 	"register.form_title": "Create your account",
 	"register.terms_label": "Terms of use and privacy policy:",

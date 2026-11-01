@@ -56,6 +56,105 @@
 	"timeline.but_export_csv": "🔢 export CSV",
 	"timeline.but_export_pdf": "📄 export PDF",
 	"timeline.label_anonymous_export": " anonymiser les exports PDF et NFP",
+	"timeline.stats_kind_red": {
+		"one": "rouge",
+		"other": "rouges"
+	},
+	"timeline.stats_kind_red._comment": "legend of the bar of the cycle's figures, after the number of days in bold: \"15 verts (52 %)\"",
+	"timeline.stats_kind_green": {
+		"one": "vert",
+		"other": "verts"
+	},
+	"timeline.stats_kind_yellow": {
+		"one": "jaune",
+		"other": "jaunes"
+	},
+	"timeline.stats_kind_baby": {
+		"one": "bébé",
+		"other": "bébés"
+	},
+	"timeline.stats_kind_none": "sans gommette",
+	"timeline.stats_kind_none._comment": "a day with a temperature or a FertilityCare note but no stamp",
+	"timeline.stats_kind_not_observed": {
+		"one": "non observé",
+		"other": "non observés"
+	},
+	"timeline.stats_kind_to_fill": "à renseigner",
+	"timeline.stats_kind_paused": "en pause",
+	"timeline.stats_filled": "Jours renseignés",
+	"timeline.stats_fraction": "{part} / {whole}",
+	"timeline.stats_streak": "Série en cours",
+	"timeline.stats_streak._comment": "the days filled in a row up to today, in the cycle under way",
+	"timeline.stats_longest_run": "Plus longue série renseignée",
+	"timeline.stats_fill_full": "🎉 Bravo, tous les jours de ce cycle sont renseignés !",
+	"timeline.stats_fill_full_ongoing": "🎉 Bravo, votre suivi est à jour !",
+	"timeline.stats_fill_today": "✍️ Tout est à jour : il ne reste qu’aujourd’hui à renseigner.",
+	"timeline.stats_fill_95": {
+		"one": "🌟 Presque complet : encore {count} jour à renseigner.",
+		"other": "🌟 Presque complet : encore {count} jours à renseigner."
+	},
+	"timeline.stats_fill_95._comment": "the cycle is filled in at 95 % or more, but not all of it; {count} is the number of days left",
+	"timeline.stats_fill_90": {
+		"one": "👏 Très bien suivi : encore {count} jour à renseigner.",
+		"other": "👏 Très bien suivi : encore {count} jours à renseigner."
+	},
+	"timeline.stats_fill_80": {
+		"one": "👍 Bon suivi ! Renseignez le jour restant pour compléter le cycle.",
+		"other": "👍 Bon suivi ! Renseignez les {count} jours restants pour compléter le cycle."
+	},
+	"timeline.stats_fill_60": {
+		"one": "💪 C’est en bonne voie : encore {count} jour à renseigner.",
+		"other": "💪 C’est en bonne voie : encore {count} jours à renseigner."
+	},
+	"timeline.stats_fill_low": {
+		"one": "🌱 Chaque jour renseigné compte : encore {count} jour à renseigner. Un jour sans observation se note « jour non observé ».",
+		"other": "🌱 Chaque jour renseigné compte : encore {count} jours à renseigner. Un jour sans observation se note « jour non observé »."
+	},
+	"timeline.stats_fill_low._comment": "the cycle is filled in at less than 60 %",
+	"timeline.stats_todo_label": "Jours à renseigner",
+	"timeline.stats_todo_open": "Ouvrir {day}",
+	"timeline.stats_todo_more": {
+		"one": "+{count} jour",
+		"other": "+{count} jours"
+	},
+	"timeline.stats_this_cycle": "Ce cycle",
+	"timeline.stats_previous": {
+		"one": "Cycle précédent",
+		"other": "Moy. des {count} cycles précédents"
+	},
+	"timeline.stats_length": "Durée",
+	"timeline.stats_peak_mucus": "Jour sommet",
+	"timeline.stats_peak_fc": "Pic",
+	"timeline.stats_after_peak_mucus": "Après le sommet",
+	"timeline.stats_after_peak_fc": "Après le pic",
+	"timeline.stats_cycles": {
+		"one": "{count} cycle",
+		"other": "{count} cycles"
+	},
+	"timeline.stats_cycles._comment": "how many of the previous cycles an average is made of, when it is fewer than the column says (the ones with a peak)",
+	"timeline.stats_none": "–",
+	"timeline.stats_union": "Jours avec rapports",
+	"timeline.stats_days": {
+		"one": "{count} jour",
+		"other": "{count} jours"
+	},
+	"timeline.stats_day_range": "J{first}–J{last}",
+	"timeline.stats_day_range._comment": "a run of days of the cycle; one day alone is timeline.day_number",
+	"timeline.stats_range": "{min}–{max}",
+	"timeline.stats_list_cut": "{list}, …",
+	"timeline.stats_list_cut._comment": "a list of days cut short: the first ones, then an ellipsis (the figure before it says how many there are)",
+	"timeline.stats_aside": "({text})",
+	"timeline.stats_aside._comment": "what goes with a figure, after it in a lighter text: a share, a range, the days it is about",
+	"timeline.stats_baby_span": "Période bébé",
+	"timeline.stats_temperature": {
+		"one": "Température ({count} relevé)",
+		"other": "Température ({count} relevés)"
+	},
+	"timeline.stats_mean": "moy. {value}",
+	"timeline.stats_degrees": "{value}°",
+	"timeline.stats_words": "Mots clés les plus utilisés",
+	"timeline.stats_word": "{word} ×{count}",
+	"timeline.stats_word._comment": "a keyword of the user and the number of days it is on",
 	"timeline.new_cycle_title": "Créer un nouveau cycle",
 	"timeline.new_cycle_ask_1st_day": "Entrer la date du premier jour du cycle à créer.",
 	"timeline.new_cycle_ask_restart": "Entrer la date du jour de reprise du suivi du cycle.",
@@ -763,8 +862,11 @@
 	"register.page_title": "moncycle.app - inscription",
 	"register.sign_in": "Se connecter 🔑",
 	"register.discover_app": "découvrir moncycle.app 😍",
-	"register.sent_text": "{br}{br2}{b}{br3} Un e-mail a été envoyé à l'adresse : {b2}{br4}{br5} Cliquez sur le lien qu'il contient pour confirmer votre adresse et activer votre compte, puis connectez-vous avec le mot de passe que vous venez de choisir.{br6}{span}",
-	"register.almost_done": "Presque terminé! 📧",
+	"register.sent_intro": "Nous venons d'envoyer un e-mail à l'adresse :",
+	"register.sent_step_open": "Ouvrez l'e-mail que nous vous avons envoyé",
+	"register.sent_step_click": "Cliquez sur le lien qu'il contient pour confirmer votre adresse et activer votre compte",
+	"register.sent_step_sign_in": "Connectez-vous avec le mot de passe que vous venez de choisir",
+	"register.almost_done": "Presque fini, bienvenue ! 🌿",
 	"register.no_message_hint": "Pas de message? Regardez dans vos courriers indésirables. Si vous aviez déjà un compte avec cette adresse, le message contient un lien pour choisir un nouveau mot de passe.",
 	"register.form_title": "Créer votre compte",
 	"register.terms_label": "Conditions d'utilisation et politique de confidentialité:",

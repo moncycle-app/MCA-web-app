@@ -32,8 +32,7 @@ export function cycle2recap(c, nb, fin) {
 		odd = !odd;
 	}
 	return el("div", {id: c_id, class: "cycle_recap"},
-		c_title,
-		cycle_option(c, dates.str(fin), "recap"),
+		el("div", {class: "cycle_head"}, c_title, cycle_option(c, dates.str(fin), "recap")),
 		c_ruler,
 		el("div", {id: "rc_contenu_" + c, class: "contenu"}));
 }
