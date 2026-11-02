@@ -15,7 +15,7 @@
 /* The screen of the link in a mail. The address holds the purpose and the token in its fragment ("#purpose=resetPassword&t=..."): a fragment is
 ** never sent to a server, written in a log or given as a Referer, and a mail scanner that only fetches the link does not run this script, so
 ** it uses nothing up. The fragment is read once and then taken off the address; the form carries the purpose and the token (hidden fields) and
-** is what is sent to POST /api/v2/verify_email.
+** is what is sent to POST /api/v3/verify_email.
 */
 import { moncycle_store } from "../../js/model/store.js";
 import { api } from "../../js/core/api.js";

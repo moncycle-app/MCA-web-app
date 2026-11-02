@@ -35,7 +35,7 @@ export function install_fake_api() {
 	globalThis.fetch = async (url, options) => {
 		const path = String(url);
 		if (path.startsWith("i18n/")) return { ok: true, json: async () => JSON.parse(readFileSync(new URL("../../src/" + path, import.meta.url), "utf8")) };
-		if (path.includes("config.json")) return { ok: true, json: async () => ({ apiUrl: "/api/v2" }) };
+		if (path.includes("config.json")) return { ok: true, json: async () => ({ apiUrl: "/api/v3" }) };
 		if (path.includes("version.json")) return { ok: true, json: async () => ({ version: "1.0.0", api: { min: 16, max: 16 } }) };
 		return fake_fetch(url, options);
 	};

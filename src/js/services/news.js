@@ -1,4 +1,4 @@
-/* The news of Tech 4 Fertility: the JSON file at NEWS_URL (the newsUrl of GET /api/v2/server_info), fetched and checked for the pages that
+/* The news of Tech 4 Fertility: the JSON file at NEWS_URL (the newsUrl of GET /api/v3/server_info), fetched and checked for the pages that
 ** show it (the banner of the timeline, the news of the settings). It is another site's data, so nothing of it is trusted: no cookie and
 ** no referrer go out, the answer must be JSON and small, only the four strings of one item are kept (length-capped; the pages draw
 ** them with .text()), and the link must be https. A missing item (null), an item a month old or older and any failure give no item, and

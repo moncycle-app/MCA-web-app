@@ -17,7 +17,7 @@ import { api } from "../core/api.js";
 import { t, t_map } from "../core/i18n.js";
 
 // The captcha of a form (register, sign-in once an account asks for it, lost password). The server keeps nothing: POST
-// /api/v2/captcha gives a picture and a signed token for a purpose and an e-mail address, the visitor types what the picture
+// /api/v3/captcha gives a picture and a signed token for a purpose and an e-mail address, the visitor types what the picture
 // says, and the form posts the answer (`captcha`) with the token (`captchaToken`). The token is tied to the address
 // and, for a sign-in or a lost password, to the account's state: a new one is asked for whenever the address changes
 // and after anything the server refused. The picture sits in a frame (.captcha_box) that is always on the page, empty until a picture is loaded; it is set with its src and nothing from the server is ever

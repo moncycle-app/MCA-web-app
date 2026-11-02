@@ -16,7 +16,7 @@
 ** words. See src/i18n/README.md.
 **
 **  t(key, vars)         plain text; {name} is replaced by vars.name; a value {"one": "...", "other": "..."} is chosen from vars.count
-**  t_list(key)          an array of the catalog (the months, the weekdays)
+**  t_list(key)          an array of the catalog (the weekdays)
 **  t_node(key, slots)   a DocumentFragment: the text of the key, where {name} is replaced by the node slots.name (markup inside a sentence)
 **  apply(root)          fills the static markup: data-i18n="key" sets the text (a child with data-slot="name" stands for {name} of the key),
 **                       data-i18n-attr="placeholder:key;title:key" sets attributes
@@ -214,17 +214,7 @@ export function parse_number(text) {
 	return parseFloat(String(text).trim().replace(",", "."));
 }
 
-/* --- dates: the names and the layouts are catalog entries ------------------ */
-export function date_short(d) {
-	return t("calendar.date_short", {day: d.getDate(), month: t_list("calendar.months_short")[d.getMonth()]});
-}
-export function date_long(d) {
-	return t("calendar.date_long", {weekday: t_list("calendar.weekdays")[d.getDay()], day: d.getDate(), month: t_list("calendar.months_long")[d.getMonth()], year: d.getFullYear()});
-}
-// heading of a timeline row: weekday initial + short date
-export function date_row(d) {
-	return t("calendar.date_row", {weekday_initial: t_list("calendar.weekdays")[d.getDay()][0], day: d.getDate(), month: t_list("calendar.months_short")[d.getMonth()]});
-}
+/* --- the time of day (the dates are in model/format.js: they follow the account's setting) ------------------ */
 export function clock(d) {
 	return t("calendar.clock", {hh: String(d.getHours()).padStart(2, "0"), mm: String(d.getMinutes()).padStart(2, "0")});
 }

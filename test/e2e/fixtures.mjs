@@ -36,7 +36,7 @@ export const test = base.extend({
 		const password = "Passw0rdPassw0rd";
 		const created = await post(request, "/_test/account", { email, password, nickname: "Testeuse", method: 2 });
 		const auth = { Authorization: "Bearer " + created.token };
-		await post(request, "/api/v2/day/" + days_ago(4), { cycleFirstDay: true, lastWriteClientUtc: new Date().toISOString() }, auth);
+		await post(request, "/api/v3/day/" + days_ago(4), { cycleFirstDay: true, lastWriteClientUtc: new Date().toISOString() }, auth);
 		await use({ email, password, user_id: created.userId, token: created.token, auth, request });
 		await request.dispose();
 	},
@@ -53,7 +53,7 @@ export const test = base.extend({
 		});
 		page.on("pageerror", (error) => problems.push("pageerror: " + error.message));
 		// the news file and the terms page are other sites: the CSP of a test server names none, and nothing here needs them
-		await page.route("**/api/v2/server_info", async (route) => {
+		await page.route("**/api/v3/server_info", async (route) => {
 			try {
 				const answer = await route.fetch();
 				const body = await answer.json();
@@ -67,7 +67,7 @@ export const test = base.extend({
 
 	// a page holding the session of the account, without going through the sign-in screen
 	signed_in: async ({ page, account }, use) => {
-		const answer = await page.request.post("/api/v2/token", { data: { email: account.email, password: account.password, name: "WEB-APP e2e", cookie: true } });
+		const answer = await page.request.post("/api/v3/token", { data: { email: account.email, password: account.password, name: "WEB-APP e2e", cookie: true } });
 		expect(answer.ok()).toBe(true);
 		await page.goto("/#/auth");
 		await expect(page.locator("#i_login_email")).toBeVisible();   // the screen has mounted (it empties the storage), the session can be set

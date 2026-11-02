@@ -13,7 +13,8 @@
 */
 import { moncycle_store } from "../../js/model/store.js";
 import * as dates from "../../js/model/dates.js";
-import { t, t_list, t_node, date_short, date_long, clock } from "../../js/core/i18n.js";
+import { t, t_list, t_node, clock, format_number } from "../../js/core/i18n.js";
+import { format_date, date_long, format_temperature, temperature_unit } from "../../js/model/format.js";
 import { by_id, el, display, is_hidden } from "../../js/core/dom.js";
 import { day_to_api } from "../../js/model/day.js";
 import { fc_note_regex } from "../../js/model/fc_notation.js";
@@ -57,7 +58,7 @@ export function show_last_write(day) {
 	let recent = Math.abs(age) < state.last_write_recent_ms;
 	box.setAttribute("title", t("timeline.last_write_title", {date: date_long(moment), clock: clock(moment)}));
 	box.append(el("span", {text: t("timeline.last_write_label")}));
-	box.append(el("b", {text: recent ? t("timeline.last_write_now") : t("timeline.last_write", {date: date_short(moment), year: moment.getFullYear(), clock: clock(moment)})}));
+	box.append(el("b", {text: recent ? t("timeline.last_write_now") : t("timeline.last_write", {date: format_date(dates.str(moment)), clock: clock(moment)})}));
 	if (recent) state.last_write_timer = setTimeout(() => show_last_write(day), state.last_write_recent_ms - age);
 }
 
@@ -152,7 +153,7 @@ export function open_menu(e, date = null) {
 	let j = state.day_timeline[state.menu_opened_date];
 	let stamp = j.stamp? j.stamp : "";
 	// the long date with its weekday in a span of its own (not bold), then the day of the cycle as a badge
-	const long_date = t_node("calendar.date_long", {weekday: el("span", {class: "jf_weekday", text: t_list("calendar.weekdays")[o_date.getDay()]}), day: String(o_date.getDate()), month: t_list("calendar.months_long")[o_date.getMonth()], year: String(o_date.getFullYear())});
+	const long_date = t_node("calendar.date_long", {weekday: el("span", {class: "jf_weekday", text: t_list("calendar.weekdays")[o_date.getDay()]}), date: format_date(date)});
 	by_id("jour_form_titre").replaceChildren(el("span", {class: "jf_date"}, long_date), el("span", {class: "jf_day", text: t("timeline.day_number", {n: j.pos})}));
 	let arrow = {"next" : t("timeline.arrow_up"), "prev" : t("timeline.arrow_down")};
 	if (!state.timeline_asc) arrow = {"next" : t("timeline.arrow_down"), "prev" : t("timeline.arrow_up")};
@@ -191,7 +192,8 @@ export function open_menu(e, date = null) {
 	}
 	if (state.stamp_class[stamp]) check("go_" + state.stamp_class[stamp]);
 	go_blank_or_empty();
-	by_id("form_temp").value = j.temperature ?? "";
+	show_temperature_unit();
+	by_id("form_temp").value = format_temperature(j.temperature);
 	by_id("form_time_temp_taken").value = j.time_temp_taken ?? "";
 	Object.values(state.desc_container_id).forEach((selector) => document.querySelector(selector).replaceChildren());
 	let active_desc = [];
@@ -271,7 +273,7 @@ export function submit_menu(event) {
 		if (j < 0) d.push({name: "date", value: state.menu_opened_date});
 		else d[j].value = state.menu_opened_date;
 	}
-	moncycle_store.queue_day(day_to_api(d, state.description));
+	moncycle_store.queue_day(day_to_api(d, state.description, state.form_temperature_unit || temperature_unit()));
 }
 
 export function bulk_submit_menu() {
@@ -293,6 +295,17 @@ export function bulk_submit_menu() {
 	}
 	state.menu_opened_date = menu_current_date;
 	if (menu_current_1st_day) by_id("ev_cycle_1st_day").checked = true;
+}
+
+// The temperature field in the unit of the account (the form carries what is typed; the body sent is in Celsius, see day_to_api). The unit
+// the form was filled in is kept, so that a change of the setting while the form is open never reinterprets what was typed.
+function show_temperature_unit() {
+	const unit = temperature_unit();
+	state.form_temperature_unit = unit;
+	const field = by_id("form_temp");
+	field.max = unit === "F" ? "210" : "99";
+	field.placeholder = t("timeline.temperature_placeholder", {example: format_number(unit === "F" ? 97.7 : 36.5, {minimumFractionDigits: 1})});
+	by_id("form_temp_unit").textContent = t("timeline.temperature_unit", {unit: unit});
 }
 
 export function suppr_day_timeline() {

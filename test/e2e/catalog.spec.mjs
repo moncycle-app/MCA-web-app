@@ -28,7 +28,7 @@ test.describe("browser in French", () => {
 test("the settings screen is filled from the catalog", async ({ page, signed_in }) => {
 	await signed_in.goto("/#/settings");
 	await check_catalog_applied(page);
-	for (const name of ["suivi", "descriptions", "donnees", "connexion", "appareils"]) {
+	for (const name of ["suivi", "profil", "affichage", "descriptions", "donnees", "connexion", "appareils"]) {
 		await page.locator("#menu_" + name).click();
 		await check_catalog_applied(page);
 		await page.locator(`#panel_${name} a.back`).click();

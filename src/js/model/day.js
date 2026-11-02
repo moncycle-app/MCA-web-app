@@ -17,6 +17,7 @@
 ** the day form is a list of {name, value}: these functions convert between the three. */
 import { fc_score_from_api, fc_score_to_codified } from "./fc_notation.js";
 import { of_day, to_day_fields } from "./descriptions.js";
+import { to_celsius } from "./temperature.js";
 
 export const codified_fields = ["codifiedBleedingObservation", "codifiedMucusSensation", "codifiedMucusObservation", "codifiedNumberObservations", "codifiedPainObservations"];
 // the content a Day holds, as opposed to where it stands in its cycle and when it was written
@@ -46,7 +47,7 @@ export function is_blank(day) {
 	return Object.keys(blank).every(key => day_meta.includes(key) || JSON.stringify(day[key]) === JSON.stringify(blank[key]));
 }
 
-// The day the server will hold once it has taken a POST /api/v2/day/{date} body, as far as the page can tell.
+// The day the server will hold once it has taken a POST /api/v3/day/{date} body, as far as the page can tell.
 export function day_from_body(body, previous) {
 	const baby = !!body.stampBaby;
 	const temperature = body.temperature > 0;
@@ -98,8 +99,9 @@ export function day_from_api(d, descriptions) {
 
 // The fields of the day form ([{name, value}], what serializeArray() gives; flat names: date, stamp, baby, fc_score, fc_arrow, temp,
 // time_temp_taken, counter_start, is_peak, union_sex, cycle_1st_day, day_not_observed, observation_paused, comment, description[],
-// last_write_client_UTC; the individual fc_* boxes are scratch state that builds fc_score) -> the JSON body POST /api/v2/day expects.
-export function day_to_api(fields, descriptions) {
+// last_write_client_UTC; the individual fc_* boxes are scratch state that builds fc_score) -> the JSON body POST /api/v3/day expects.
+// `unit` is the one the temperature of the form was typed in (the account's temperatureUnit): the body carries Celsius.
+export function day_to_api(fields, descriptions, unit = "C") {
 	const get = (n) => fields.filter(f => f.name == n).map(f => f.value);
 	const get1 = (n) => { const v = get(n); return v.length ? v[0] : undefined; };
 	return Object.assign({
@@ -107,7 +109,7 @@ export function day_to_api(fields, descriptions) {
 		stampColor : {"R":"Red","G":"Green","Y":"Yellow","":null}[get1('stamp') || ''],
 		stampBaby : get1('baby') == 'BB',
 		codifiedArrow : arrow_to_api[get1('fc_arrow')] || null,
-		temperature : get1('temp') ? parseFloat(get1('temp')) : null,
+		temperature : get1('temp') ? to_celsius(parseFloat(get1('temp').replace(',', '.')), unit) : null,
 		temperatureTime : get1('time_temp_taken') || null,
 		counterStart : parseInt(get1('counter_start') || '0'),
 		isPeak : get1('is_peak') == '1',

@@ -61,23 +61,30 @@ export function nfp_method_from_api(method, temperature_tracking) {
 	const pair = table[method] || table["cervicalMucus"];
 	return temperature_tracking ? pair[1] : pair[0];
 }
-// GET /api/v2/account (with the lists of the timeline sync) -> the flat shape the timeline reads
+// The optional settings of the account (`settings` of GET /account: {value, isSet, default}) and their defaults, for a copy made before one existed.
+// `customSettings` is for third-party apps and is never read here.
+export const SETTING_DEFAULTS = {timelineAscending : true, autoMailExport : false, dayBackgroundColor : true, dateFormat : "DMY_SLASH", temperatureUnit : "C", notificationEmails : ""};
+export function account_setting(account, name) {
+	const one = account && account.settings && account.settings[name];
+	return one && one.value !== undefined ? one.value : SETTING_DEFAULTS[name];
+}
+// GET /api/v3/account (with the lists of the timeline sync) -> the flat shape the timeline reads
 export function constante_from_api(d) {
 	const nfp_method = nfp_method_from_api(d.method, d.temperatureTracking);
 	return {
 		no_user_account : d.userId,
 		nickname : d.nickname,
-		sponsor : d.sponsor,
 		nfp_method : nfp_method,
 		nfp_method_name : {1:"mucus_temp", 2:"mucus", 3:"fc", 4:"fc_temp"}[nfp_method],
 		all_cycles_1st_day : d.allCyclesFirstDay,
 		all_observation_paused_dates : d.allObservationPausedDates,
-		timeline_asc : d.timelineAscending,
+		timeline_asc : account_setting(d, "timelineAscending"),
+		day_background_color : account_setting(d, "dayBackgroundColor"),
 	};
 }
-// what the cycles drawn were made from: when the account says otherwise, they are drawn again
+// what the cycles drawn were made from (the layout, and the date and temperature formats written in them): when the account says otherwise, they are drawn again
 export function structure_of(account) {
-	return JSON.stringify([account.allCyclesFirstDay, account.allObservationPausedDates, account.timelineAscending, account.method, account.temperatureTracking]);
+	return JSON.stringify([account.allCyclesFirstDay, account.allObservationPausedDates, account_setting(account, "timelineAscending"), account_setting(account, "dateFormat"), account_setting(account, "temperatureUnit"), account.method, account.temperatureTracking]);
 }
 
 // The lengths of the complete cycles, latest first: [{start, days}]. The latest cycle (still open) has none, and neither has a cycle that

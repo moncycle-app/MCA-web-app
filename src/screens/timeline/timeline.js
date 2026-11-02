@@ -118,6 +118,7 @@ function stop_timeline() {
 	stop_listening.forEach((stop) => stop());
 	stop_listening = [];
 	clearTimeout(state.last_write_timer);
+	document.documentElement.classList.remove("no_day_color");
 	Object.values(state.graphs).forEach((graph) => graph.destroy && graph.destroy());
 }
 
@@ -144,11 +145,11 @@ export function show_account() {
 export function show_header() {
 	state.constante = constante_from_api(moncycle_store.account);
 	state.timeline_asc = state.constante.timeline_asc;
+	document.documentElement.classList.toggle("no_day_color", !state.constante.day_background_color);
 	state.description = moncycle_store.all_descriptions().map(description_from_api);
 	document.title = t("timeline.page_title", {name: state.constante.nickname});
-	// the name is free text: text first, then the badge (markup of ours)
+	// the name is free text
 	by_id("name").textContent = state.constante.nickname;
-	if (state.constante.sponsor) by_id("name").append(document.createTextNode(t("timeline.sponsor_badge")));
 	charger_actu();
 	document.querySelectorAll(".main_button").forEach(function (button) { button.style.display = "inline-block"; });
 	display(by_id("charger_cycle"), !state.timeline_asc);
@@ -187,7 +188,7 @@ export function store_changed(change) {
 			rebuild();
 			return;
 		}
-		// the cycles stay as drawn: only the header (name, sponsor) can have changed
+		// the cycles stay as drawn: only the header (the nickname) can have changed
 		if (!state.page_a_recharger) show_header();
 	}
 	change.days.forEach(refresh_day);

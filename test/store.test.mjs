@@ -9,14 +9,14 @@ install();
 install_fake_api();
 const { moncycle_store: store } = await import("/js/model/store.js");
 const { moncycle_config } = await import("/js/core/config.js");
-moncycle_config.set_api_url("/api/v2");   // the default is relative to the page
+moncycle_config.set_api_url("/api/v3");   // the default is relative to the page
 
-const ACCOUNT = { userId: 7, nickname: "T", method: "cervicalMucus", temperatureTracking: false, timelineAscending: true };
+const ACCOUNT = { userId: 7, nickname: "T", method: "cervicalMucus", temperatureTracking: false, settings: { timelineAscending: { value: true, isSet: false, default: true } }, customSettings: {} };
 const DAY = "2026-03-10";
 const events = [];
 
 function answer_for(request) {
-	const path = request.url.replace("/api/v2", "");
+	const path = request.url.replace("/api/v3", "");
 	if (path === "/server_info") return { status: 200, json: { data: { appVersion: "16dev" } } };
 	if (path.startsWith("/day/") && request.method === "POST") return { status: 200, json: { data: { ...request.body, cycleStartDate: DAY, cycleDay: 1, lastWriteDb: "2026-03-10T10:00:00Z" } } };
 	return { status: 404, json: { error: { code: "not_found", message: "" } } };

@@ -12,21 +12,21 @@
 ** https://github.com/moncycle-app/backend-api-web-app
 */
 
-/* Where the API is. config.json (next to index.html, optional: without it the API is api/v2 of the same site) holds one value, apiUrl: the base URL of the contract, one of the `servers` of
-** the OpenAPI file ("api/v2", relative to the page, for the API of the same site, "https://tableau.moncycle.app/api/v2" for another one). Every call of
+/* Where the API is. config.json (next to index.html, optional: without it the API is api/v3 of the same site) holds one value, apiUrl: the base URL of the contract, one of the `servers` of
+** the OpenAPI file ("api/v3", relative to the page, for the API of the same site, "https://tableau.moncycle.app/api/v3" for another one). Every call of
 ** the web app is built with api_url("/token"), api_url("/day/2026-03-10")...: the paths of the contract.
 **
 ** A page's own code waits for the file: `await moncycle_config.ready` at the top of the page's module (main.js does, before the router starts).
 ** An API on another origin ("remote") gets no cookie: the token of the sign-in is kept here and sent as `Authorization: Bearer`.
 */
 export const moncycle_config = {
-	default_api_url : "api/v2",
+	default_api_url : "api/v3",
 	token_key : "auth_token",
-	api_base : "api/v2",
+	api_base : "api/v3",
 	remote : false,
 	ready : null,
 
-	// the base URL checked: https or http link, or a path (relative to the page or not), ending in a version of the contract (/v2); else null
+	// the base URL checked: https or http link, or a path (relative to the page or not), ending in a version of the contract (/v3); else null
 	parse_api_url : function (value) {
 		if (typeof value !== "string") return null;
 		let base = value.trim().replace(/\/+$/, "");
@@ -70,7 +70,7 @@ export const moncycle_config = {
 		}));
 	},
 
-	// the pages name the API as "api/v2/..." in the action of a form and the link of a download (what a browser without script would
+	// the pages name the API as "api/v3/..." in the action of a form and the link of a download (what a browser without script would
 	// use): they are pointed at the configured API once, so that the script reads the right address from the form
 	point_pages : function (root = document) {
 		root.querySelectorAll('form[action^="api/v"], a[href^="api/v"]').forEach(function (element) {

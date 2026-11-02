@@ -19,7 +19,7 @@ async function fill_form(page) {
 
 async function catch_registration(page) {
 	const seen = { body: null };
-	await page.route("**/api/v2/register", async (route) => {
+	await page.route("**/api/v3/register", async (route) => {
 		seen.body = route.request().postDataJSON();
 		await route.fulfill({ status: 201, json: { data: { sent: true } } });
 	});

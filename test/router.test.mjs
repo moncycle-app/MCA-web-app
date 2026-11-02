@@ -20,7 +20,7 @@ test("parse_route", () => {
 });
 test("is_route", () => {
 	for (const path of ["/", "/auth", "/register", "/recover", "/verify_email", "/settings", "/settings/"]) assert.equal(is_route(path), true, path);
-	for (const path of ["/nope", "/api/v2/token", "/settings/extra", "/js/main.js", "/constructor", "/__proto__"]) assert.equal(is_route(path), false, path);
+	for (const path of ["/nope", "/api/v3/token", "/settings/extra", "/js/main.js", "/constructor", "/__proto__"]) assert.equal(is_route(path), false, path);
 });
 test("has_session reads the sign-in marker", () => {
 	localStorage.clear();

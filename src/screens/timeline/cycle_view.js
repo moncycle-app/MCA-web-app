@@ -14,7 +14,9 @@
 import { moncycle_config } from "../../js/core/config.js";
 import { moncycle_store } from "../../js/model/store.js";
 import * as dates from "../../js/model/dates.js";
-import { t, t_map, t_node, date_short, date_row, format_number } from "../../js/core/i18n.js";
+import { t, t_map, t_node, format_number } from "../../js/core/i18n.js";
+import { format_date, date_row, temperature_unit, format_temperature } from "../../js/model/format.js";
+import { to_unit } from "../../js/model/temperature.js";
 import { by_id, el, display } from "../../js/core/dom.js";
 import { counter_days, peak_follow_days } from "../../js/model/cycles.js";
 import { cycle_stats, fill_level, filled_percent, percent, previous_cycles, todo_runs } from "../../js/model/cycle_stats.js";
@@ -34,9 +36,9 @@ export function hide_method_parts() {
 
 // "Cycle du 3 mars au 29 mars de 27j": the end and the number are elements of their own (the stylesheet colours them)
 export function cycle_title_node(key, key_end, start, end, nb) {
-	const end_span = el("span", {class: "cycle_fin", text: t(key_end, {end: date_short(end)})});
+	const end_span = el("span", {class: "cycle_fin", text: t(key_end, {end: format_date(dates.str(end))})});
 	const nb_span = el("span", {class: "nb_jours", text: String(nb)});
-	return t_node(key, {start: date_short(start), end: end_span, nb: nb_span});
+	return t_node(key, {start: format_date(dates.str(start)), end: end_span, nb: nb_span});
 }
 
 
@@ -284,7 +286,7 @@ function cycle_stats_node(from, to) {
 	const union_days = stats.union.slice(0, UNION_SHOWN).map((n) => day_text(n)).join(", ");
 	stats_row(rows, t("timeline.stats_union"), number(stats.union.length), stats.union.length > UNION_SHOWN ? t("timeline.stats_list_cut", {list: union_days}) : union_days);
 	if (stats.temperature) {
-		const degrees = (value) => t("timeline.stats_degrees", {value: format_number(value, {minimumFractionDigits: 2, maximumFractionDigits: 2})});
+		const degrees = (value) => t("timeline.stats_degrees", {unit: temperature_unit(), value: format_number(to_unit(value), {minimumFractionDigits: 2, maximumFractionDigits: 2})});
 		const {count, mean, min, max} = stats.temperature;
 		stats_row(rows, t("timeline.stats_temperature", {count: count}), t("timeline.stats_mean", {value: degrees(mean)}), min != max ? t("timeline.stats_range", {min: degrees(min), max: degrees(max)}) : "");
 	}
@@ -384,7 +386,7 @@ export function day_timeline2timeline(j) {
 				let temp = parseFloat(j.temperature);
 				// how warm, from 0 (36.5° and under) to 1 (37.5° and over): the colours are in timeline.css
 				const heat = String(Math.min(1, Math.max(0, temp - 36.5)) || 0);
-				const temp_cell = el("span", {class: "t pas_mucus pas_fc", text: String(temp)});
+				const temp_cell = el("span", {class: "t pas_mucus pas_fc", text: format_temperature(temp)});
 				temp_cell.style.setProperty("--heat", heat);
 				day_timeline.append(temp_cell);
 				if (j.time_temp_taken) {

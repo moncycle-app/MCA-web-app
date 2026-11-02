@@ -65,7 +65,7 @@ export function settings_tokens_load() {
 	});
 }
 
-// The form says what to revoke by its address: api/v2/token/{prefix} for one connection, api/v2/token?others=true for all the others.
+// The form says what to revoke by its address: api/v3/token/{prefix} for one connection, api/v3/token?others=true for all the others.
 export function settings_tokens_revoke(form) {
 	settings_say(by_id("tokens_msg"), "busy", "⏳");
 	settings_api("DELETE", form.getAttribute("action")).then(function (ret) {

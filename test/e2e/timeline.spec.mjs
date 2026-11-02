@@ -12,16 +12,16 @@ test("a day is saved, shown as text, and kept after a reload", async ({ page, si
 	await page.reload();
 	await open_today(page);
 	await expect(page.locator("#from_com")).toHaveValue("<b>x</b>");
-	const stored = await account.request.get(`${API}/api/v2/day/${today()}`, { headers: account.auth });
+	const stored = await account.request.get(`${API}/api/v3/day/${today()}`, { headers: account.auth });
 	expect((await stored.json()).data.comment).toBe("<b>x</b>");
 });
 
 test("a day that cannot be sent waits in the queue, then goes", async ({ page, signed_in }) => {
 	await open_today(signed_in);
-	await page.route("**/api/v2/day**", (route) => route.abort());
+	await page.route("**/api/v3/day**", (route) => route.abort());
 	await page.locator("#go_jaune").check();
 	await expect(page.locator("#jour_form_unsent")).toBeVisible();
-	await page.unroute("**/api/v2/day**");
+	await page.unroute("**/api/v3/day**");
 	await page.locator("#sync_retry").click();
 	await expect(page.locator("#jour_form_saved")).toBeVisible();
 	await expect(page.locator("#jour_form_unsent")).toBeHidden();
@@ -43,7 +43,7 @@ test("the mini and maxi views switch, and a cycle exports through the API", asyn
 	await page.locator("#but_mini_maxi").click();
 	await expect(page.locator("#timeline")).toBeVisible({ visible: !before });
 	await expect(page.locator("#recap")).toBeVisible({ visible: before });
-	const exports = page.locator('.cycle_options a[href^="/api/v2/export/"]');
+	const exports = page.locator('.cycle_options a[href^="/api/v3/export/"]');
 	await expect(exports.first()).toBeAttached();
 	expect(await exports.evaluateAll((links) => links.map((link) => link.getAttribute("href").split("?")[0].split("/").pop()))).toEqual(expect.arrayContaining(["nfp", "csv", "pdf"]));
 });

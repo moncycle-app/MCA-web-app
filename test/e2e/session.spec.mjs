@@ -29,7 +29,7 @@ test("a session that ended on the server sends back to /auth with an empty stora
 
 test("an API generation out of the supported range stops the app and sends nothing", async ({ page, signed_in }) => {
 	const writes = [];
-	await page.route("**/api/v2/server_info", async (route) => {
+	await page.route("**/api/v3/server_info", async (route) => {
 		const answer = await route.fetch();
 		const body = await answer.json();
 		body.data.appVersion = "99";

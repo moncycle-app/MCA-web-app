@@ -4,11 +4,11 @@ import { test, expect, API } from "./fixtures.mjs";
 
 // the language of the account, set through the API
 async function set_account_language(account, language) {
-	const answer = await account.request.post(API + "/api/v2/account", { data: { language }, headers: { "Content-Type": "application/json", ...account.auth } });
+	const answer = await account.request.post(API + "/api/v3/account", { data: { language }, headers: { "Content-Type": "application/json", ...account.auth } });
 	expect(answer.ok()).toBe(true);
 }
 async function account_language(account) {
-	const answer = await account.request.get(API + "/api/v2/account", { headers: account.auth });
+	const answer = await account.request.get(API + "/api/v3/account", { headers: account.auth });
 	return (await answer.json()).data.language;
 }
 
@@ -72,7 +72,7 @@ test.describe("not signed in", () => {
 test.describe("signed in", () => {
 	test("the language of the account is the one used, over the browser's", async ({ page, signed_in, account }) => {
 		await set_account_language(account, "FR");
-		await signed_in.goto("/#/settings/suivi");
+		await signed_in.goto("/#/settings/profil");
 		await expect(page.locator("html")).toHaveAttribute("lang", "fr");
 		await expect(page.locator("#i_language")).toHaveValue("FR");
 		await expect(page.locator('label[for="i_language"]')).toHaveText("Langue");
@@ -82,7 +82,7 @@ test.describe("signed in", () => {
 
 	test("an account in a language we have no catalog for is read in English, and the select says where the account stands", async ({ page, signed_in, account }) => {
 		await set_account_language(account, "ES");
-		await signed_in.goto("/#/settings/suivi");
+		await signed_in.goto("/#/settings/profil");
 		await expect(page.locator("html")).toHaveAttribute("lang", "en");
 		await expect(page.locator("#i_language")).toHaveValue("ES");
 		expect(await page.locator("#i_language option").evaluateAll((options) => options.map((option) => option.value))).toEqual(["EN", "FR", "ES"]);
@@ -90,22 +90,22 @@ test.describe("signed in", () => {
 	});
 
 	test("the settings change the language of the account and of the screen", async ({ page, signed_in, account }) => {
-		await signed_in.goto("/#/settings/suivi");
+		await signed_in.goto("/#/settings/profil");
 		await expect(page.locator("html")).toHaveAttribute("lang", "en");
 		await expect(page.locator("#i_language")).toHaveValue("EN");
-		const saved = page.waitForResponse((answer) => answer.url().endsWith("/api/v2/account") && answer.request().method() === "POST");
+		const saved = page.waitForResponse((answer) => answer.url().endsWith("/api/v3/account") && answer.request().method() === "POST");
 		await page.locator("#i_language").selectOption("FR");
 		const answer = await saved;
 		expect(answer.ok()).toBe(true);
 		expect(answer.request().postDataJSON()).toEqual({ language: "FR" });
 		await expect(page.locator("html")).toHaveAttribute("lang", "fr");
-		await expect(page.locator("#panel_suivi")).toBeVisible();   // still on the panel
+		await expect(page.locator("#panel_profil")).toBeVisible();   // still on the panel
 		await expect(page.locator("#i_language")).toHaveValue("FR");
 		await expect(page).toHaveTitle(/réglages/);
 		expect(await account_language(account)).toBe("FR");
 
 		// the next visit: French, from the account
-		await page.goto("/#/settings/suivi");
+		await page.goto("/#/settings/profil");
 		await expect(page.locator("html")).toHaveAttribute("lang", "fr");
 		await page.locator("#i_language").selectOption("EN");
 		await expect(page.locator("html")).toHaveAttribute("lang", "en");

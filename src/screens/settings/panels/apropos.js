@@ -13,9 +13,11 @@
 */
 import { moncycle_config } from "../../../js/core/config.js";
 import { moncycle_store } from "../../../js/model/store.js";
-import { t, locale } from "../../../js/core/i18n.js";
+import { t } from "../../../js/core/i18n.js";
+import * as dates from "../../../js/model/dates.js";
+import { format_date } from "../../../js/model/format.js";
 import { by_id } from "../../../js/core/dom.js";
-import { settings_api, settings_say } from "../common.js";
+import { settings_api, settings_say, settings_state } from "../common.js";
 import { settings_load_news } from "./actualites.js";
 
 /* ===========================================================================
@@ -26,7 +28,7 @@ export function settings_fill_about(account) {
 	by_id("tech_info_no").textContent = account.userId;
 	by_id("tech_info_id").textContent = account.loginEmail;
 	const since = new Date(account.inscriptionDate);
-	by_id("tech_info_insc").textContent = since.toLocaleDateString(locale(), {day: "2-digit", month: "2-digit", year: "numeric"});
+	by_id("tech_info_insc").textContent = isNaN(since) ? "" : format_date(dates.str(since));
 }
 
 // The version, and the terms of service: their page is a setting of the server (TERMS_OF_SERVICE_URL, told by server_info). None told: the
@@ -39,6 +41,7 @@ export function settings_load_server_info() {
 	settings_api("GET", moncycle_config.api_url("/server_info")).then(function (ret) {
 		if (!by_id("tech_info_ver")) return;
 		const info = (ret || {}).data || {};
+		settings_state.limits = info.limits || {};
 		by_id("tech_info_ver").textContent = info.appVersion ?? "?";
 		if (info.passwordPolicyRegex) document.querySelectorAll("#i_pw1, #i_pw2").forEach(function (input) { input.setAttribute("pattern", info.passwordPolicyRegex); });
 		if (info.newsUrl) settings_load_news(info.newsUrl);

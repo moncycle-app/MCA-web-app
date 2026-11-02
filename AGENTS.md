@@ -27,7 +27,7 @@ jQuery (`src/vendor/jquery.min.js`) stays in the project only until the existing
   (`settings_say()` for a server message). jQuery's `append(string)` reads a `<` or an entity in a string as HTML, so a text
   is `document.createTextNode()`. The terms of service (`TERMS_OF_SERVICE_URL`, `termsOfServiceUrl`) come from outside and are never read by
   the page: a sandboxed iframe (`sandbox` without `allow-scripts`, `referrerpolicy="no-referrer"`), and the CSP's `frame-src` names its
-  origin. The news banner is a JSON file (`NEWS_URL`, the `newsUrl` of `GET /api/v2/server_info`): `js/news.js` (`moncycle_news.load`) fetches it
+  origin. The news banner is a JSON file (`NEWS_URL`, the `newsUrl` of `GET /api/v3/server_info`): `js/news.js` (`moncycle_news.load`) fetches it
   (no cookie, no referrer), checks type, size, shape and the https link, and gives the item of the interface's language (the French one when the file has none), drawn with `.text()` only, by the
   timeline's banner and the settings' "Tech 4 Fertility actualités" panel; on any problem there is no item and the details go to the console. "OK merci" hides the article (its link) it was clicked on.
 - **Forms carry the data, the script only submits it.** Every value sent to the remote API lives in an HTML `<form>` of the page: a
@@ -39,10 +39,10 @@ jQuery (`src/vendor/jquery.min.js`) stays in the project only until the existing
   is sent from localStorage, because localStorage survives a reload of the page and the form does not. What enters the queue still
   comes from a form's `submit`.
 - **`store.js` is the local copy** (localStorage, in the API's own JSON): `data_day_YYYY-MM-DD`, `data_account` (the account of
-  `GET /api/v2/account` plus the lists of cycles and pauses of the sync plus `newsUrl` of `server_info`), `data_account_etag`,
+  `GET /api/v3/account` plus the lists of cycles and pauses of the sync plus `newsUrl` of `server_info`), `data_account_etag`,
   `data_descriptions`, `data_pending` (the queue of unsent days), `data_pending_descriptions` (descriptions made here that the server
-  has not created), `data_last_sync`, `data_version`. It runs the sync (`GET /api/v2/server_info` once for the version, `GET /api/v2/account`
-  with its ETag, then `GET /api/v2/timeline_sync?since=`, one answer, not paged), the queue and its retries, and the end of the session
+  has not created), `data_last_sync`, `data_version`. It runs the sync (`GET /api/v3/server_info` once for the version, `GET /api/v3/account`
+  with its ETag, then `GET /api/v3/timeline_sync?since=`, one answer, not paged), the queue and its retries, and the end of the session
   (a 401 `unauthorized` empties all of localStorage through `moncycle_store.clear_storage()`, the one place that empties it; the
   sign-in, sign-up and settings pages call it too).
   - A day refused as late (409 `stale_write`) is dropped from the queue and downloaded again, like any refusal.
@@ -60,6 +60,13 @@ jQuery (`src/vendor/jquery.min.js`) stays in the project only until the existing
   not signed in (`.public_screen`, set by the router); a screen's own CSS only what is its own. The timeline and the day form set the
   look. Buttons: the default (grey), `.primary` or a submit input (the action of a form), `.rouge` (delete, leave), `.nav_button`
   (the header), `.link_button`.
+- **What a person reads follows the account's settings.** `GET /account` gives `settings` (each `{value, isSet, default}`) and `customSettings`
+  (third-party apps: never read, never sent). `moncycle_store.setting(name)` is the value; `set_setting(name, value)` changes the copy at once
+  (`null`: back to the default) and `restore_setting` undoes it when the server refuses; `account_saved(data)` takes the answer of a `POST /account`.
+  `js/model/format.js` writes and reads **every date** (`format_date`, `parse_date`, `date_row`, `date_long`: the seven `dateFormat`s, the year on two
+  digits) and **every temperature** (`format_temperature`, `parse_temperature`: `temperatureUnit` C or F). Display only: the API and the copy carry ISO
+  dates and **Celsius** (`day_to_api` takes the unit the form was typed in and sends Celsius). `dayBackgroundColor: false` puts `no_day_color` on `<html>`.
+  The optional settings of the settings screen are forms of `form.setting_form` (`panels/affichage.js`), one key each, a reset sends `null`.
 - **A request to the API carries no cache-buster** (`cache: false` adds `_=...`, an unknown query parameter, which is refused).
 
 

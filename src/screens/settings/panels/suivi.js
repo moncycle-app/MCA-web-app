@@ -12,15 +12,18 @@
 ** https://github.com/moncycle-app/backend-api-web-app
 */
 import { moncycle_config } from "../../../js/core/config.js";
+import { moncycle_store } from "../../../js/model/store.js";
 import { t, set_language, fill_language_select } from "../../../js/core/i18n.js";
 import { refresh } from "../../../js/core/router.js";
 import { by_id, delegate } from "../../../js/core/dom.js";
 import { settings_account_error, settings_api, settings_is_checked, settings_read, settings_say, settings_state, settings_sync_later } from "../common.js";
 import { settings_fill_notifications } from "./notifications.js";
+import { settings_fill_settings, settings_setup_setting_forms } from "./affichage.js";
 import { settings_show_method_entries } from "../settings.js";
 
 /* ===========================================================================
-** 5a. MON SUIVI: nickname, method, temperature, display, birth year, research. Each control saves by itself.
+** 5a. MON SUIVI (method, temperature) and MON PROFIL (nickname, language, birth year, research). Each control saves by itself.
+** The optional settings (display, automatic mail) are the forms of affichage.js, saved through the same settings_save.
 ** ======================================================================== */
 
 // What each autosaved control sends, by its name. The method and the temperature make one setting of the account: each change sends both.
@@ -28,22 +31,24 @@ export const settings_autosave = {
 	nickname : function (form) { return {nickname: settings_read(form, "nickname")}; },
 	method : function (form) { return {method: settings_read(form, "method"), temperatureTracking: settings_is_checked(form, "temperature_tracking")}; },
 	temperature_tracking : function (form) { return settings_autosave.method(form); },
-	timeline_asc : function (form) { return {timelineAscending: settings_is_checked(form, "timeline_asc")}; },
 	age : function (form) { return {birthYear: parseInt(settings_read(form, "age"))}; },
 	language : function (form) { return {language: settings_read(form, "language")}; },
 	research : function (form) { return {research: settings_is_checked(form, "research")}; },
-	auto_mail_export : function (form) { return {autoMailExport: settings_is_checked(form, "auto_mail_export")}; },
 };
 
 // The saves go one after the other, so that the server applies them in the order they were made: the method and the temperature are two
 // controls of one setting, and two quick clicks would otherwise be free to arrive in reverse.
 let settings_save_queue = Promise.resolve();
-export function settings_save(payload, line) {
+// `on_refused()` (optional) undoes what was shown before the answer.
+export function settings_save(payload, line, {on_refused} = {}) {
 	settings_say(line, "busy", "⏳");
 	settings_save_queue = settings_save_queue.then(function () {
 		return settings_api("POST", moncycle_config.api_url("/account"), payload).then(function (ret) {
 			settings_say(line, "ok", t("settings.saved"), true);
 			Object.assign(settings_state.account, ret.data || {});
+			// the copy of the timeline holds the account too: it takes the answer as it is (settings included)
+			moncycle_store.account_saved(ret.data);
+			settings_fill_settings(settings_state.account);
 			if (ret.data && ret.data.nickname && by_id("name")) by_id("name").textContent = ret.data.nickname;
 			settings_show_method_entries();
 			settings_sync_later();
@@ -53,8 +58,11 @@ export function settings_save(payload, line) {
 			console.error(failure);
 			settings_say(line, "error", t("settings.not_saved") + settings_account_error(failure));
 			// the controls show what is saved, not what was refused
+			if (on_refused) on_refused();
 			if (by_id("f_suivi")) {
 				settings_fill_suivi(settings_state.account);
+				settings_fill_profil(settings_state.account);
+				settings_fill_settings(settings_state.account);
 				settings_fill_notifications(settings_state.account);
 			}
 		});
@@ -72,12 +80,13 @@ export function settings_autosave_changed(event) {
 }
 
 export function settings_setup_autosave() {
-	const forms = [by_id("f_suivi"), by_id("f_auto_mail")];
+	const forms = [by_id("f_suivi"), by_id("f_profil")];
 	forms.forEach(function (form) {
 		// (the nickname is saved as it is typed, below, not again when the field is left)
 		delegate(form, "change", "input:not([name=nickname]), select", settings_autosave_changed);
 		form.addEventListener("submit", function (event) { event.preventDefault(); });
 	});
+	settings_setup_setting_forms(settings_save);
 	// the nickname is saved as it is typed, once the typing pauses
 	let timer = null;
 	by_id("i_nickname").addEventListener("input", function (event) {
@@ -88,10 +97,13 @@ export function settings_setup_autosave() {
 
 export function settings_fill_suivi(account) {
 	const form = by_id("f_suivi");
-	form.elements["nickname"].value = account.nickname ?? "";
 	form.querySelectorAll("[name=method]").forEach(function (radio) { radio.checked = radio.value == account.method; });
 	form.elements["temperature_tracking"].checked = !!account.temperatureTracking;
-	form.elements["timeline_asc"].checked = !!account.timelineAscending;
+}
+
+export function settings_fill_profil(account) {
+	const form = by_id("f_profil");
+	form.elements["nickname"].value = account.nickname ?? "";
 	form.elements["research"].checked = !!account.research;
 	settings_fill_birth_years(form.elements["age"], account.birthYear);
 	fill_language_select(form.elements["language"], account.language);

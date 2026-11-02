@@ -60,7 +60,9 @@ export function reset_state() {
 	// container holding the chips for each description type: 2=sensation, 1=observation, 0=autre (legacy)
 	desc_container_id : {2 : "#menu_sensation_container", 1 : "#menu_observation_container", 0 : "#menu_autre_container"},
 	desc_chip_count : 0,
-	menu_opened_date : null
+	menu_opened_date : null,
+	// the unit the temperature of the open day form was filled in (see day_form.js)
+	form_temperature_unit : null
 	});
 }
 reset_state();

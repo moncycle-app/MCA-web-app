@@ -27,10 +27,28 @@
  * @property {string} nickname
  * @property {"cervicalMucus"|"fertilityCare"} method
  * @property {boolean} temperatureTracking
- * @property {boolean} timelineAscending
  * @property {string} [language]
+ * @property {Settings} settings  the optional settings, each {value, isSet, default}
+ * @property {Object} customSettings  for third-party apps: ignored by the web app
  * @property {string[]} allCyclesFirstDay  newest first
  * @property {string[]} allObservationPausedDates  newest first
+ */
+
+/**
+ * @typedef {Object} Setting  an optional setting: `value` is what the app uses (the default while `isSet` is false)
+ * @property {*} value
+ * @property {boolean} isSet
+ * @property {*} default
+ */
+
+/**
+ * @typedef {Object} Settings
+ * @property {Setting} timelineAscending
+ * @property {Setting} autoMailExport
+ * @property {Setting} dayBackgroundColor
+ * @property {Setting} dateFormat  DMY_SLASH, DMY_DOT, DMY_DASH, MDY_SLASH, YMD_DASH, YMD_SLASH or YMD_DOT
+ * @property {Setting} temperatureUnit  "C" or "F" (the API always carries Celsius)
+ * @property {Setting} notificationEmails
  */
 
 /**

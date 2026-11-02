@@ -18,7 +18,8 @@ import { send } from "../../js/core/api.js";
 import { say } from "../../js/core/dom.js";
 import { moncycle_store } from "../../js/model/store.js";
 import * as dates from "../../js/model/dates.js";
-import { t, t_map, locale } from "../../js/core/i18n.js";
+import { format_date } from "../../js/model/format.js";
+import { t, t_map, clock } from "../../js/core/i18n.js";
 import { settings_text } from "./text.js";
 
 /* ===========================================================================
@@ -67,7 +68,7 @@ export function settings_error(failure, own_map = {}) {
 	return moncycle_store.error_text(failure).replace(/\.$/, "");
 }
 
-// The same for what a refusal of POST /api/v2/account says.
+// The same for what a refusal of POST /api/v3/account says.
 export function settings_account_error(failure) {
 	return settings_error(failure, t_map("settings.account_errors"));
 }
@@ -96,16 +97,19 @@ export function settings_today() {
 	return dates.str(new Date());
 }
 
+// a date of the API (2026-09-20) in the format of the account
 export function settings_local_date(ymd) {
-	const parts = ymd.split("-");
-	return t("calendar.date_numeric", {day: parts[2], month: parts[1], year: parts[0]});
+	return format_date(ymd);
 }
 
+// a moment of the API (RFC 3339) in the user's own time zone: the date in the format of the account, then the time
 export function settings_local_time(iso) {
-	return iso ? new Date(iso).toLocaleString(locale(), {dateStyle: "short", timeStyle: "short"}) : "";
+	if (!iso) return "";
+	const moment = new Date(iso);
+	return isNaN(moment) ? "" : format_date(dates.str(moment)) + " " + clock(moment);
 }
 
-// A form that changes the account with the password asked again (an address, the password): POST /api/v2/account, its answer under the
+// A form that changes the account with the password asked again (an address, the password): POST /api/v3/account, its answer under the
 // button. `build_payload(form)` reads the form when it is submitted; `on_done(ret)` says what went well; the server's refusal is said
 // here. `check(form)` (optional) answers a text when the form must not be sent at all.
 export function settings_confirmed_change(form, build_payload, on_done, check) {
@@ -129,4 +133,4 @@ export function settings_confirmed_change(form, build_payload, on_done, check) {
 
 // The account of the screen, read once and kept up to date by what the panels save. One object, so that every module sees the same.
 // `signal` is the screen's: what is listened to outside the screen's own markup ends with it.
-export const settings_state = {account: {}, signal: undefined};
+export const settings_state = {account: {}, limits: {}, signal: undefined};

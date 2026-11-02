@@ -31,19 +31,14 @@ test("t: plurals follow the language's rule (French: 0 and 1 are singular)", () 
 	assert.equal(i18n.t("settings.n_days", { count: 2 }), "2 jours");
 });
 test("t_list, t_map", () => {
-	assert.equal(i18n.t_list("calendar.months_short").length, 12);
+	assert.equal(i18n.t_list("calendar.weekdays").length, 7);
 	assert.deepEqual(i18n.t_list("no.list"), []);
 	const errors = i18n.t_map("settings.export_errors");
 	assert.equal(errors.no_data_in_period, "aucune observation sur cette période.");
 	assert.ok(!Object.keys(errors).some((key) => key.includes("_comment")));
 });
-test("dates keep today's output", () => {
-	const day = new Date(2026, 2, 3, 14, 5);
-	assert.equal(i18n.date_short(day), "3 mars");
-	assert.equal(i18n.date_long(day), "mardi 3 mars 2026");
-	assert.equal(i18n.date_row(day), "m 3 mars ");
-	assert.equal(i18n.date_short(new Date(2026, 0, 8)), "8 jan");
-	assert.equal(i18n.clock(day), "14:05");
+test("the time of day", () => {
+	assert.equal(i18n.clock(new Date(2026, 2, 3, 14, 5)), "14:05");
 });
 test("numbers use the catalog's locale", () => {
 	assert.equal(i18n.locale(), "fr-FR");
@@ -87,7 +82,6 @@ test("no catalog for the language asked: English is read, and the news follow wh
 		assert.equal(i18n.requested_language(), "es");
 		assert.equal(i18n.t("common.language_label"), "Language:");
 		assert.equal(i18n.locale(), "en-GB");
-		assert.equal(i18n.date_short(new Date(2026, 9, 8)), "8 Oct");
 		assert.equal(await i18n.set_language("en"), "en");
 	}
 	finally {

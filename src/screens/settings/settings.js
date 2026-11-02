@@ -19,7 +19,8 @@ import { moncycle_store } from "../../js/model/store.js";
 import { t } from "../../js/core/i18n.js";
 import { by_id } from "../../js/core/dom.js";
 import { settings_state, settings_api, settings_error, settings_say } from "./common.js";
-import { settings_fill_suivi, settings_setup_autosave } from "./panels/suivi.js";
+import { settings_fill_suivi, settings_fill_profil, settings_setup_autosave } from "./panels/suivi.js";
+import { settings_fill_settings } from "./panels/affichage.js";
 import { settings_descriptions_load, settings_setup_descriptions } from "./panels/descriptions.js";
 import { settings_fill_notifications, settings_setup_notifications } from "./panels/notifications.js";
 import { settings_fill_data, settings_setup_export, settings_setup_import } from "./panels/donnees.js";
@@ -52,6 +53,8 @@ export function settings_show_account(account) {
 	settings_show_method_entries();
 
 	settings_fill_suivi(account);
+	settings_fill_profil(account);
+	settings_fill_settings(account);
 	settings_fill_notifications(account);
 	settings_fill_data(account);
 	settings_fill_connexion(account);

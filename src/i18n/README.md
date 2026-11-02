@@ -6,21 +6,21 @@ without script reads (the link preview of `index.html` and its `<noscript>` mess
 
 ## The format
 
-A flat object. Keys are English names, `screen.thing`, describing what the text is for (never a slice of its French wording): `timeline.cycle_title`, `settings.delete_confirm`, `common.error_unknown`, `calendar.months_short`.
+A flat object. Keys are English names, `screen.thing`, describing what the text is for (never a slice of its French wording): `timeline.cycle_title`, `settings.delete_confirm`, `common.error_unknown`, `calendar.weekdays`.
 
 | value | meaning |
 |---|---|
 | `"text {name}"` | `t(key, {name: ...})`. `{name}` is replaced; the text is plain, never HTML |
 | `{"one": "...", "other": "..."}` | a plural: `t(key, {count: n})` picks the form with `Intl.PluralRules(meta.locale)`. Other categories (`zero`, `two`, `few`, `many`) are allowed |
-| `["jan", "fév", ...]` | a list (`calendar.months_short`, `months_long`, `weekdays`), read with `t_list(key)` |
+| `["jan", "fév", ...]` | a list (`calendar.weekdays`), read with `t_list(key)` |
 | `"key._comment"` | a note for translators about `key`; never shown |
 
 A group of keys under a prefix is read as a lookup by `t_map("settings.export_errors")` (the last part of the key is the API's error code).
 Markup inside a sentence: the key holds `{end}` and the code gives `t_node(key, {end: node})` the element to put there. In a screen's
 HTML, a `data-i18n="key"` element lists its inline children with `data-slot="name"`: they take the place of `{name}`.
 
-`meta.locale` (`en-GB`, `fr-FR`) is the locale of numbers (`Intl.NumberFormat`). Dates are not formatted by `Intl`: the names and the layouts are
-catalog entries (`calendar.date_short` is `{day} {month}`), so the output is the app's own.
+`meta.locale` (`en-GB`, `fr-FR`) is the locale of numbers (`Intl.NumberFormat`). Dates are not formatted by `Intl`: they are numeric, in the format the account chose (`dateFormat`, `js/model/format.js`); the catalog holds the
+weekday names and the layouts around the date (`calendar.date_long` is `{weekday} {date}`).
 
 Not language, so not here: CSS class names, element ids, form field names, FertilityCare codes (`VL`, `10KL`, `X1`).
 

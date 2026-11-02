@@ -9,19 +9,19 @@ text of the pages is English by default, or French (`src/i18n/`; see `src/i18n/R
 ```sh
 npm ci                      # installs jQuery and Chart.js and copies their dist files to src/vendor/ (postinstall)
 npm run serve               # http://localhost:8080, routes are in the hash: http://localhost:8080/#/auth
-node scripts/serve.mjs 8193 --api-url http://localhost:8003/api/v2   # try another API without editing config.json
+node scripts/serve.mjs 8193 --api-url http://localhost:8003/api/v3   # try another API without editing config.json
 npm test                    # node --test: compat rules and API address handling
 ```
 
 ## Where the API is: `src/config.json`
 
 ```json
-{ "apiUrl": "/api/v2" }
+{ "apiUrl": "/api/v3" }
 ```
 
-`apiUrl` is the base URL of the contract, one of the `servers` of the OpenAPI file: `/api/v2` (the API of the same site, what the Docker
-image serves) or a full link such as `https://tableau.moncycle.app/api/v2`. Always with the `/api/v2` part. Every call of the app is that
-base plus a path of the contract (`/token`, `/day/2026-03-10`). A missing or invalid file falls back to `/api/v2` with a console warning.
+`apiUrl` is the base URL of the contract, one of the `servers` of the OpenAPI file: `/api/v3` (the API of the same site, what the Docker
+image serves) or a full link such as `https://tableau.moncycle.app/api/v3`. Always with the `/api/v3` part. Every call of the app is that
+base plus a path of the contract (`/token`, `/day/2026-03-10`). A missing or invalid file falls back to `/api/v3` with a console warning.
 
 - **Same origin:** the session is an HttpOnly cookie, as before.
 - **Another origin ("remote"):** no cookie. The sign-in asks for the token alone, `js/config.js` keeps it in `localStorage`
@@ -32,7 +32,7 @@ base plus a path of the contract (`/token`, `/day/2026-03-10`). A missing or inv
 
 Copy `src/` (after `npm ci`) to any directory of any static host, an FTP space included: nothing to configure. The routes are in the hash
 (`index.html#/auth`, `#/settings/notifications`) and every path in the code is relative to `index.html`, so the folder works at the root of a
-host or in a sub-directory, with no rewrite and no `config.json` (the API is then `api/v2` of the same site; `config.json` points elsewhere).
+host or in a sub-directory, with no rewrite and no `config.json` (the API is then `api/v3` of the same site; `config.json` points elsewhere).
 The Content-Security-Policy of the image is a good start; for a remote API it needs the API origin in
 `connect-src` (and `form-action`, `img-src data: blob:`). Set the API's `APP_URL` to the public URL of this site: it builds the links of the mails.
 
