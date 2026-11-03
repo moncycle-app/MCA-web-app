@@ -16,7 +16,7 @@
 	"calendar.part_y": "YY",
 	"calendar.clock": "{hh}:{mm}",
 	"common.error_unknown": "unknown error",
-	"common.on_app": "on {app}",
+	"common.on_app": "{app}",
 	"common.language_label": "Language:",
 	"common.footer_by": "A project of {a}",
 	"timeline.console_banner": "moncycle.app - cycle charting app for natural methods",

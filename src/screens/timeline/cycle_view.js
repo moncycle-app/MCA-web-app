@@ -363,14 +363,16 @@ export function day_timeline2timeline(j) {
 			if (j.stamp) {
 				let contenu = "o";
 				let color = j.stamp;
+				let with_baby = false;
 				if (j.stamp.includes("BB") && j.stamp.length>2){
 					contenu = t_map("timeline.stamp_glyph")["BB"];
 					color = j.stamp.replace("BB", "");
+					with_baby = true;
 				}
 				else {
 					contenu = t_map("timeline.stamp_glyph")[j.stamp];
 				}
-				day_timeline.append(el("span", {class: `g ${state.stamp_class[color]}`, text: contenu}));
+				day_timeline.append(el("span", {class: `g ${state.stamp_class[color]}${with_baby ? " with_baby" : ""}`, text: contenu}));
 				pos.classList.add("j_" + state.stamp_class[color]);
 				tint(state.stamp_class[color]);
 				tbd = false;

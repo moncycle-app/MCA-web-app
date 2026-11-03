@@ -113,7 +113,7 @@ h1.logo {
 	overflow-wrap: anywhere;
 }
 
-/* "on moncycle.app", just under the nickname */
+/* "moncycle.app", just under the nickname */
 .logo_sub {
 	margin: -12px 0 12px;
 	font-family: var(--font-title);
@@ -122,6 +122,7 @@ h1.logo {
 }
 
 .logo_sub .logo_cycle {
+	color: var(--ink);
 	font-weight: 700;
 }
 

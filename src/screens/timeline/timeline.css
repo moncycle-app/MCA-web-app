@@ -394,6 +394,11 @@
 	color: var(--stamp-ink);
 }
 
+/* the baby of a coloured stamp: its symbol shows on the colour */
+.day .g.with_baby {
+	color: var(--on-color);
+}
+
 .day .g.baby {
 	box-shadow: inset 0 0 0 1px var(--white-edge);
 }
