@@ -19,6 +19,7 @@ import { api } from "../../js/core/api.js";
 import { field, checked, el } from "../../js/core/dom.js";
 import { t, t_map, attach_language_select } from "../../js/core/i18n.js";
 import { has_session } from "../../js/core/router.js";
+import { device } from "../../js/core/device.js";
 
 const by_id = (root, id) => root.querySelector("#" + id);
 
@@ -30,7 +31,7 @@ export const screen = {
 	title: () => t("register.page_title"),
 	// Someone on a demo account can sign up: they stay here, and what the browser keeps of the demo goes (its session ends on the
 	// server with the captcha this screen asks for, which replaces its cookie).
-	redirect: () => (has_session() && !moncycle_store.is_demo(localStorage.auth) ? "/" : null),
+	redirect: () => (has_session() && !moncycle_store.is_demo(device.keep.getItem("auth")) ? "/" : null),
 
 	mount(root, ctx) {
 		const listen = {signal: ctx.signal};

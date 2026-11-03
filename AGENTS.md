@@ -67,6 +67,9 @@ jQuery (`src/vendor/jquery.min.js`) stays in the project only until the existing
   digits) and **every temperature** (`format_temperature`, `parse_temperature`: `temperatureUnit` C or F). Display only: the API and the copy carry ISO
   dates and **Celsius** (`day_to_api` takes the unit the form was typed in and sends Celsius). `dayBackgroundColor: false` puts `no_day_color` on `<html>`.
   The optional settings of the settings screen are forms of `form.setting_form` (`panels/affichage.js`), one key each, a reset sends `null`.
+- **Public device** (`js/core/device.js`, the "This is not my device" box of the sign-in): the token is asked with `expiresInDays: 1` (the API's least), no cookie, and
+  sent as `Authorization: Bearer` (`moncycle_config.bearer()`). The session marker and token live in `device.keep` (sessionStorage there), the local copy and the view
+  choices in `device.storage` (memory there). Code reads and writes those two, never `localStorage` directly. `device.watch` ends the session two hours after the sign-in.
 - **A request to the API carries no cache-buster** (`cache: false` adds `_=...`, an unknown query parameter, which is refused).
 
 

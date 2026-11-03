@@ -105,7 +105,6 @@
 	},
 	"timeline.stats_cycles._comment": "how many of the previous cycles an average is made of, when it is fewer than the column says (the ones with a peak)",
 	"timeline.stats_none": "–",
-	"timeline.stats_union": "Jours avec rapports",
 	"timeline.stats_days": {
 		"one": "{count} jour",
 		"other": "{count} jours"
@@ -114,8 +113,6 @@
 	"timeline.stats_day_range._comment": "a run of days of the cycle, short form for the stats panel; one day alone is timeline.stats_day",
 	"timeline.stats_day": "J{n}",
 	"timeline.stats_range": "{min}–{max}",
-	"timeline.stats_list_cut": "{list}, …",
-	"timeline.stats_list_cut._comment": "a list of days cut short: the first ones, then an ellipsis (the figure before it says how many there are)",
 	"timeline.stats_aside": "({text})",
 	"timeline.stats_aside._comment": "what goes with a figure, after it in a lighter text: a share, a range, the days it is about",
 	"timeline.stats_baby_span": "Période bébé",
@@ -799,6 +796,8 @@
 	"auth.captcha_image_title": "Cliquer pour obtenir une autre image",
 	"auth.captcha_image_alt": "captcha",
 	"auth.captcha_hint": "Majuscules ou minuscules, peu importe. Image difficile à lire ? Cliquez dessus pour en obtenir une autre.",
+	"auth.public_device_label": "Ce n’est pas mon appareil (ordinateur public ou partagé)",
+	"auth.public_device_hint": "La session se termine au bout de 2 heures ou à la fermeture de l’onglet, et rien de votre compte n’est gardé dans ce navigateur. Pas d’usage hors ligne.",
 	"auth.but_connect": "Connexion 🔑",
 	"auth.demo_mucus": "compte de démo {b} 🥸",
 	"auth.cervical_mucus": "glaire cervicale",

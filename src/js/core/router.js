@@ -23,6 +23,7 @@
 ** with index.html is written back as a route at the start.
 */
 import { moncycle_config } from "./config.js";
+import { device } from "./device.js";
 import { apply } from "./i18n.js";
 
 const routes = {
@@ -52,7 +53,7 @@ export function is_route(path) {
 	return Object.prototype.hasOwnProperty.call(routes, path === "/" ? "/" : path.replace(/\/+$/, ""));
 }
 export function has_session() {
-	return parseInt(localStorage.auth) > 0;
+	return parseInt(device.keep.getItem("auth")) > 0;
 }
 // the hash of a route: "/auth" -> "#/auth", "/" -> "#/"
 function hash_of(address) {

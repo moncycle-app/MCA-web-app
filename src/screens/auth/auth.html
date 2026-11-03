@@ -10,6 +10,7 @@
 		<!-- what the server is told about this sign-in: the name of the session (js/auth.js writes the domain in it) and that the browser keeps it in a cookie -->
 		<input type="hidden" name="name" id="i_token_name" value="WEB-APP" />
 		<input type="hidden" name="cookie" id="i_token_cookie" value="true" />
+		<input type="hidden" name="expiresInDays" id="i_expires_days" value="" />
 	<label data-i18n="auth.email_label" for="i_login_email"></label><br />
 	<input data-i18n-attr="placeholder:auth.email_placeholder" name="login_email" id="i_login_email" type="email" required  value="" /><br />
 	<br />
@@ -18,6 +19,9 @@
 	<br />
 	<label data-i18n="auth.code_label" for="i_code"></label><br />
 	<input data-i18n-attr="placeholder:auth.code_placeholder" name="code" id="i_code" type="number" value="" /><br />
+	<br />
+	<label><input type="checkbox" name="public_device" id="i_public_device" /> <span data-i18n="auth.public_device_label"></span></label><br />
+	<span data-i18n="auth.public_device_hint" class="label_info"></span><br />
 	<br />
 	<div id="captcha_wrapper" hidden>
 		<label data-i18n="auth.captcha_label" for="i_captcha"></label><br />

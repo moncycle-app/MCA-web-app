@@ -170,7 +170,6 @@ test("cycle stats: the days of a cycle by kind, filled in, in a row, the peak, i
 	assert.deepEqual(cycle.to_fill, [7, 21, 22, 25]);
 	assert.equal(cycle.streak, 2);    // days 23 and 24: the last day is still to fill in
 	assert.equal(cycle.longest, 13);  // days 8 to 20
-	assert.deepEqual(cycle.union, [7, 20]);   // a day to fill in can hold intercourse
 	assert.equal(cycle.peak, 14);
 	assert.deepEqual(cycle.baby, { first: 10, last: 17, days: 8 });   // the day not observed between baby days is one of them
 	assert.equal(cycle.temperature, null);

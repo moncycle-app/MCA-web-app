@@ -17,10 +17,18 @@ import { moncycle_config } from "./core/config.js";
 import { ready as i18n_ready, resolve_language, set_language, requested_language } from "./core/i18n.js";
 import { set_session_end_handler } from "./core/api.js";
 import { moncycle_store } from "./model/store.js";
+import { device } from "./core/device.js";
+import { send } from "./core/api.js";
 import { start, refresh, has_session } from "./core/router.js";
 
 await Promise.all([moncycle_config.ready, i18n_ready]);
 set_session_end_handler(() => moncycle_store.expire_session());
+// A public device: the session ends two hours after the sign-in. The token is asked to end on the server too (the API cannot make
+// one shorter than a day, so this call is what ends it early; it is lost if the tab was closed before).
+device.watch(async () => {
+	try { await send("DELETE", moncycle_config.api_url("/token"), {timeout: 5000}); } catch (e) { }
+	moncycle_store.expire_session();
+});
 // the local copy is made once and lives across the screens; the first sync is at the start, and only for a session
 if (has_session()) {
 	moncycle_store.init();

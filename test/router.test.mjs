@@ -25,8 +25,8 @@ test("is_route", () => {
 test("has_session reads the sign-in marker", () => {
 	localStorage.clear();
 	assert.equal(has_session(), false);
-	localStorage.auth = "7";
+	localStorage.setItem("auth", "7");
 	assert.equal(has_session(), true);
-	localStorage.auth = "0";
+	localStorage.setItem("auth", "0");
 	assert.equal(has_session(), false);
 });

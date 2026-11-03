@@ -42,7 +42,6 @@ export function day_kind(day, method) {
 //   to_fill      its days still to fill in, in order
 //   streak       its days filled in a row up to its last day (up to the day before when the last one is still to fill in)
 //   longest      its most days filled in a row
-//   union        its days with intercourse
 //   peak         the day of its latest peak, or null
 //   baby         its baby period (baby_period), or null
 //   temperature  the summary of its temperatures, or null (there is none when the method has no temperature)
@@ -50,7 +49,7 @@ export function day_kind(day, method) {
 export function cycle_stats(days, from, to, method) {
 	const total = dates.days_between(from, to) + 1;
 	const kinds = {R: 0, G: 0, Y: 0, BB: 0, none: 0, not_observed: 0, to_fill: 0, paused: 0};
-	const cycle = [], to_fill = [], union = [], temperatures = [];
+	const cycle = [], to_fill = [], temperatures = [];
 	const words = new Map();
 	let peak = null, run = 0, longest = 0;
 	for (let n = 1; n <= total; n++) {
@@ -62,10 +61,9 @@ export function cycle_stats(days, from, to, method) {
 		longest = Math.max(longest, run);
 		if (kind == "to_fill") to_fill.push(n);
 		if (!day) continue;
-		// what the timeline marks on a day: a peak on any day, intercourse on a day that is not paused
+		// what the timeline marks on a day: a peak on any day
 		if (day.isPeak) peak = n;
 		if (kind == "paused") continue;
-		if (day.sexUnion) union.push(n);
 		if (kind == "not_observed") continue;
 		if (method.temperature && day.temperature > 0) temperatures.push(Number(day.temperature));
 		if (!method.fc) new Set([...(day.freeMucusObservation || []), ...(day.freeMucusSensation || []), ...(day.freeOther || [])]).forEach((word) => words.set(word, (words.get(word) || 0) + 1));
@@ -74,7 +72,7 @@ export function cycle_stats(days, from, to, method) {
 	let streak = 0;
 	while (streak < last && cycle[last - 1 - streak].kind != "to_fill") streak++;
 	return {
-		total: total, kinds: kinds, to_fill: to_fill, streak: streak, longest: longest, union: union, peak: peak,
+		total: total, kinds: kinds, to_fill: to_fill, streak: streak, longest: longest, peak: peak,
 		baby: baby_period(cycle, peak),
 		temperature: summary(temperatures),
 		words: [...words].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 3),

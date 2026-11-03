@@ -18,6 +18,7 @@ import { moncycle_compat } from "../core/compat.js";
 import { show_notice } from "../core/compat_notice.js";
 import { t } from "../core/i18n.js";
 import { send } from "../core/api.js";
+import { device } from "../core/device.js";
 import { blank_day, is_blank, day_from_body, day_meta, codified_fields } from "./day.js";
 import { day_number, cycle_of, set_member, place_days, account_setting, SETTING_DEFAULTS } from "./cycles.js";
 
@@ -38,6 +39,7 @@ import { day_number, cycle_of, set_member, place_days, account_setting, SETTING_
 **  - GET /api/v3/timeline_sync brings what was changed elsewhere, and the cursor it gives is kept
 **    (data_last_sync); GET /api/v3/account is read before it (its ETag is kept, data_account_etag: an account
 **    that did not change costs a 304);
+**  - on a public device (js/core/device.js) the copy is in memory only: nothing is written in the browser;
 **  - when the session ends, all of localStorage goes. When the app is updated (`moncycle_store.schema` or the
 **    appVersion of GET /api/v3/server_info changes), the copy goes and is downloaded again; the unsent changes stay.
 **
@@ -127,7 +129,7 @@ export const moncycle_store = {
 	** ====================================================================== */
 	read : function (key) {
 		try {
-			let raw = localStorage.getItem(key);
+			let raw = device.storage.getItem(key);
 			return raw === null ? null : JSON.parse(raw);
 		}
 		catch (e) { return null; }
@@ -136,22 +138,22 @@ export const moncycle_store = {
 	// memory, and the cursor is dropped so the next visit downloads everything again.
 	write : function (key, value) {
 		if (moncycle_store.expired) return;
-		try { localStorage.setItem(key, JSON.stringify(value)); }
+		try { device.storage.setItem(key, JSON.stringify(value)); }
 		catch (e) {
 			console.error(e);
 			moncycle_store.storage_failed = true;
-			try { localStorage.removeItem(moncycle_store.keys.last_sync); } catch (e2) { }
+			try { device.storage.removeItem(moncycle_store.keys.last_sync); } catch (e2) { }
 		}
 	},
 	erase : function (key) {
 		if (moncycle_store.expired) return;
-		try { localStorage.removeItem(key); } catch (e) { }
+		try { device.storage.removeItem(key); } catch (e) { }
 	},
 	// every key of the copy (not the other things localStorage holds: the user id, the view chosen...)
 	data_keys : function () {
 		let found = [];
-		for (let i = 0; i < localStorage.length; i++) {
-			let key = localStorage.key(i);
+		for (let i = 0; i < device.storage.length; i++) {
+			let key = device.storage.key(i);
 			if (key.startsWith("data_")) found.push(key);
 		}
 		return found;
@@ -161,7 +163,7 @@ export const moncycle_store = {
 	wipe_data : function (keep_pending) {
 		let queue = keep_pending ? moncycle_store.read(moncycle_store.keys.pending) : null;
 		let queue_descriptions = keep_pending ? moncycle_store.read(moncycle_store.keys.pending_descriptions) : null;
-		moncycle_store.data_keys().forEach(function (key) { localStorage.removeItem(key); });
+		moncycle_store.data_keys().forEach(function (key) { device.storage.removeItem(key); });
 		moncycle_store.days = {};
 		moncycle_store.descriptions = [];
 		moncycle_store.account = null;
@@ -178,15 +180,15 @@ export const moncycle_store = {
 	// view chosen. The one place that empties localStorage: the pages that sign in, sign out or delete the account
 	// call it too, they do not clear it themselves.
 	clear_storage : function () {
-		try { localStorage.clear(); } catch (e) { }
+		device.clear();
 	},
 	// Empties what this browser holds, except the sign-in marker (`auth`: the pages need it to know a session exists; the session
 	// token itself is an HttpOnly cookie, out of reach of the script, or on another origin the token kept by config.js) and the unsent changes. The next sync downloads everything again.
 	reset_local : function () {
 		moncycle_store.wipe_data(true);
 		try {
-			Object.keys(localStorage).forEach(function (key) {
-				if (key !== "auth" && key !== moncycle_config.token_key && !key.startsWith("data_")) localStorage.removeItem(key);
+			device.storage_keys().forEach(function (key) {
+				if (key !== "auth" && key !== moncycle_config.token_key && !key.startsWith("data_")) device.storage.removeItem(key);
 			});
 		} catch (e) { }
 		// the version stamp was erased: check_version writes it again
@@ -212,9 +214,9 @@ export const moncycle_store = {
 	** START: read the copy
 	** ====================================================================== */
 	init : function () {
-		moncycle_store.legacy_keys.forEach(function (key) { localStorage.removeItem(key); });
+		moncycle_store.legacy_keys.forEach(function (key) { device.storage.removeItem(key); });
 
-		let stamp = localStorage.getItem(moncycle_store.keys.version);
+		let stamp = device.storage.getItem(moncycle_store.keys.version);
 		if (stamp === null || stamp.split("/")[0] != String(moncycle_store.schema)) {
 			moncycle_store.wipe_data(false);
 			stamp = null;
@@ -237,7 +239,7 @@ export const moncycle_store = {
 		// a copy without a cursor, or without the account, is not one to trust
 		if (!moncycle_store.account || !moncycle_store.last_sync) {
 			moncycle_store.wipe_data(true);
-			if (stamp !== null) localStorage.setItem(moncycle_store.keys.version, stamp);
+			if (stamp !== null) device.storage.setItem(moncycle_store.keys.version, stamp);
 		}
 
 		window.addEventListener("online", function () { moncycle_store.wake(true); });
@@ -711,10 +713,10 @@ export const moncycle_store = {
 			let info = ret.data || {};
 			moncycle_store.set_news_url(info.newsUrl || null);
 			let stamp = [moncycle_store.schema, info.appVersion, (moncycle_store.webapp_version || {}).version].join("/");
-			let known = localStorage.getItem(moncycle_store.keys.version);
+			let known = device.storage.getItem(moncycle_store.keys.version);
 			if (known === stamp) return;
 			if (known !== null) moncycle_store.wipe_data(true);
-			try { localStorage.setItem(moncycle_store.keys.version, stamp); } catch (e) { }
+			try { device.storage.setItem(moncycle_store.keys.version, stamp); } catch (e) { }
 			if (known === null) return;
 			window.location.reload();
 			return new Promise(function () { });

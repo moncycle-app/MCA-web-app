@@ -19,6 +19,8 @@
 ** A page's own code waits for the file: `await moncycle_config.ready` at the top of the page's module (main.js does, before the router starts).
 ** An API on another origin ("remote") gets no cookie: the token of the sign-in is kept here and sent as `Authorization: Bearer`.
 */
+import { device } from "./device.js";
+
 export const moncycle_config = {
 	default_api_url : "api/v3",
 	token_key : "auth_token",
@@ -52,20 +54,22 @@ export const moncycle_config = {
 
 	// the token of a remote API, in localStorage but outside the copy (data_*): an update of the app drops the copy, not the session
 	token : function () {
-		try { return localStorage.getItem(moncycle_config.token_key); } catch (e) { return null; }
+		try { return device.keep.getItem(moncycle_config.token_key); } catch (e) { return null; }
 	},
 	set_token : function (token) {
-		try { localStorage.setItem(moncycle_config.token_key, token); } catch (e) { console.error(e); }
+		try { device.keep.setItem(moncycle_config.token_key, token); } catch (e) { console.error(e); }
 	},
 	// the headers a call of the API carries
+	// the token goes as a header on another origin, and on a public device (no cookie is left in the browser there)
+	bearer : function () { return moncycle_config.remote || device.is_public(); },
 	headers : function () {
-		let token = moncycle_config.remote ? moncycle_config.token() : null;
+		let token = moncycle_config.bearer() ? moncycle_config.token() : null;
 		return token ? {"Authorization" : "Bearer " + token} : {};
 	},
 	// fetch() for the API: the cookie goes along on the same origin, the token on another
 	fetch : function (url, options) {
 		return fetch(url, Object.assign({}, options, {
-			credentials : moncycle_config.remote ? "omit" : "same-origin",
+			credentials : moncycle_config.bearer() ? "omit" : "same-origin",
 			headers : Object.assign({}, (options || {}).headers, moncycle_config.headers()),
 		}));
 	},

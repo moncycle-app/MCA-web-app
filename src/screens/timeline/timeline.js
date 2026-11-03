@@ -13,6 +13,7 @@
 */
 
 import { moncycle_store } from "../../js/model/store.js";
+import { device } from "../../js/core/device.js";
 import { moncycle_news } from "../../js/services/news.js";
 import * as dates from "../../js/model/dates.js";
 import { t, t_map } from "../../js/core/i18n.js";
@@ -86,7 +87,7 @@ function start_timeline(ctx) {
 	bind_desc_add_forms();
 	by_id("but_mini_maxi").addEventListener("click", mini_maxi_switch);
 	by_id("go_baby").addEventListener("click", go_blank_or_empty);
-	if (localStorage.mini_maxi == "mini") state.mini_maxi = "maxi";
+	if (device.storage.getItem("mini_maxi") == "mini") state.mini_maxi = "maxi";
 	else state.mini_maxi = "mini";
 	mini_maxi_switch();
 	by_id("form_time_temp_taken").addEventListener("focus", function (event) {
@@ -109,7 +110,7 @@ function start_timeline(ctx) {
 	// another tab wrote its copy: nothing to do. It logged out, or logged in as someone else: leave.
 	window.addEventListener("storage", function (event) {
 		if (event.key !== null && event.key != "auth") return;
-		if (localStorage.auth != state.constante.no_user_account) location.reload();
+		if (device.keep.getItem("auth") != state.constante.no_user_account) location.reload();
 	}, {signal});
 	if (moncycle_store.account) show_account();
 }
@@ -246,14 +247,14 @@ export function mini_maxi_switch() {
 		display(by_id("recap"), true);
 		by_id("but_mini_maxi").textContent = t("timeline.but_view_maxi");
 		state.mini_maxi="mini";
-		localStorage.mini_maxi="mini";
+		device.storage.setItem("mini_maxi", "mini");
 	}
 	else {
 		display(by_id("timeline"), true);
 		display(by_id("recap"), false);
 		by_id("but_mini_maxi").textContent = t("timeline.but_view_mini");
 		state.mini_maxi="maxi";
-		localStorage.mini_maxi="maxi";
+		device.storage.setItem("mini_maxi", "maxi");
 	}
 	if (state.cycle_curseur == 0) remplir_page_de_cycle();
 	if (state.timeline_asc && page_height()<=document.documentElement.clientHeight) remplir_page_de_cycle();
@@ -281,14 +282,14 @@ export function charger_actu() {
 }
 
 export function show_actu(item) {
-	if (localStorage.actu_hidden === item.url) return;
+	if (device.storage.getItem("actu_hidden") === item.url) return;
 	by_id("actu_title").textContent = item.title;
 	by_id("actu_text").textContent = item.description;
 	by_id("lire_actu").onclick = function () {
 		window.open(item.url, "_blank", "noopener,noreferrer");
 	};
 	by_id("fermer_actu").onclick = function () {
-		localStorage.actu_hidden = item.url;
+		device.storage.setItem("actu_hidden", item.url);
 		display(by_id("actu"), false);
 	};
 	display(by_id("actu"), true);

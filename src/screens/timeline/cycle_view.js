@@ -189,8 +189,6 @@ const DAY_KINDS = [
 	{kind: "to_fill", css: "stamp_ar", key: "timeline.stats_kind_to_fill"},
 	{kind: "paused", css: "stamp_pause", key: "timeline.stats_kind_paused"},
 ];
-// the most intercourse days a cycle's row names: the number before them says how many there are
-const UNION_SHOWN = 5;
 
 // one bar, one segment per kind of day, as wide as its days and the largest first (the sort is stable: equals keep the order of DAY_KINDS);
 // the legend follows the bar and gives the days and their share of the cycle
@@ -270,7 +268,7 @@ function compare_node(stats, from, fc) {
 }
 
 // The figures of one cycle (cycle_stats.js), from the local copy: its days by kind, how much of it is filled in, how it compares with the
-// cycles before it, its baby period, intercourse, temperatures and keywords. Every figure is text; the keywords are the user's own words
+// cycles before it, its baby period, temperatures and keywords. Every figure is text; the keywords are the user's own words
 // and go in as text.
 function cycle_stats_node(from, to) {
 	const nfp_method = state.constante.nfp_method;
@@ -283,8 +281,6 @@ function cycle_stats_node(from, to) {
 	if (compare) root.append(compare);
 	const rows = el("dl", {class: "stats_rows"});
 	if (stats.baby) stats_row(rows, t("timeline.stats_baby_span"), run_text(stats.baby.first, stats.baby.last), days_text(stats.baby.days));
-	const union_days = stats.union.slice(0, UNION_SHOWN).map((n) => day_text(n)).join(", ");
-	stats_row(rows, t("timeline.stats_union"), number(stats.union.length), stats.union.length > UNION_SHOWN ? t("timeline.stats_list_cut", {list: union_days}) : union_days);
 	if (stats.temperature) {
 		const degrees = (value) => t("timeline.stats_degrees", {unit: temperature_unit(), value: format_number(to_unit(value), {minimumFractionDigits: 2, maximumFractionDigits: 2})});
 		const {count, mean, min, max} = stats.temperature;

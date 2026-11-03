@@ -22,6 +22,7 @@ import { field } from "../../js/core/dom.js";
 import { attach_terms_link } from "../../js/core/public_footer.js";
 import { t, t_map, attach_language_select } from "../../js/core/i18n.js";
 import { has_session } from "../../js/core/router.js";
+import { device } from "../../js/core/device.js";
 
 const by_id = (root, id) => root.querySelector("#" + id);
 
@@ -62,6 +63,13 @@ export const screen = {
 		// the session is named after the site it was opened on, as the browser knows it
 		by_id(root, "i_token_name").value = "WEB-APP " + location.hostname;
 
+		// "not my device": a token for the least time the API allows, no cookie, nothing kept in the browser (js/core/device.js)
+		const public_box = by_id(root, "i_public_device");
+		public_box.addEventListener("change", () => {
+			by_id(root, "i_expires_days").value = public_box.checked ? String(device.token_days) : "";
+			by_id(root, "i_token_cookie").value = public_box.checked || moncycle_config.remote ? "false" : "true";
+		}, listen);
+
 		const button = by_id(root, "connexion_but");
 		const message = by_id(root, "message_err");
 		form.addEventListener("submit", async (event) => {
@@ -74,6 +82,7 @@ export const screen = {
 				name: field(form, "name"),
 				cookie: field(form, "cookie") === "true",
 			};
+			if (field(form, "expiresInDays")) payload.expiresInDays = parseInt(field(form, "expiresInDays"));
 			if (field(form, "code")) payload.code = field(form, "code");
 			if (!wrapper.hidden) {
 				payload.captcha = field(form, "captcha");
@@ -81,8 +90,9 @@ export const screen = {
 			}
 			try {
 				const ret = await api("POST", "/token", payload);
-				if (moncycle_config.remote) moncycle_config.set_token(ret.data.token);
-				localStorage.auth = ret.data.userId;
+				if (public_box.checked) device.begin_public();
+				if (moncycle_config.bearer()) moncycle_config.set_token(ret.data.token);
+				device.keep.setItem("auth", ret.data.userId);
 				restart("/");   // a full load: nothing of the screen or of an older session stays in memory
 			}
 			catch (failure) {
