@@ -225,6 +225,7 @@ export function open_menu(e, date = null) {
 	if (j.day_not_observed) check("ev_jesaispas");
 	if (j.observation_paused) check("ev_observation_paused");
 	by_id("from_com").value = j.comment ?? "";
+	by_id("from_com").maxLength = moncycle_store.comment_max_chars;
 	show_last_write(j);
 	[document.documentElement, document.body].forEach((page) => {
 		page.style.overflow = "hidden";

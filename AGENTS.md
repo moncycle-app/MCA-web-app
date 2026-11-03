@@ -70,6 +70,9 @@ jQuery (`src/vendor/jquery.min.js`) stays in the project only until the existing
 - **Public device** (`js/core/device.js`, the "This is not my device" box of the sign-in): the token is asked with `expiresInDays: 1` (the API's least), no cookie, and
   sent as `Authorization: Bearer` (`moncycle_config.bearer()`). The session marker and token live in `device.keep` (sessionStorage there), the local copy and the view
   choices in `device.storage` (memory there). Code reads and writes those two, never `localStorage` directly. `device.watch` ends the session two hours after the sign-in.
+- **Dev serves `src/`, production `dist/`** (`npm run build`, `scripts/build.mjs`: bundled, minified, hashed names). A new module needs no
+  registration as long as it is imported (a static or a dynamic `import`); a file the app fetches by its name at run time (markup, JSON, image)
+  must be copied by `build.mjs`, whose checks fail on a missing one only when a page names it.
 - **A request to the API carries no cache-buster** (`cache: false` adds `_=...`, an unknown query parameter, which is refused).
 
 

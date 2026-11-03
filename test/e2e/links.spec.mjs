@@ -1,6 +1,7 @@
 import { fileURLToPath } from "node:url";
 // The addresses that exist outside the app: links of the backend's mails, and pages opened by hand.
 import { test, expect, API, sql } from "./fixtures.mjs";
+import { WEB_ROOT } from "../../playwright.config.mjs";
 
 test("a sign-in link from a mail pre-fills the address", async ({ page }) => {
 	await page.goto("/#/auth?login_email=x@y.z");
@@ -23,7 +24,7 @@ test("a verify_email link shows its form and the fragment leaves the address bar
 });
 
 test("an address of the first version, answered with index.html by a server, is written back as a route", async ({ page }) => {
-	await page.route("**/auth.html", (route) => route.fulfill({ path: fileURLToPath(new URL("../../src/index.html", import.meta.url)), contentType: "text/html" }));
+	await page.route("**/auth.html", (route) => route.fulfill({ path: fileURLToPath(new URL(`../../${WEB_ROOT}/index.html`, import.meta.url)), contentType: "text/html" }));
 	await page.goto("/auth.html");
 	await expect(page.locator("#i_login_email")).toBeVisible();
 	expect(new URL(page.url()).hash).toBe("#/auth");

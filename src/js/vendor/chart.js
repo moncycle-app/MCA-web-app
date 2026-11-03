@@ -12,20 +12,16 @@
 ** https://github.com/moncycle-app/backend-api-web-app
 */
 
-/* Chart.js (its UMD build, vendor/chart.js) is loaded when a chart is first needed, with a <script> tag added once. Only the timeline uses it,
-** and only for the methods that take a temperature. load_chart() resolves with the Chart class. */
+/* Chart.js (its UMD build, vendor/chart.js) is loaded when a chart is first needed, by a dynamic import, so that the build puts it in a
+** chunk of its own. Only the timeline uses it, and only for the methods that take a temperature. load_chart() resolves with the Chart class:
+** served as it is (src/), the UMD file sets globalThis.Chart; bundled (dist/), it is wrapped as CommonJS and the class is its default export. */
 let loading = null;
 
 export function load_chart() {
-	if (globalThis.Chart) return Promise.resolve(globalThis.Chart);
 	if (!loading) {
-		loading = new Promise((resolve, reject) => {
-			const script = document.createElement("script");
-			script.src = "vendor/chart.js";
-			script.addEventListener("load", () => resolve(globalThis.Chart));
-			script.addEventListener("error", () => { loading = null; reject(new Error("chart.js not loaded")); });
-			document.head.append(script);
-		});
+		loading = import("../../vendor/chart.js")
+			.then((module) => globalThis.Chart || module.default)
+			.catch((error) => { loading = null; throw error; });
 	}
 	return loading;
 }

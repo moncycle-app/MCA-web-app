@@ -1,27 +1,31 @@
-// Static server for src/, with no dependency. The app is one page whose routes live in the hash (index.html#/auth), so, like any FTP
-// directory, it needs no rewrite: an address with no file is a 404.
-//   node scripts/serve.mjs [port] [--api-url URL] [--api-proxy URL]
+// Static server for src/ (or the build: --root dist), with no dependency. The app is one page whose routes live in the hash
+// (index.html#/auth), so, like any FTP directory, it needs no rewrite: an address with no file is a 404.
+//   node scripts/serve.mjs [port] [--root DIR] [--api-url URL] [--api-proxy URL]
+// --root serves another folder of the repository than src/: dist/, the output of scripts/build.mjs, to try the production build.
 // --api-url answers /config.json with that apiUrl instead of the file, to try another API without editing anything.
 // --api-proxy forwards /api/... to another server, so that the page and the API share one origin (cookie mode, like production).
 //   The Host and the headers go through as they came (the API compares Origin with Host), and so do the status, headers and Set-Cookie.
 // It sends the headers of the Docker image's Apache (Content-Security-Policy, Cache-Control), so that a CSP problem shows up here.
 import { createServer, request as http_request } from "node:http";
 import { readFile, stat } from "node:fs/promises";
-import { dirname, extname, join, normalize } from "node:path";
+import { dirname, extname, join, normalize, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const root = join(dirname(fileURLToPath(import.meta.url)), "..", "src");
 const args = process.argv.slice(2);
 function option(name) {
 	const index = args.indexOf(name);
 	return index >= 0 ? args[index + 1] : null;
 }
+const root_name = option("--root") ?? "src";
+const root = join(dirname(fileURLToPath(import.meta.url)), "..", root_name);
 const api_url = option("--api-url");
 const api_proxy = option("--api-proxy") ? new URL(option("--api-proxy")) : null;
-const values = new Set([api_url, option("--api-proxy")]);
+const values = new Set([api_url, option("--api-proxy"), option("--root")]);
 const port = parseInt(args.find((arg) => /^\d+$/.test(arg) && !values.has(arg)) ?? "8080", 10);
 const types = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css", ".json": "application/json",
 	".png": "image/png", ".jpg": "image/jpeg", ".svg": "image/svg+xml", ".ico": "image/x-icon", ".ttf": "font/ttf", ".txt": "text/plain" };
+// the bundles of the build, as the image's Apache caches them (zz-moncycleapp.conf)
+const hashed = /^\/assets\/[^/]+-[A-Z0-9]{8}\.(js|css)$/;
 // zz-moncycleapp.conf, with the defaults of the entrypoint when no news or terms address is set
 const csp = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-src 'none'; " +
 	"frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'";
@@ -56,10 +60,11 @@ createServer(async (request, response) => {
 		return response.end(JSON.stringify({ apiUrl: api_url }));
 	}
 	const path = normalize(join(root, decodeURIComponent(url.pathname)));
-	let file = path.startsWith(root) ? await find(path) : null;
+	let file = path.startsWith(root + sep) || path === root ? await find(path) : null;
 	if (!file) { response.writeHead(404, security_headers); return response.end("not found"); }
 	const extension = extname(file);
-	const cache = [".html", ".js", ".css", ".json"].includes(extension) ? { "Cache-Control": "no-cache" } : {};
+	const cache = hashed.test(url.pathname) ? { "Cache-Control": "public, max-age=31536000, immutable" }
+		: [".html", ".js", ".css", ".json"].includes(extension) ? { "Cache-Control": "no-cache" } : {};
 	response.writeHead(200, { "Content-Type": types[extension] ?? "application/octet-stream", ...cache, ...security_headers });
 	response.end(await readFile(file));
-}).listen(port, () => console.log("serving src/ on http://localhost:" + port + (api_url ? " with apiUrl " + api_url : "") + (api_proxy ? " with /api/ proxied to " + api_proxy.origin : "")));
+}).listen(port, () => console.log("serving " + root_name + "/ on http://localhost:" + port + (api_url ? " with apiUrl " + api_url : "") + (api_proxy ? " with /api/ proxied to " + api_proxy.origin : "")));

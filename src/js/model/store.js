@@ -439,8 +439,9 @@ export const moncycle_store = {
 	** ====================================================================== */
 	// the list of a Day that carries a description, by the type the API gives it
 	description_field : {sensation : "freeMucusSensation", observation : "freeMucusObservation", "undefined" : "freeOther"},
-	// the longest comment the day form takes (index.html, maxlength of #from_com); the server's own limit is 256
-	comment_max_chars : 255,
+	// the longest comment the day form takes (index.html, maxlength of #from_com); the server's own limit
+	// (limits.dayCommentMaxChars of server_info, read by check_version; 512 until it is known)
+	comment_max_chars : 512,
 
 	// The POST /api/v3/day/{date} body that makes the server hold a day of the copy as it is, so that a write can change one
 	// field of it: a day is posted whole. Where it stands in its cycle is left out, the server works it out.
@@ -712,6 +713,8 @@ export const moncycle_store = {
 			moncycle_store.checked_version = true;
 			let info = ret.data || {};
 			moncycle_store.set_news_url(info.newsUrl || null);
+			let comment_max = info.limits && info.limits.dayCommentMaxChars;
+			if (Number.isInteger(comment_max) && comment_max > 0) moncycle_store.comment_max_chars = comment_max;
 			let stamp = [moncycle_store.schema, info.appVersion, (moncycle_store.webapp_version || {}).version].join("/");
 			let known = device.storage.getItem(moncycle_store.keys.version);
 			if (known === stamp) return;
