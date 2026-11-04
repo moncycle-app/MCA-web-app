@@ -15,7 +15,7 @@ import { moncycle_config } from "../../js/core/config.js";
 import { moncycle_store } from "../../js/model/store.js";
 import * as dates from "../../js/model/dates.js";
 import { t, t_map, t_node, format_number } from "../../js/core/i18n.js";
-import { format_date, date_row, temperature_unit, format_temperature } from "../../js/model/format.js";
+import { date_compact, temperature_unit, format_temperature } from "../../js/model/format.js";
 import { to_unit } from "../../js/model/temperature.js";
 import { by_id, el, display } from "../../js/core/dom.js";
 import { counter_days, peak_follow_days } from "../../js/model/cycles.js";
@@ -36,9 +36,9 @@ export function hide_method_parts() {
 
 // "Cycle du 3 mars au 29 mars de 27j": the end and the number are elements of their own (the stylesheet colours them)
 export function cycle_title_node(key, key_end, start, end, nb) {
-	const end_span = el("span", {class: "cycle_fin", text: t(key_end, {end: format_date(dates.str(end))})});
+	const end_span = el("span", {class: "cycle_fin", text: t(key_end, {end: date_compact(end, false)})});
 	const nb_span = el("span", {class: "nb_jours", text: String(nb)});
-	return t_node(key, {start: format_date(dates.str(start)), end: end_span, nb: nb_span});
+	return t_node(key, {start: date_compact(start, false), end: end_span, nb: nb_span});
 }
 
 
@@ -340,7 +340,7 @@ export function day_timeline2timeline(j) {
 	// the stamp of the day colours its whole row (timeline.css, .stamp_*): its square, its tint, its day number
 	const tint = (name) => day_timeline.classList.add("stamp_" + name);
 	let d_bold = o_date.getDay()==0 ? "bold" : "";
-	day_timeline.append(el("span", {class: `d ${d_bold}`.trim(), text: date_row(o_date)}));
+	day_timeline.append(el("span", {class: `d ${d_bold}`.trim(), text: date_compact(o_date)}));
 	let pos = el("span", {class: "j", text: String(j.pos)});
 	day_timeline.append(pos);
 	day_timeline.addEventListener("click", open_menu);

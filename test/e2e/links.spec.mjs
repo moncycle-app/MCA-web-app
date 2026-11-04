@@ -23,8 +23,9 @@ test("a verify_email link shows its form and the fragment leaves the address bar
 	expect(new URL(page.url()).hash).toBe("#/verify_email");
 });
 
+// the route is by exact path: a glob "**/auth.html" would also catch screens/auth/auth.html, the markup of the screen
 test("an address of the first version, answered with index.html by a server, is written back as a route", async ({ page }) => {
-	await page.route("**/auth.html", (route) => route.fulfill({ path: fileURLToPath(new URL(`../../${WEB_ROOT}/index.html`, import.meta.url)), contentType: "text/html" }));
+	await page.route((url) => url.pathname === "/auth.html", (route) => route.fulfill({ path: fileURLToPath(new URL(`../../${WEB_ROOT}/index.html`, import.meta.url)), contentType: "text/html" }));
 	await page.goto("/auth.html");
 	await expect(page.locator("#i_login_email")).toBeVisible();
 	expect(new URL(page.url()).hash).toBe("#/auth");

@@ -9,7 +9,7 @@
     "postinstall": "node scripts/vendor.mjs",
     "serve": "node scripts/serve.mjs",
     "build": "node scripts/build.mjs",
-    "test": "node --import ./test/support/register.mjs --test test/*.test.mjs",
+    "test": "node --import ./test/support/register.mjs --test --test-reporter=dot test/*.test.mjs",
     "test:e2e": "playwright test"
   },
   "dependencies": {

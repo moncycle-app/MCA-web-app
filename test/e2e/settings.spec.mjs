@@ -27,27 +27,29 @@ test("the nickname saves by itself", async ({ page, signed_in }) => {
 // The Affichage panel: each optional setting is a form that sends its key alone, null puts it back to the default, and the timeline follows.
 const posted = (page) => page.waitForResponse((answer) => answer.url().endsWith("/api/v3/account") && answer.request().method() === "POST");
 
-test("the date format is saved alone, shown in the timeline, and reset with null", async ({ page, signed_in, account }) => {
+test("the date order is saved alone and the day rows follow it, then it is reset with null", async ({ page, signed_in, account }) => {
 	await signed_in.goto("/#/settings/affichage");
-	const reset = page.locator('form[data-setting="dateFormat"] button[name="reset"]');
-	await expect(reset).toBeDisabled();   // nothing chosen yet: the default
-	await expect(page.locator("#i_date_format")).toHaveValue("");
+	const reset = page.locator('form[data-setting="dateOrder"] button[name="reset"]');
+	await expect(reset).toBeDisabled();
+	await expect(reset).toBeHidden();   // at its default, there is nothing to go back to
+	await expect(page.locator("#i_date_order")).toHaveValue("DAY_FIRST");
 	let saved = posted(page);
-	await page.locator("#i_date_format").selectOption("YMD_DOT");
-	expect((await saved).request().postDataJSON()).toEqual({ dateFormat: "YMD_DOT" });
+	await page.locator("#i_date_order").selectOption("MONTH_FIRST");
+	expect((await saved).request().postDataJSON()).toEqual({ dateOrder: "MONTH_FIRST" });
 	await expect(reset).toBeEnabled();
-	// the cycle heading and the day rows are written in it (two-digit year, dots)
+	await expect(reset).toBeVisible();
 	await page.goto("/");
-	await expect(page.locator("#timeline .title, #recap .title").first()).toContainText(/\d\d\.\d\d\.\d\d/);
+	// "T NOV 3": the initial, the month on 3 letters, the day (and ", 25" when the year is not this one)
+	await expect(page.locator("#timeline .d").first()).toHaveText(/^\S [^\d\s]{3} \d{1,2}(, \d\d)?$/);
 	await page.goto("/#/settings/affichage");
-	await expect(page.locator("#i_date_format")).toHaveValue("YMD_DOT");
 	saved = posted(page);
 	await reset.click();
-	expect((await saved).request().postDataJSON()).toEqual({ dateFormat: null });
-	await expect(page.locator("#i_date_format")).toHaveValue("");
-	await expect(reset).toBeDisabled();
+	expect((await saved).request().postDataJSON()).toEqual({ dateOrder: null });
+	await expect(page.locator("#i_date_order")).toHaveValue("DAY_FIRST");
+	await page.goto("/");
+	await expect(page.locator("#timeline .d").first()).toHaveText(/^\S \d{1,2} [^\d\s]{3}( \d\d)?$/);
 	const stored = await (await account.request.get(`${API}/api/v3/account`, { headers: account.auth })).json();
-	expect(stored.data.settings.dateFormat.isSet).toBe(false);
+	expect(stored.data.settings.dateOrder.isSet).toBe(false);
 });
 
 test("the colour behind the days can be switched off", async ({ page, signed_in, account }) => {

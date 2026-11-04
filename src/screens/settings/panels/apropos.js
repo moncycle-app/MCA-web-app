@@ -14,8 +14,7 @@
 import { moncycle_config } from "../../../js/core/config.js";
 import { moncycle_store } from "../../../js/model/store.js";
 import { t } from "../../../js/core/i18n.js";
-import * as dates from "../../../js/model/dates.js";
-import { format_date } from "../../../js/model/format.js";
+import { date_long } from "../../../js/model/format.js";
 import { by_id } from "../../../js/core/dom.js";
 import { settings_api, settings_say, settings_state } from "../common.js";
 import { settings_load_news } from "./actualites.js";
@@ -28,7 +27,7 @@ export function settings_fill_about(account) {
 	by_id("tech_info_no").textContent = account.userId;
 	by_id("tech_info_id").textContent = account.loginEmail;
 	const since = new Date(account.inscriptionDate);
-	by_id("tech_info_insc").textContent = isNaN(since) ? "" : format_date(dates.str(since));
+	by_id("tech_info_insc").textContent = isNaN(since) ? "" : date_long(since);
 }
 
 // The version, and the terms of service: their page is a setting of the server (TERMS_OF_SERVICE_URL, told by server_info). None told: the

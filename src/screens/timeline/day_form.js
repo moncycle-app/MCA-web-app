@@ -13,8 +13,8 @@
 */
 import { moncycle_store } from "../../js/model/store.js";
 import * as dates from "../../js/model/dates.js";
-import { t, t_list, t_node, clock, format_number } from "../../js/core/i18n.js";
-import { format_date, date_long, format_temperature, temperature_unit } from "../../js/model/format.js";
+import { t, clock, format_number } from "../../js/core/i18n.js";
+import { date_compact, date_long, date_long_node, weekday_name, format_temperature, temperature_unit } from "../../js/model/format.js";
 import { by_id, el, display, is_hidden } from "../../js/core/dom.js";
 import { day_to_api } from "../../js/model/day.js";
 import { fc_note_regex } from "../../js/model/fc_notation.js";
@@ -58,7 +58,7 @@ export function show_last_write(day) {
 	let recent = Math.abs(age) < state.last_write_recent_ms;
 	box.setAttribute("title", t("timeline.last_write_title", {date: date_long(moment), clock: clock(moment)}));
 	box.append(el("span", {text: t("timeline.last_write_label")}));
-	box.append(el("b", {text: recent ? t("timeline.last_write_now") : t("timeline.last_write", {date: format_date(dates.str(moment)), clock: clock(moment)})}));
+	box.append(el("b", {text: recent ? t("timeline.last_write_now") : t("timeline.last_write", {date: date_compact(moment, false), clock: clock(moment)})}));
 	if (recent) state.last_write_timer = setTimeout(() => show_last_write(day), state.last_write_recent_ms - age);
 }
 
@@ -153,7 +153,7 @@ export function open_menu(e, date = null) {
 	let j = state.day_timeline[state.menu_opened_date];
 	let stamp = j.stamp? j.stamp : "";
 	// the long date with its weekday in a span of its own (not bold), then the day of the cycle as a badge
-	const long_date = t_node("calendar.date_long", {weekday: el("span", {class: "jf_weekday", text: t_list("calendar.weekdays")[o_date.getDay()]}), date: format_date(date)});
+	const long_date = date_long_node(o_date, el("span", {class: "jf_weekday", text: weekday_name(o_date)}));
 	by_id("jour_form_titre").replaceChildren(el("span", {class: "jf_date"}, long_date), el("span", {class: "jf_day", text: t("timeline.day_number", {n: j.pos})}));
 	let arrow = {"next" : t("timeline.arrow_up"), "prev" : t("timeline.arrow_down")};
 	if (!state.timeline_asc) arrow = {"next" : t("timeline.arrow_down"), "prev" : t("timeline.arrow_up")};

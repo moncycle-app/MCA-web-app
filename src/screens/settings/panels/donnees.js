@@ -16,7 +16,6 @@ import { moncycle_config } from "../../../js/core/config.js";
 import { moncycle_store } from "../../../js/model/store.js";
 import { t, t_map } from "../../../js/core/i18n.js";
 import { by_id, el } from "../../../js/core/dom.js";
-import { format_date, parse_date, date_placeholder } from "../../../js/model/format.js";
 import { settings_api, settings_error, settings_is_checked, settings_local_date, settings_read, settings_say, settings_sync_later, settings_today } from "../common.js";
 import { settings_text } from "../text.js";
 
@@ -27,16 +26,14 @@ import { settings_text } from "../text.js";
 export function settings_fill_data(account) {
 	const today = settings_today();
 	const form = by_id("f_export_complexe");
-	// the dates are typed in the format of the account (the form's script reads them back as ISO dates)
-	[form.elements["from"], form.elements["to"]].forEach(function (input) { input.placeholder = date_placeholder(); });
 	// nothing to export before the first day; with no day at all, nothing to export
 	if (account.oldestDay) {
 		form.dataset.oldest = account.oldestDay;
 		by_id("export_oldest_day").textContent = settings_local_date(account.oldestDay);
 		by_id("export_oldest").hidden = false;
 		// the whole history is what most exports want: ready to go
-		form.elements["from"].value = format_date(account.oldestDay);
-		form.elements["to"].value = format_date(today);
+		form.elements["from"].value = account.oldestDay;
+		form.elements["to"].value = today;
 	}
 }
 
@@ -45,8 +42,8 @@ export function settings_setup_export() {
 	const error_line = by_id("export_err");
 
 	by_id("but_export_all").addEventListener("click", function () {
-		form.elements["from"].value = form.dataset.oldest ? format_date(form.dataset.oldest) : "";
-		form.elements["to"].value = format_date(settings_today());
+		form.elements["from"].value = form.dataset.oldest || "";
+		form.elements["to"].value = settings_today();
 	});
 
 	// On the API's own site the browser saves the file with its cookie; another origin has no cookie, so the file is fetched with the token.
@@ -61,15 +58,13 @@ export function settings_setup_export() {
 
 	form.addEventListener("submit", function (event) {
 		event.preventDefault();
-		const typed_from = settings_read(form, "from").trim();
-		const typed_to = settings_read(form, "to").trim();
-		const from = parse_date(typed_from);
-		const to = parse_date(typed_to);
+		// a date field answers an ISO date, or "" when it is empty or incomplete
+		const from = settings_read(form, "from");
+		const to = settings_read(form, "to");
 		const format = settings_read(form, "format");
 		const show_error = function (reason) { settings_say(error_line, "error", reason); };
 		settings_say(error_line, "", "");
-		if (typed_from == "" || typed_to == "") return show_error(t_map("settings.export_errors").missing_field);
-		if (from === null || to === null) return show_error(t("settings.export_invalid_date", {example: format_date(settings_today())}));
+		if (from == "" || to == "") return show_error(t_map("settings.export_errors").missing_field);
 		if (from > to) return show_error(t_map("settings.export_errors").invalid_range);
 		moncycle_store.download(`${form.getAttribute("action")}/${encodeURIComponent(format)}?from=${from}&to=${to}`).catch(function (failure) {
 			const own = t_map("settings.export_errors")[failure.issues.length ? failure.issues[0].code : failure.code];

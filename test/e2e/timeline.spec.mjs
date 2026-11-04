@@ -43,7 +43,7 @@ test("the mini and maxi views switch, and a cycle exports through the API", asyn
 	await page.locator("#but_mini_maxi").click();
 	await expect(page.locator("#timeline")).toBeVisible({ visible: !before });
 	await expect(page.locator("#recap")).toBeVisible({ visible: before });
-	const exports = page.locator('.cycle_options a[href^="/api/v3/export/"]');
+	const exports = page.locator('.cycle_options a[href*="api/v3/export/"]');
 	await expect(exports.first()).toBeAttached();
 	expect(await exports.evaluateAll((links) => links.map((link) => link.getAttribute("href").split("?")[0].split("/").pop()))).toEqual(expect.arrayContaining(["nfp", "csv", "pdf"]));
 });

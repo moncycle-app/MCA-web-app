@@ -13,68 +13,53 @@
 */
 
 import { moncycle_store } from "./store.js";
-import { t, t_list } from "../core/i18n.js";
-import * as dates from "./dates.js";
+import { t, t_list, t_node } from "../core/i18n.js";
 import { to_unit, to_celsius } from "./temperature.js";
 
-/* What a person reads and types: dates and temperatures, as the settings of the account ask (`dateFormat`, `temperatureUnit`).
+/* What a person reads: dates and temperatures, as the settings of the account ask (`dateOrder`, `temperatureUnit`).
 ** Display only: the API and the local copy carry ISO dates (YYYY-MM-DD) and Celsius. */
 
-// the seven formats of the API: the order of the parts, the separator
-export const DATE_FORMATS = {
-	DMY_SLASH : {order : "DMY", separator : "/"},
-	DMY_DOT : {order : "DMY", separator : "."},
-	DMY_DASH : {order : "DMY", separator : "-"},
-	MDY_SLASH : {order : "MDY", separator : "/"},
-	YMD_DASH : {order : "YMD", separator : "-"},
-	YMD_SLASH : {order : "YMD", separator : "/"},
-	YMD_DOT : {order : "YMD", separator : "."},
-};
+/* --- the dates: compact and long -------------------------------------------- */
+// No numeric date is shown: the weekday and the month are words of the catalog, and the order of the day and the month is the account's
+// `dateOrder`, not the language's habit. (A date field of a form is the browser's own, and answers ISO.)
 
-function date_format_of(name) {
-	return DATE_FORMATS[name] || DATE_FORMATS[moncycle_store.setting("dateFormat")] || DATE_FORMATS.DMY_SLASH;
+// `order` is a code of `dateOrder`; the account's when it is not given
+function month_first(order) {
+	return (order || moncycle_store.setting("dateOrder")) === "MONTH_FIRST";
 }
 
-// "2026-12-31" -> "31/12/26" (the year on two digits); what is not an ISO date is returned as it is. `format` is a name of DATE_FORMATS (the
-// account's by default).
-export function format_date(iso, format) {
-	const found = /^(\d{4})-(\d{2})-(\d{2})/.exec(typeof iso === "string" ? iso : "");
-	if (!found) return String(iso ?? "");
-	const parts = {Y : found[1].slice(2), M : found[2], D : found[3]};
-	const one = date_format_of(format);
-	return [...one.order].map((letter) => parts[letter]).join(one.separator);
+// "Tuesday": the weekday of a Date, with a capital
+export function weekday_name(date) {
+	const name = t_list("calendar.weekdays")[date.getDay()];
+	return name.charAt(0).toUpperCase() + name.slice(1);
 }
 
-// "31/12/26" -> "2026-12-31", null when it is not a date of that format. The separator may be any of . / - (or a space); the year has two
-// digits (20xx) or four.
-export function parse_date(text, format) {
-	const one = date_format_of(format);
-	const found = /^(\d{1,4})\D(\d{1,2})\D(\d{1,4})$/.exec(String(text).trim());
-	if (!found) return null;
-	const parts = {};
-	[...one.order].forEach((letter, i) => { parts[letter] = found[i + 1]; });
-	if (parts.Y.length === 3 || (one.order[0] === "Y" ? found[1] : found[3]).length > 4) return null;
-	const year = parts.Y.length === 2 ? 2000 + Number(parts.Y) : Number(parts.Y);
-	const month = Number(parts.M), day = Number(parts.D);
-	const check = new Date(Date.UTC(year, month - 1, day));
-	if (check.getUTCFullYear() !== year || check.getUTCMonth() !== month - 1 || check.getUTCDate() !== day) return null;
-	return [String(year).padStart(4, "0"), String(month).padStart(2, "0"), String(day).padStart(2, "0")].join("-");
+// "M 3 NOV" / "T NOV 3": the weekday's initial, the day, the month on 3 letters; "M 3 NOV 25" / "T NOV 3, 25" when the year is not the current
+// one. `with_weekday` false leaves the initial out (inside a sentence).
+export function date_compact(date, with_weekday = true, order = null) {
+	const month = t_list("calendar.months_short")[date.getMonth()].toUpperCase();
+	const first = month_first(order);
+	let text = first ? `${month} ${date.getDate()}` : `${date.getDate()} ${month}`;
+	if (date.getFullYear() !== new Date().getFullYear()) text += (first ? ", " : " ") + String(date.getFullYear()).slice(-2);
+	return with_weekday ? `${weekday_name(date).charAt(0)} ${text}` : text;
 }
 
-// the same date as a person reads it in a text field, for a field that takes it back with parse_date
-export const date_placeholder = (format) => {
-	const one = date_format_of(format);
-	const names = {D : t("calendar.part_d"), M : t("calendar.part_m"), Y : t("calendar.part_y")};
-	return [...one.order].map((letter) => names[letter]).join(one.separator);
-};
-
-// "L 31/12/26": the weekday's initial and the date, the heading of a timeline row
-export function date_row(date) {
-	return t("calendar.date_row", {weekday_initial : t_list("calendar.weekdays")[date.getDay()][0], date : format_date(dates.str(date))});
+// "Tuesday 3 November 2026" / "Tuesday, November 3, 2026": the year is always there. `weekday` replaces the weekday's text with a node
+// (t_node) when a screen styles it.
+function long_slots(date) {
+	return {
+		weekday : weekday_name(date),
+		day : date.getDate() === 1 ? t("calendar.day_one") : String(date.getDate()),
+		month : t_list("calendar.months")[date.getMonth()],
+		year : String(date.getFullYear()),
+	};
 }
-// "Thursday 31/12/26"
 export function date_long(date) {
-	return t("calendar.date_long", {weekday : t_list("calendar.weekdays")[date.getDay()], date : format_date(dates.str(date))});
+	return month_first() ? t("calendar.date_long_month_first", long_slots(date)) : t("calendar.date_long_day_first", long_slots(date));
+}
+export function date_long_node(date, weekday_node) {
+	const slots = {...long_slots(date), weekday : weekday_node};
+	return month_first() ? t_node("calendar.date_long_month_first", slots) : t_node("calendar.date_long_day_first", slots);
 }
 
 /* --- temperatures: always Celsius in the API and the copy -------------------- */

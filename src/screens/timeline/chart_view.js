@@ -12,7 +12,7 @@
 ** https://github.com/moncycle-app/backend-api-web-app
 */
 import * as dates from "../../js/model/dates.js";
-import { format_date } from "../../js/model/format.js";
+import { date_compact } from "../../js/model/format.js";
 import { to_unit } from "../../js/model/temperature.js";
 import { by_id, display, is_hidden } from "../../js/core/dom.js";
 import { load_chart } from "../../js/vendor/chart.js";
@@ -70,7 +70,7 @@ export function graph_preparation_data(data) {
 	Object.entries(data).forEach(function ([o_date, o_data]) {
 		if (state.graph_data[o_data.cycle] == undefined) state.graph_data[o_data.cycle] = {};
 		let date = dates.parse(o_date);
-		let label = format_date(o_date);
+		let label = date_compact(date, false);
 		state.graph_data[o_data.cycle][label] = to_unit(parseFloat(o_data.temperature));
 		if (state.graphs[o_data.cycle]) graph_update(o_data.cycle);
 	});

@@ -72,6 +72,7 @@ export const test = base.extend({
 		await page.goto("/#/auth");
 		await expect(page.locator("#i_login_email")).toBeVisible();   // the screen has mounted (it empties the storage), the session can be set
 		await page.evaluate((id) => { localStorage.auth = id; }, String((await answer.json()).data.userId));
+		await page.goto("about:blank");   // the app reads the session when it loads (the real sign-in reloads too): the test's next goto must be a full load, not a change of hash
 		await use(page);
 	},
 });

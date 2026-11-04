@@ -16,8 +16,8 @@ export default defineConfig({
 	fullyParallel: true,
 	workers: 4,
 	retries: 0,
-	timeout: 60000,
-	reporter: "line",
+	timeout: 20000,
+	reporter: "dot",
 	outputDir: "test-results",
 	use: {
 		baseURL: `http://localhost:${WEB_PORT}`,

@@ -19,11 +19,6 @@
 	padding: 12px 15px 0;
 }
 
-/* the line break under the page's message is no spacing */
-.settings > br {
-	display: none;
-}
-
 #warning_demo {
 	font-weight: bold;
 }
@@ -97,9 +92,29 @@
 	margin-bottom: 8px;
 }
 
-.settings .choice_group .choice_check,
 .settings form > .choice_check {
 	margin-bottom: 14px;
+}
+
+/* --- An optional setting (form.setting_form): its control and, right under it, the link back to the default ------------------- */
+
+.settings .setting_form {
+	margin-bottom: 18px;
+}
+
+.settings .setting_form > :is(.choice, .field) {
+	margin: 0;
+}
+
+/* the size of the hints; the padding makes it easy to tap and sets it apart from its control */
+.setting_form .link_button {
+	padding: 6px 0;
+	font-size: .8em;
+}
+
+/* a setting at its default has nothing to go back to */
+.setting_form .link_button:disabled {
+	display: none;
 }
 
 /* --- The menu: one tappable row per panel ------------------------------------------------ */
@@ -231,16 +246,14 @@
 	margin-top: 8px;
 }
 
-/* key / value: the key small and grey, the value bold */
+/* key / value: the key small and grey above its value in bold (an address or a date is too long for two columns on a phone) */
 .kv {
-	display: grid;
-	grid-template-columns: max-content 1fr;
-	gap: 4px 14px;
 	margin: 8px 0 0;
 	line-height: 1.4;
 }
 
 .kv dt {
+	margin-top: 8px;
 	color: var(--muted);
 	font-size: .85em;
 }
@@ -251,16 +264,6 @@
 	overflow-wrap: anywhere;
 }
 
-/* a token's facts are too long for two columns on a phone: the key above its value */
-.token_row .kv {
-	grid-template-columns: 1fr;
-	gap: 0;
-}
-
-.token_row .kv dt {
-	margin-top: 8px;
-}
-
 .kv dd small {
 	display: block;
 	font-weight: normal;
@@ -268,7 +271,7 @@
 }
 
 .settings .tech_info {
-	margin-top: 40px;
+	margin-top: 28px;
 }
 
 /* --- Sensations & observations: a line per keyword, and what acts on it under the one being edited ---------

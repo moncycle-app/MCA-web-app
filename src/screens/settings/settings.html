@@ -8,7 +8,6 @@
 
 <div class="contennu settings">
 	<p class="form_msg" id="page_msg" role="status"></p>
-	<br />
 
 	<!-- ===== The menu: one entry per panel below. A panel opens with the address #name (settings#securite). ===== -->
 	<nav id="menu">
@@ -175,11 +174,11 @@
 			<p class="form_msg" role="status"></p>
 		</form>
 
-		<form class="setting_form" data-setting="dateFormat" action="api/v3/account" method="post">
+		<form class="setting_form" data-setting="dateOrder" action="api/v3/account" method="post">
 			<div class="field">
-				<label data-i18n="settings.date_format_label" for="i_date_format"></label>
-				<select id="i_date_format" name="dateFormat"></select>
-				<span data-i18n="settings.date_format_hint" class="label_info"></span>
+				<label data-i18n="settings.date_order_label" for="i_date_order"></label>
+				<select id="i_date_order" name="dateOrder"></select>
+				<span data-i18n="settings.date_order_hint" class="label_info"></span>
 			</div>
 			<button data-i18n="settings.reset_default" type="submit" name="reset" value="1" class="link_button" disabled></button>
 			<p class="form_msg" role="status"></p>
@@ -204,7 +203,7 @@
 	<section class="panel" id="panel_descriptions" hidden>
 		<a data-i18n="settings.back_to_menu" class="nav_button back" href="#/settings"></a>
 		<h2 data-i18n="settings.descriptions_title"></h2>
-		<p data-i18n="settings.descriptions_intro"></p>
+		<p data-i18n="settings.descriptions_intro" class="label_info"></p>
 
 		<p class="desc_unknown_note label_info" hidden></p>
 		<div id="desc_froms_container"><center data-i18n="settings.icon_loading"></center></div>
@@ -276,11 +275,11 @@
 			<div class="field_row">
 				<div class="field">
 					<label data-i18n="settings.export_from" for="i_start_date"></label>
-					<input id="i_start_date" name="from" type="text" inputmode="numeric" autocomplete="off" />
+					<input id="i_start_date" name="from" type="date" autocomplete="off" />
 				</div>
 				<div class="field">
 					<label data-i18n="settings.export_to" for="i_end_date"></label>
-					<input id="i_end_date" name="to" type="text" inputmode="numeric" autocomplete="off" />
+					<input id="i_end_date" name="to" type="date" autocomplete="off" />
 				</div>
 			</div>
 			<p data-i18n="settings.export_oldest" id="export_oldest" class="label_info" hidden><b data-slot="b" id="export_oldest_day"></b><button data-i18n="settings.export_select_all" data-slot="button" type="button" id="but_export_all" class="link_button"></button></p>
@@ -549,7 +548,7 @@
 		<h3 data-i18n="settings.contact_title"></h3>
 		<p data-i18n="settings.contact_text"><br data-slot="br" /><a data-i18n="settings.contact_address" data-slot="a" href="mailto:hello@tech4fertility.org"></a></p>
 
-		<dl class="kv tech_info">
+		<dl class="kv tech_info card">
 			<dt data-i18n="settings.info_account_number"></dt><dd id="tech_info_no"></dd>
 			<dt data-i18n="settings.info_identifier"></dt><dd id="tech_info_id"></dd>
 			<dt data-i18n="settings.info_signup_date"></dt><dd id="tech_info_insc"></dd>

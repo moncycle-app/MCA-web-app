@@ -18,7 +18,7 @@ import { send } from "../../js/core/api.js";
 import { say } from "../../js/core/dom.js";
 import { moncycle_store } from "../../js/model/store.js";
 import * as dates from "../../js/model/dates.js";
-import { format_date } from "../../js/model/format.js";
+import { date_compact } from "../../js/model/format.js";
 import { t, t_map, clock } from "../../js/core/i18n.js";
 import { settings_text } from "./text.js";
 
@@ -97,16 +97,16 @@ export function settings_today() {
 	return dates.str(new Date());
 }
 
-// a date of the API (2026-09-20) in the format of the account
+// a date of the API (2026-09-20) as the compact date of the account
 export function settings_local_date(ymd) {
-	return format_date(ymd);
+	return date_compact(dates.parse(ymd), false);
 }
 
-// a moment of the API (RFC 3339) in the user's own time zone: the date in the format of the account, then the time
+// a moment of the API (RFC 3339) in the user's own time zone: the compact date, then the time
 export function settings_local_time(iso) {
 	if (!iso) return "";
 	const moment = new Date(iso);
-	return isNaN(moment) ? "" : format_date(dates.str(moment)) + " " + clock(moment);
+	return isNaN(moment) ? "" : date_compact(moment, false) + " " + clock(moment);
 }
 
 // A form that changes the account with the password asked again (an address, the password): POST /api/v3/account, its answer under the

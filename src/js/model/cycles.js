@@ -63,7 +63,7 @@ export function nfp_method_from_api(method, temperature_tracking) {
 }
 // The optional settings of the account (`settings` of GET /account: {value, isSet, default}) and their defaults, for a copy made before one existed.
 // `customSettings` is for third-party apps and is never read here.
-export const SETTING_DEFAULTS = {timelineAscending : true, autoMailExport : false, dayBackgroundColor : true, dateFormat : "DMY_SLASH", temperatureUnit : "C", notificationEmails : ""};
+export const SETTING_DEFAULTS = {timelineAscending : true, autoMailExport : false, dayBackgroundColor : true, dateOrder : "DAY_FIRST", temperatureUnit : "C", notificationEmails : ""};
 export function account_setting(account, name) {
 	const one = account && account.settings && account.settings[name];
 	return one && one.value !== undefined ? one.value : SETTING_DEFAULTS[name];
@@ -84,7 +84,7 @@ export function constante_from_api(d) {
 }
 // what the cycles drawn were made from (the layout, and the date and temperature formats written in them): when the account says otherwise, they are drawn again
 export function structure_of(account) {
-	return JSON.stringify([account.allCyclesFirstDay, account.allObservationPausedDates, account_setting(account, "timelineAscending"), account_setting(account, "dateFormat"), account_setting(account, "temperatureUnit"), account.method, account.temperatureTracking]);
+	return JSON.stringify([account.allCyclesFirstDay, account.allObservationPausedDates, account_setting(account, "timelineAscending"), account_setting(account, "dateOrder"), account_setting(account, "temperatureUnit"), account.method, account.temperatureTracking]);
 }
 
 // The lengths of the complete cycles, latest first: [{start, days}]. The latest cycle (still open) has none, and neither has a cycle that
