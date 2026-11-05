@@ -161,7 +161,7 @@
 	"timeline.target_blank": "blanc",
 	"timeline.target_empty": "vide",
 	"timeline.fc_syntax_valid": "syntaxe valide",
-	"timeline.fc_syntax_invalid": "syntaxe invalide",
+	"timeline.fc_syntax_invalid": "note non enregistrée",
 	"timeline.sync_offline": "⚠️ Connexion impossible : les données affichées peuvent ne pas être à jour.",
 	"timeline.sync_server_error": "⚠️ Le serveur ne répond pas correctement : nouvel essai automatique.",
 	"timeline.sync_retry": "Réessayer",

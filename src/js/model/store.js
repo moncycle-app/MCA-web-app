@@ -20,6 +20,7 @@ import { t } from "../core/i18n.js";
 import { send } from "../core/api.js";
 import { device } from "../core/device.js";
 import { blank_day, is_blank, day_from_body, day_meta, codified_fields } from "./day.js";
+import { fc_note_from_packed } from "./fc_notation.js";
 import { day_number, cycle_of, set_member, place_days, account_setting, SETTING_DEFAULTS } from "./cycles.js";
 
 
@@ -48,7 +49,7 @@ import { day_number, cycle_of, set_member, place_days, account_setting, SETTING_
 export const moncycle_store = {
 
 	// Bump it when what is kept in localStorage changes shape: the copy of the versions before is dropped.
-	schema : 8,
+	schema : 9,
 	// The public demo accounts: ACCOUNT_DEMO_IDS of constants.php, change both. Whoever is on one is no one who has an
 	// account yet: the sign-up and the sign-in pages do not send them back to the app.
 	demo_user_ids : [2, 3],
@@ -218,7 +219,10 @@ export const moncycle_store = {
 
 		let stamp = device.storage.getItem(moncycle_store.keys.version);
 		if (stamp === null || stamp.split("/")[0] != String(moncycle_store.schema)) {
-			moncycle_store.wipe_data(false);
+			// the copy of schema 8 only differs by the FertilityCare note: what the user did offline can still be sent
+			let before_note_split = stamp !== null && stamp.split("/")[0] === "8";
+			moncycle_store.wipe_data(before_note_split);
+			if (before_note_split) moncycle_store.split_queued_notes();
 			stamp = null;
 		}
 
@@ -252,6 +256,14 @@ export const moncycle_store = {
 			event.preventDefault();
 			event.returnValue = "";
 		});
+	},
+
+	// The days of the queue in the shape of the API: a day written by schema 8 has its FertilityCare note packed.
+	split_queued_notes : function () {
+		Object.values(moncycle_store.pending).forEach(function (entry) {
+			if (entry.op == "put") Object.assign(entry.body, fc_note_from_packed(entry.body));
+		});
+		moncycle_store.write(moncycle_store.keys.pending, moncycle_store.pending);
 	},
 
 	// A page that comes back into view: sync, unless it just did.

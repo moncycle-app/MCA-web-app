@@ -121,8 +121,37 @@ test("a 401 that is a wrong password is not the end of the session", () => {
 	assert.equal(store.is_unauthorized({ status: 403 }), false);
 });
 
+test("the body of a day read keeps the note's boolean and list", () => {
+	const read = { ...store.blank_day(DAY), codifiedBleedingBrown: true, codifiedMucusObservation: ["K", "L"], codifiedMucusSensation: "0", cycleDay: 3 };
+	const again = store.body_of_day(read, "2026-03-10T10:00:00Z");
+	assert.equal(again.codifiedBleedingBrown, true);
+	assert.deepEqual(again.codifiedMucusObservation, ["K", "L"]);
+	assert.equal(again.codifiedMucusSensation, "0");
+	assert.equal(again.cycleDay, undefined);
+});
+
+test("a copy of schema 8 is dropped, its queue kept with the note of the API", () => {
+	localStorage.setItem("data_version", "8/16dev/1.0.0");
+	localStorage.setItem("data_account", JSON.stringify(ACCOUNT));
+	localStorage.setItem("data_last_sync", JSON.stringify("2026-03-10T00:00:00Z"));
+	localStorage.setItem("data_day_" + DAY, JSON.stringify({ date: DAY, codifiedBleedingObservation: "VLB", codifiedMucusObservation: "KL" }));
+	const packed = { ...body(), codifiedBleedingObservation: "VLB", codifiedMucusSensation: "10", codifiedMucusObservation: "KL" };
+	localStorage.setItem("data_pending", JSON.stringify({ [DAY]: { op: "put", body: packed }, "2026-03-09": { op: "delete", lastWriteClientUtc: null } }));
+	store.init();
+	assert.deepEqual(store.days, {});
+	assert.equal(store.last_sync, null);
+	assert.equal(localStorage.getItem("data_day_" + DAY), null);
+	assert.equal(store.pending_count(), 2);
+	const kept = JSON.parse(localStorage.getItem("data_pending"))[DAY].body;
+	assert.equal(kept.codifiedBleedingObservation, "VL");
+	assert.equal(kept.codifiedBleedingBrown, true);
+	assert.deepEqual(kept.codifiedMucusObservation, ["K", "L"]);
+	assert.equal(kept.comment, packed.comment);
+	assert.equal(store.pending["2026-03-09"].op, "delete");
+});
+
 test("a copy of another schema is dropped, with its queue", () => {
-	localStorage.setItem("data_version", `${store.schema - 1}/16dev/1.0.0`);
+	localStorage.setItem("data_version", "7/16dev/1.0.0");
 	localStorage.setItem("data_account", JSON.stringify(ACCOUNT));
 	localStorage.setItem("data_last_sync", JSON.stringify("2026-03-10T00:00:00Z"));
 	localStorage.setItem("data_day_" + DAY, JSON.stringify({ date: DAY, comment: "old" }));

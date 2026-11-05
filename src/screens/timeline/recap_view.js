@@ -44,61 +44,50 @@ export function day_timeline2recap(j) {
 	if (j.observation_paused) o_class += " o_paused";
 	let day_timeline = el("div", {id: o_id, class: o_class, date: dates.str(o_date)});
 	day_timeline.addEventListener("click", open_menu);
-	let color = "vide";
-	let index_couleur = j.stamp;
+	let color = "empty";
+	let stamp_code = j.stamp;
 	let baby = (j.stamp == "BB");
 	if (j.stamp && j.stamp.includes("BB") && j.stamp.length>2) {
 		color = state.stamp_class["BB"];
-		index_couleur = index_couleur.replace("BB", "");
+		stamp_code = stamp_code.replace("BB", "");
 		baby = true;
 	}
-	if (state.stamp_class[index_couleur]) color = state.stamp_class[index_couleur];
-	let car_du_milieu = baby ? t_map("timeline.stamp_glyph")["BB"] : "";
-	let car_du_bas = j.union_sex ? t("timeline.union") : "";
-	if (j.err && j.err.includes("no data")) car_du_milieu = t("timeline.to_fill_in_glyph");
-	let recap_note = j.fc_score;
-	if ((state.constante.nfp_method==3 || state.constante.nfp_method==4) && j.fc_score) {
-		recap_note = recap_note.toUpperCase();
-		recap_note = recap_note.replace('RAP','').replace('LAP','').replace('AD','').replace('AP','').replace('B','');
-	}
-	else recap_note = "";
-	if ((state.constante.nfp_method==3 || state.constante.nfp_method==4) && car_du_milieu == "" && j.fc_score) {
-		const should_be_red = ['VL', 'L', 'VH', 'H', 'M'];
-		should_be_red.forEach(c => {
-			recap_note = recap_note.trim();
-			if (recap_note.indexOf(c) == 0) {
-				car_du_milieu += c;
-				recap_note = recap_note.replace(c,'');
-			}
-		});
+	if (state.stamp_class[stamp_code]) color = state.stamp_class[stamp_code];
+	let middle_glyph = baby ? t_map("timeline.stamp_glyph")["BB"] : "";
+	let bottom_glyph = j.union_sex ? t("timeline.union") : "";
+	if (j.err && j.err.includes("no data")) middle_glyph = t("timeline.to_fill_in_glyph");
+	const fc_method = state.constante.nfp_method==3 || state.constante.nfp_method==4;
+	// the flow goes in the square, unless the baby is there: then it goes with the letters
+	let flow = fc_method && j.fc_score ? j.fc_flow ?? "" : "";
+	if (middle_glyph == "") {
+		middle_glyph = flow;
+		flow = "";
 	}
 	if (j.observation_paused) {
 		color = "pink";
-		car_du_milieu = t("timeline.observation_paused_stamp_glyph");
-		car_du_bas = "";
+		middle_glyph = t("timeline.observation_paused_stamp_glyph");
+		bottom_glyph = "";
 	}
 	if (j.day_not_observed) {
-		car_du_milieu = t("timeline.not_observed_glyph");
-		color = "jcpas";
+		middle_glyph = t("timeline.not_observed_glyph");
+		color = "not_observed";
 	}
-	if (car_du_milieu=="" && j.stamp=="") car_du_milieu = t("timeline.to_fill_in_glyph");
+	if (middle_glyph=="" && j.stamp=="") middle_glyph = t("timeline.to_fill_in_glyph");
 	day_timeline.append(el("span", {class: "s", text: j.is_peak ? t("timeline.peak_mucus") : ""}));
 	if (state.constante.nfp_method==1 || state.constante.nfp_method==2) day_timeline.append(el("span", {class: "n"}));
-	day_timeline.append(el("span", {class: `g ${color}`, text: car_du_milieu}));
-	if ((state.constante.nfp_method==3 || state.constante.nfp_method==4) && !j.observation_paused && !j.day_not_observed && j.fc_score){
-		recap_note = recap_note.replace('X1','').replace('X2','').replace('X3','');
-		let fc_glaire = recap_note.match(/\d+/);
-		if (fc_glaire) recap_note = recap_note.replace(fc_glaire[0], '');
-		day_timeline.append(el("span", {class: "fc", text: fc_glaire? fc_glaire[0] : ""}));
-		recap_note = recap_note.trim().replace(/\s+/g, '')
-		if (recap_note.length>2) recap_note = t("timeline.fc_note_overflow");
-		day_timeline.append(el("span", {class: "fc", text: recap_note}));
+	day_timeline.append(el("span", {class: `g ${color}`, text: middle_glyph}));
+	if (fc_method && !j.observation_paused && !j.day_not_observed && j.fc_score){
+		const sensation = j.fc_sensation ?? "";
+		const stretch = sensation.match(/^\d+/)?.[0] ?? "";
+		const letters = flow + sensation.slice(stretch.length) + (j.fc_letters || []).join("");
+		day_timeline.append(el("span", {class: "fc", text: stretch}));
+		day_timeline.append(el("span", {class: "fc", text: letters.length>2 ? t("timeline.fc_note_overflow") : letters}));
 	}
-	else if (state.constante.nfp_method==3 || state.constante.nfp_method==4) {
+	else if (fc_method) {
 		day_timeline.append(el("span", {class: "fc"}));
 		day_timeline.append(el("span", {class: "fc"}));
 	}
-	day_timeline.append(el("span", {class: "c", text: car_du_bas}));
+	day_timeline.append(el("span", {class: "c", text: bottom_glyph}));
 	return day_timeline;
 }
 

@@ -2,7 +2,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import * as dates from "/js/model/dates.js";
-import { parse_fc_note, fc_score_to_codified, fc_score_from_api, fc_note_regex } from "/js/model/fc_notation.js";
+import { fc_score_to_codified, fc_score_from_api, fc_note_regex, fc_note_from_packed, fc_note_from_boxes, fc_boxes_from_note, fc_boxes_unticked_by } from "/js/model/fc_notation.js";
 import { description_from_api, resolve, exists, of_day, to_day_fields } from "/js/model/descriptions.js";
 import { day_from_api, day_to_api, blank_day, is_blank, day_from_body, stamp_from_api } from "/js/model/day.js";
 import * as cycles from "/js/model/cycles.js";
@@ -18,30 +18,201 @@ test("dates", () => {
 	assert.match(dates.now_in_utc(), /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$/);
 });
 
-test("fc notation: parse", () => {
-	const note = parse_fc_note("VL 10KL X1");
-	assert.deepEqual(["VL", "X1", "10", "K", "L"].map((k) => note[k]), [true, true, true, true, true]);
-	assert.equal(note.H, false);
-	assert.equal(parse_fc_note("L 0").Lsaignement, true);
-	assert.equal(parse_fc_note("LAP").Lsaignement, false);
-	assert.equal(parse_fc_note("LAP").LAP, true);
-	assert.equal(parse_fc_note("").Lsaignement, false);
-});
-test("fc notation: to and from the API", () => {
-	assert.deepEqual(fc_score_to_codified("VL 10KL X1"), {
-		codifiedBleedingObservation: "VL", codifiedMucusSensation: "10", codifiedMucusObservation: "KL",
-		codifiedNumberObservations: "X1", codifiedPainObservations: null,
+// typed note -> the fields of the API, the note shown: [typed, flow, brown, discharge, letters, number, pain]
+const NOTES = [
+	["H AP", "H", false, null, [], null, "AP"],
+	["MB", "M", true, null, [], null, null],
+	["VLB 4 X1", "VL", true, "4", [], "X1", null],
+	["LB", "L", true, null, [], null, null],
+	["L", "L", false, null, [], null, null],
+	["L 10KL AD", "L", false, "10", ["K", "L"], "AD", null],
+	["10KL AD", null, false, "10", ["K", "L"], "AD", null],
+	["0 AD", null, false, "0", [], "AD", null],
+	["2W X1", null, false, "2W", [], "X1", null],
+	["10DL", null, false, "10DL", [], null, null],
+	["10SL X2", null, false, "10SL", [], "X2", null],
+	["6CP X3", null, false, "6", ["C", "P"], "X3", null],
+	["PY AD", null, false, null, ["P", "Y"], "AD", null],
+	["6BC X1", null, false, "6", ["B", "C"], "X1", null],
+	["B", null, true, null, [], null, null],
+	["LAP", null, false, null, [], null, "LAP"],
+	["RAP", null, false, null, [], null, "RAP"],
+	["VLB 10KL AD", "VL", true, "10", ["K", "L"], "AD", null],
+];
+for (const [typed, flow, brown, discharge, letters, number, pain] of NOTES) {
+	test(`the FertilityCare note ${typed}: typed, read, shown`, () => {
+		const fields = {
+			codifiedBleedingObservation: flow, codifiedBleedingBrown: brown, codifiedMucusSensation: discharge,
+			codifiedMucusObservation: letters, codifiedNumberObservations: number, codifiedPainObservations: pain,
+		};
+		assert.deepEqual(fc_score_to_codified(typed), fields);
+		assert.equal(fc_score_from_api(fields), typed);
+		assert.ok(fc_note_regex.test(typed), typed);
 	});
+}
+
+test("a note is read whatever its case and spacing, longest code first", () => {
+	assert.equal(fc_score_from_api(fc_score_to_codified("vlb 10kl ad")), "VLB 10KL AD");
+	assert.equal(fc_score_from_api(fc_score_to_codified("VL B 10 KL")), "VLB 10KL");
+	assert.equal(fc_score_to_codified("10WL").codifiedMucusSensation, "10WL");
+	assert.equal(fc_score_to_codified("10WLAP").codifiedPainObservations, "AP");
+	assert.deepEqual(fc_score_to_codified("6KCK").codifiedMucusObservation, ["C", "K"]);
 	assert.equal(fc_score_to_codified("").codifiedBleedingObservation, null);
-	assert.equal(fc_score_from_api({ codifiedBleedingObservation: "VL", codifiedMucusSensation: "10", codifiedMucusObservation: "K", codifiedNumberObservations: "X1" }), "VL 10 K X1");
 	assert.equal(fc_score_from_api({}), "");
-	// spotting is "BL" in the API and a leading L in a note
-	assert.equal(fc_score_from_api({ codifiedBleedingObservation: "BL", codifiedMucusSensation: "2" }), "L B 2");
-	assert.equal(fc_score_from_api({ codifiedMucusObservation: "L" }), " L");
 });
-test("fc notation: what may be typed", () => {
-	for (const ok of ["VL 10KL X1", "H", "0", "6C", "2W AD", "10KL X2 AP"]) assert.ok(fc_note_regex.test(ok.toUpperCase()), ok);
-	for (const bad of ["Z", "12", "VL VL"]) assert.ok(!fc_note_regex.test(bad.toUpperCase()), bad);
+
+test("L beside AP: a pain when glued, a flow when apart", () => {
+	assert.equal(fc_score_to_codified("L AP").codifiedBleedingObservation, "L");
+	assert.equal(fc_score_to_codified("L AP").codifiedPainObservations, "AP");
+	assert.equal(fc_score_to_codified("LLAP").codifiedBleedingObservation, "L");
+	assert.equal(fc_score_to_codified("LLAP").codifiedPainObservations, "LAP");
+	assert.equal(fc_score_to_codified("6KLAP").codifiedPainObservations, "LAP");
+	assert.deepEqual(fc_score_to_codified("6KL AP").codifiedMucusObservation, ["K", "L"]);
+});
+
+test("a typed R is not a code", () => {
+	assert.deepEqual(fc_score_to_codified("6CR").codifiedMucusObservation, ["C"]);
+	assert.equal(fc_score_to_codified("6CRAP").codifiedPainObservations, "RAP");
+	assert.equal(fc_score_to_codified("R").codifiedMucusSensation, null);
+});
+
+test("every day the server can hold reads back the same from its note; a B with no discharge is the brown of the notation", () => {
+	for (const flow of [null, "H", "L", "VL"]) for (const brown of [false, true]) for (const discharge of [null, "0", "2W", "10", "10WL"])
+		for (const letters of [[], ["B"], ["L"], ["B", "C"], ["B", "L"], ["C", "K"], ["B", "C", "G", "K", "P", "Y", "L"]])
+			for (const pain of [null, "LAP", "AP"]) {
+				const fields = { codifiedBleedingObservation: flow, codifiedBleedingBrown: brown, codifiedMucusSensation: discharge, codifiedMucusObservation: letters, codifiedNumberObservations: null, codifiedPainObservations: pain };
+				const moved = discharge === null && letters.includes("B");
+				const expected = moved ? { ...fields, codifiedBleedingBrown: true, codifiedMucusObservation: letters.filter((letter) => letter !== "B") } : fields;
+				assert.deepEqual(fc_score_to_codified(fc_score_from_api(fields)), expected, JSON.stringify(fields));
+			}
+});
+
+test("the chart: one B, two L, C/K", () => {
+	assert.equal(fc_score_from_api({ codifiedMucusObservation: ["L"] }), " L");
+	assert.deepEqual(fc_score_to_codified(" L").codifiedMucusObservation, ["L"]);
+	assert.equal(fc_score_to_codified(" L").codifiedBleedingObservation, null);
+	assert.equal(fc_score_from_api({ codifiedBleedingBrown: true, codifiedMucusObservation: ["L"] }), "B L");
+	assert.equal(fc_score_from_api({ codifiedMucusObservation: [], codifiedPainObservations: "LAP" }), "LAP");
+	for (const typed of ["H B", "HB", "H  B", " B", "PB", "BP"]) assert.equal(fc_score_to_codified(typed).codifiedBleedingBrown, true, typed);
+	assert.deepEqual(fc_score_to_codified("PB").codifiedMucusObservation, ["P"]);
+	assert.equal(fc_score_to_codified("6BC").codifiedBleedingBrown, false);
+	assert.equal(fc_score_to_codified("HB 6BC").codifiedBleedingBrown, true);
+	assert.deepEqual(fc_score_to_codified("HB 6BC").codifiedMucusObservation, ["B", "C"]);
+	for (const typed of ["10C/K", "6C/K X1", "VL 8C/K AD", "c/k ad"]) {
+		assert.ok(fc_note_regex.test(typed), typed);
+		assert.ok(fc_score_to_codified(typed).codifiedMucusObservation.join() === "C,K", typed);
+	}
+});
+
+// the boxes as they are in timeline.html, by part
+const BOXES = {
+	flow: ["fc_h", "fc_m", "fc_flow_l", "fc_vl", "fc_vh"],
+	discharge: ["fc_0", "fc_2", "fc_2w", "fc_4", "fc_6", "fc_8", "fc_10", "fc_10dl", "fc_10sl", "fc_10wl"],
+	number: ["fc_x1", "fc_x2", "fc_x3", "fc_ad"],
+	pain: ["fc_ap", "fc_rap", "fc_lap"],
+	free: ["fc_b", "fc_c", "fc_g", "fc_k", "fc_p", "fc_y", "fc_l"],
+};
+const sorted = (list) => [...list].sort();
+
+test("every combination of boxes makes a valid note that gives back the same boxes and the fields ticked", () => {
+	let count = 0;
+	for (const flow of [null, ...BOXES.flow]) for (const discharge of [null, ...BOXES.discharge]) for (const number of [null, ...BOXES.number]) for (const pain of [null, ...BOXES.pain])
+		for (let bits = 0; bits < 2 ** BOXES.free.length; bits++) {
+			const free = BOXES.free.filter((_, i) => bits & (1 << i));
+			const ticked = [flow, discharge, number, pain, ...free].filter(Boolean);
+			const note = fc_note_from_boxes(ticked, "");
+			assert.ok(fc_note_regex.test(note), note);
+			assert.deepEqual(sorted(fc_boxes_from_note(note)), sorted(ticked), JSON.stringify(note));
+			const fields = fc_score_to_codified(note);
+			assert.equal(fields.codifiedBleedingBrown, free.includes("fc_b"));
+			assert.equal(fields.codifiedBleedingObservation === null, flow === null);
+			assert.equal(fields.codifiedMucusSensation === null, discharge === null);
+			assert.equal(fields.codifiedNumberObservations === null, number === null);
+			assert.equal(fields.codifiedPainObservations === null, pain === null);
+			assert.equal(fields.codifiedMucusObservation.length, free.filter((box) => box !== "fc_b").length);
+			count++;
+		}
+	assert.equal(count, 6 * 11 * 5 * 4 * 128);
+});
+
+test("ticking and unticking at random never breaks the note", () => {
+	const all = Object.values(BOXES).flat();
+	let seed = 42;
+	const next = (max) => (seed = (seed * 1664525 + 1013904223) % 4294967296) % max;
+	let ticked = [];
+	let note = "";
+	for (let step = 0; step < 50000; step++) {
+		const box = all[next(all.length)];
+		if (ticked.includes(box)) ticked = ticked.filter((other) => other !== box);
+		else ticked = [...ticked.filter((other) => !fc_boxes_unticked_by(box).includes(other)), box];
+		note = fc_note_from_boxes(ticked, note);
+		assert.ok(fc_note_regex.test(note), note);
+		assert.deepEqual(sorted(fc_boxes_from_note(note)), sorted(ticked), JSON.stringify(note));
+	}
+});
+
+test("a typed letter B stays through the boxes while there is a discharge", () => {
+	assert.equal(fc_note_from_boxes(["fc_6", "fc_c", "fc_ad"], "6BC X1"), "6BC AD");
+	assert.equal(fc_note_from_boxes(["fc_8", "fc_c"], "6BC"), "8BC");
+	assert.equal(fc_note_from_boxes(["fc_c"], "6BC"), "C");
+	assert.deepEqual(sorted(fc_boxes_from_note("6BC X1")), ["fc_6", "fc_c", "fc_x1"]);
+});
+
+test("the box R, which the notation does not know, stays in the note and is not sent", () => {
+	for (const ticked of [["fc_r"], ["fc_6", "fc_c", "fc_r"], ["fc_l", "fc_r"], ["fc_h", "fc_r"]]) {
+		const note = fc_note_from_boxes(ticked, "");
+		assert.ok(fc_note_regex.test(note), note);
+		assert.deepEqual(sorted(fc_boxes_from_note(note)), sorted(ticked), note);
+		assert.ok(!fc_score_to_codified(note).codifiedMucusObservation.includes("R"));
+	}
+});
+
+test("what is accepted of a note is read whole, and the note of any day the server holds is accepted", () => {
+	for (const ok of ["VL 10KL X1", "H", "0", "6C", "2W AD", "10KL X2 AP", "B", "BC", "h b", " L", "6KLR", "10C/K", "PY", "L AP", "VLAP", "10", "6", "2C", "0 K", "10WLK", "R"]) assert.ok(fc_note_regex.test(ok), ok);
+	for (const bad of ["Z", "12", "VL VL", "HM", "2 4", "X1X2", "APLAP", "AD 10KL", "1010DL", "10 10", "6 X1 X2"]) assert.ok(!fc_note_regex.test(bad), bad);
+	for (const flow of [null, "H", "VL"]) for (const brown of [false, true]) for (const discharge of [null, "0", "2", "2W", "4", "6", "10", "10DL"])
+		for (const letters of [[], ["B"], ["L"], ["B", "C"], ["K", "L"]]) for (const number of [null, "AD"]) {
+			const note = fc_score_from_api({ codifiedBleedingObservation: flow, codifiedBleedingBrown: brown, codifiedMucusSensation: discharge, codifiedMucusObservation: letters, codifiedNumberObservations: number });
+			assert.ok(fc_note_regex.test(note), JSON.stringify(note));
+		}
+});
+
+test("a body queued before the note was split takes the shape of the API", () => {
+	assert.deepEqual(fc_note_from_packed({ codifiedBleedingObservation: "VLB", codifiedMucusSensation: "10", codifiedMucusObservation: "KL", codifiedNumberObservations: "AD", codifiedPainObservations: null }), {
+		codifiedBleedingObservation: "VL", codifiedBleedingBrown: true, codifiedMucusSensation: "10",
+		codifiedMucusObservation: ["K", "L"], codifiedNumberObservations: "AD", codifiedPainObservations: null,
+	});
+	assert.equal(fc_note_from_packed({ codifiedBleedingObservation: "BL" }).codifiedBleedingObservation, "L");
+	assert.equal(fc_note_from_packed({ codifiedBleedingObservation: "BL" }).codifiedBleedingBrown, true);
+	assert.equal(fc_note_from_packed({ codifiedBleedingObservation: "B" }).codifiedBleedingObservation, null);
+	assert.equal(fc_note_from_packed({ codifiedMucusSensation: "0" }).codifiedMucusSensation, "0");
+	assert.deepEqual(fc_note_from_packed({ codifiedMucusObservation: "CK" }).codifiedMucusObservation, ["C", "K"]);
+	assert.deepEqual(fc_note_from_packed({}).codifiedMucusObservation, []);
+});
+
+test("a day of the form and its twin in the copy hold the note's boolean and list", () => {
+	const blank = blank_day("2026-03-10");
+	assert.equal(blank.codifiedBleedingBrown, false);
+	assert.deepEqual(blank.codifiedMucusObservation, []);
+	assert.ok(is_blank({ ...blank }));
+	assert.ok(!is_blank({ ...blank, codifiedBleedingBrown: true }));
+	assert.ok(!is_blank({ ...blank, codifiedMucusSensation: "0" }));
+	assert.ok(!is_blank({ ...blank, codifiedMucusObservation: ["K"] }));
+	const letters = ["C", "K"];
+	const day = day_from_body({ date: "2026-03-10", codifiedBleedingBrown: true, codifiedMucusSensation: "0", codifiedMucusObservation: letters });
+	assert.equal(day.codifiedBleedingBrown, true);
+	assert.equal(day.codifiedMucusSensation, "0");
+	assert.deepEqual(day.codifiedMucusObservation, letters);
+	assert.notEqual(day.codifiedMucusObservation, letters);
+	const none = day_from_body({ date: "2026-03-10" });
+	assert.equal(none.codifiedBleedingBrown, false);
+	assert.deepEqual(none.codifiedMucusObservation, []);
+	assert.equal(none.codifiedPainObservations, null);
+	const flat = day_from_api({ date: "2026-03-10", codifiedBleedingObservation: "VL", codifiedBleedingBrown: true, codifiedMucusSensation: "10", codifiedMucusObservation: ["K"], freeMucusSensation: [], freeMucusObservation: [], freeOther: [] }, []);
+	assert.equal(flat.fc_score, "VLB 10K");
+	assert.equal(flat.fc_flow, "VL");
+	assert.equal(flat.fc_sensation, "10");
+	assert.deepEqual(flat.fc_letters, ["K"]);
 });
 
 test("descriptions", () => {
@@ -157,6 +328,9 @@ test("cycle stats: a day is of the kind the timeline draws", () => {
 	assert.equal(stats.day_kind({ temperature: 36.5 }, mucus_temp), "none");
 	assert.equal(stats.day_kind({ codifiedMucusSensation: "10" }, fc), "none");
 	assert.equal(stats.day_kind({ codifiedMucusSensation: "10" }, MUCUS), "to_fill");
+	assert.equal(stats.day_kind({ codifiedBleedingBrown: true, codifiedMucusObservation: [] }, fc), "none");
+	assert.equal(stats.day_kind({ codifiedMucusSensation: "0", codifiedMucusObservation: [] }, fc), "none");
+	assert.equal(stats.day_kind({ codifiedBleedingBrown: false, codifiedMucusObservation: [] }, fc), "to_fill");
 	assert.equal(stats.day_kind({ sexUnion: true, isPeak: true, comment: "x", freeMucusSensation: ["a"] }, MUCUS), "to_fill");
 });
 

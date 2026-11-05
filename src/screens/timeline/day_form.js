@@ -17,7 +17,7 @@ import { t, clock, format_number } from "../../js/core/i18n.js";
 import { date_compact, date_long, date_long_node, weekday_name, format_temperature, temperature_unit } from "../../js/model/format.js";
 import { by_id, el, display, is_hidden } from "../../js/core/dom.js";
 import { day_to_api } from "../../js/model/day.js";
-import { fc_note_regex } from "../../js/model/fc_notation.js";
+import { fc_boxes_from_note, fc_boxes_unticked_by, fc_note_from_boxes, fc_note_regex } from "../../js/model/fc_notation.js";
 import { type_from_int, unsent_description } from "../../js/model/descriptions.js";
 import { day_timeline2recap } from "./recap_view.js";
 import { day_timeline2timeline, hide_method_parts, trois_jours } from "./cycle_view.js";
@@ -180,6 +180,7 @@ export function open_menu(e, date = null) {
 	display(by_id("jour_form_saved"), false);
 	display(by_id("jour_form_unsent"), !!moncycle_store.pending[date]);
 	by_id("form_date").value = j.date_obs;
+	by_id("form_fc_saved").value = state.constante.nfp_method==3 || state.constante.nfp_method==4 ? j.fc_score ?? "" : "";
 	if (j.fc_score && (state.constante.nfp_method==3 || state.constante.nfp_method==4)) {
 		by_id("form_fc").value = j.fc_score;
 		fc_note2form();
@@ -263,12 +264,22 @@ export function submit_menu(event) {
 	display(by_id("jour_form_saved"), false);
 	display(by_id("jour_form_unsent"), false);
 	by_id("form_save_time").value = dates.now_in_utc();
-	if (event && event.currentTarget && event.currentTarget.id == "form_fc") fc_note2form();
-	else fc_form2note();
+	const source = event && event.currentTarget;
+	if (source && source.id == "form_fc") fc_note2form();
+	else if (source && source.matches('input.fc_form_note[type="checkbox"]')) {
+		if (source.checked) fc_boxes_unticked_by(source.id).forEach((id) => check(id, false));
+		fc_form2note();
+	}
+	// any other field: the note stays as typed while it is not valid, the boxes would save only the part of it they could read
+	else if (fc_note_regex.test(by_id("form_fc").value)) fc_form2note();
 	fc_test_note();
+	const note_is_valid = fc_note_regex.test(by_id("form_fc").value);
+	if (note_is_valid) by_id("form_fc_saved").value = by_id("form_fc").value;
 	if (by_id("ev_counter_start_actif").checked) by_id("ev_hidden_counter_start").value = by_id("ev_counter_start_nb").value;
 	else by_id("ev_hidden_counter_start").value = 0;
 	let d = day_form_fields(by_id("form_data"));
+	// a note that is not valid is not sent: the day keeps the note it has, the rest of the form is saved
+	if (!note_is_valid) d.find((field) => field.name == "fc_score").value = by_id("form_fc_saved").value;
 	if (state.menu_opened_date != null) {
 		let j = d.findIndex((field) => field.name == "date");
 		if (j < 0) d.push({name: "date", value: state.menu_opened_date});
@@ -336,51 +347,18 @@ export function fc_test_note() {
 	}
 }
 
-export function fc_form2note() {
-	let note = checked_values('input[name="fc_regles"]').join("");
-	if (note.length && !note.endsWith(' ')) note += " ";
-	note += checked_values('.fc_sens').join("");
-	note += checked_values(".fc_obs").join("");
-	note += checked_values('.fc_sens_L')[0] || "";
-	if (note.length && !note.endsWith(' ')) note += " ";
-	note += checked_values('input[name="fc_rec"]').join("");
-	if (note.length && !note.endsWith(' ')) note += " ";
-	note += checked_values('input[name="fc_dou"]').join("");
-	by_id("form_fc").value = note.trim();
-	return note;
+function fc_boxes() {
+	return by_id("form_data").querySelectorAll('input.fc_form_note[type="checkbox"]');
 }
 
+// The note the boxes make.
+export function fc_form2note() {
+	const ticked = [...fc_boxes()].filter((box) => box.checked).map((box) => box.id);
+	by_id("form_fc").value = fc_note_from_boxes(ticked, by_id("form_fc").value);
+}
+
+// The boxes the note makes.
 export function fc_note2form() {
-	let note = by_id("form_fc").value.trim().toUpperCase();
-	if (note.startsWith('L') && !note.startsWith('LAP')) {
-		check("fc_rl");
-		note = note.slice(1);
-	}
-	else {
-		check("fc_rl", false);
-	}
-	['10DL', '10SL', '10WL', 'RAP', 'LAP', 'X1', 'X2', 'X3', 'AD', 'AP', 'VL', 'VH', '2W', '10', 'H', 'M', 'L', 'B', '0', '2', '4', '6', '8', 'C', 'G', 'K', 'P', 'Y', 'R'].forEach(c => {
-		if (note.includes(c)) {
-			check("fc_" + c.toLowerCase());
-			note = note.replace(c,'');
-		}
-		else check("fc_" + c.toLowerCase(), false);
-	});
-	note = by_id("form_fc").value.trim().toUpperCase();
-	['10DL', '10SL', '10WL', '10', '2W'].forEach(c => {
-		note = note.replace(c,'');
-	});
-	['RAP', 'LAP', 'AP'].forEach(c => {
-		note = note.replace(c,'');
-	});
-	['X1', 'X2', 'X3', 'AD'].forEach(c => {
-		note = note.replace(c,'');
-	});
-	['VL', 'VH', 'H', 'M', 'L'].forEach(c => {
-		note = note.replace(c,'');
-	});
-	['0', '2', '4', '6', '8'].forEach(c => {
-		note = note.replace(c,'');
-	});
-	return note;
+	const ticked = fc_boxes_from_note(by_id("form_fc").value);
+	fc_boxes().forEach((box) => { box.checked = ticked.includes(box.id); });
 }

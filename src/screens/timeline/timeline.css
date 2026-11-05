@@ -44,14 +44,14 @@
 	--wash: var(--neutral);
 }
 
-:is(.stamp_jcpas, .g.jcpas) {
+:is(.stamp_not_observed, .g.not_observed) {
 	--stamp: var(--blue-hatch);
 	--stamp-ink: var(--blue-ink);
 	--edge: var(--blue-edge);
 	--wash: var(--blue-wash);
 }
 
-:is(.stamp_ar, .g.ar, .g.vide) {
+:is(.stamp_ar, .g.ar, .g.empty) {
 	--stamp: var(--yellow-hatch);
 	--stamp-ink: var(--yellow-ink);
 	--edge: var(--hatch-edge);
@@ -390,7 +390,7 @@
 	overflow: hidden;
 }
 
-.day .g:is(.baby, .jcpas, .ar, .pink) {
+.day .g:is(.baby, .not_observed, .ar, .pink) {
 	color: var(--stamp-ink);
 }
 
@@ -472,7 +472,7 @@
 	font-weight: 400;
 }
 
-.day .fc .note_rouge {
+.day .fc .note_red {
 	color: var(--red-ink);
 	font-weight: 400;
 }
@@ -635,7 +635,7 @@
 	box-shadow: inset 0 0 0 1px var(--neutral);
 }
 
-.cycle_recap .obs span.g:is(.jcpas, .vide) {
+.cycle_recap .obs span.g:is(.not_observed, .empty) {
 	background-size: 6px 6px;
 }
 
@@ -1072,6 +1072,11 @@
 	padding: 8px 10px 6px;
 	border-radius: var(--radius) var(--radius) 0 0;
 	background-color: var(--card);
+	/* the label and the message share one line, whatever the message: the field under them never moves */
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	align-items: baseline;
+	column-gap: 12px;
 }
 
 #fc_score_holder .categorie {
@@ -1079,13 +1084,18 @@
 }
 
 #fc_msg {
-	float: right;
+	overflow: hidden;
 	font-family: var(--font-mono);
 	font-size: .8em;
+	line-height: 1;
+	text-align: right;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 #form_fc {
 	display: block;
+	grid-column: 1 / -1;
 	box-sizing: border-box;
 	width: 100%;
 	margin-top: 6px;

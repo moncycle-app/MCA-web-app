@@ -60,6 +60,8 @@ jQuery (`src/vendor/jquery.min.js`) stays in the project only until the existing
   not signed in (`.public_screen`, set by the router); a screen's own CSS only what is its own. The timeline and the day form set the
   look. Buttons: the default (grey), `.primary` or a submit input (the action of a form), `.rouge` (delete, leave), `.nav_button`
   (the header), `.link_button`.
+- **The FertilityCare note is one typed text and six fields of the API** (`js/model/fc_notation.js`): `fc_score_to_codified` reads the text, `fc_score_from_api` writes it, and the
+  text never reaches the API. `0` is a code: never test a field for truthiness. The notation has one B (brown): a letter only beside a discharge (`6BC`), else `codifiedBleedingBrown`. It has two L: at the start the light flow, elsewhere the lubricative letter, alone with a leading space (` L`). The boxes of the day form go through the same functions (`fc_note_from_boxes`, `fc_boxes_from_note`). A note that fails `fc_note_regex` is not sent: the form's hidden `fc_saved_note` is.
 - **What a person reads follows the account's settings.** `GET /account` gives `settings` (each `{value, isSet, default}`) and `customSettings`
   (third-party apps: never read, never sent). `moncycle_store.setting(name)` is the value; `set_setting(name, value)` changes the copy at once
   (`null`: back to the default) and `restore_setting` undoes it when the server refuses; `account_saved(data)` takes the answer of a `POST /account`.

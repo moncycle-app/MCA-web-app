@@ -19,7 +19,9 @@ import { fc_score_from_api, fc_score_to_codified } from "./fc_notation.js";
 import { of_day, to_day_fields } from "./descriptions.js";
 import { to_celsius } from "./temperature.js";
 
-export const codified_fields = ["codifiedBleedingObservation", "codifiedMucusSensation", "codifiedMucusObservation", "codifiedNumberObservations", "codifiedPainObservations"];
+// the fields of a FertilityCare note that hold one code or null ("0" is a code); with them, codifiedBleedingBrown (boolean) and codifiedMucusObservation (list)
+const codified_code_fields = ["codifiedBleedingObservation", "codifiedMucusSensation", "codifiedNumberObservations", "codifiedPainObservations"];
+export const codified_fields = [...codified_code_fields, "codifiedBleedingBrown", "codifiedMucusObservation"];
 // the content a Day holds, as opposed to where it stands in its cycle and when it was written
 export const day_meta = ["date", "cycleStartDate", "cycleDay", "lastWriteClientUtc", "lastWriteDb"];
 
@@ -37,9 +39,10 @@ export function blank_day(date) {
 		date : date, cycleStartDate : null, cycleDay : null, cycleFirstDay : false, dayNotObserved : false,
 		stampColor : null, stampBaby : false, isPeak : false, counterStart : null, sexUnion : false, observationPaused : false,
 		freeMucusSensation : [], freeMucusObservation : [], freeOther : [], temperature : null, temperatureTime : null, codifiedArrow : null,
+		codifiedBleedingBrown : false, codifiedMucusObservation : [],
 		comment : "", lastWriteClientUtc : null, lastWriteDb : null,
 	};
-	codified_fields.forEach(field => { day[field] = null; });
+	codified_code_fields.forEach(field => { day[field] = null; });
 	return day;
 }
 export function is_blank(day) {
@@ -66,11 +69,13 @@ export function day_from_body(body, previous) {
 		temperature : temperature ? body.temperature : null,
 		temperatureTime : temperature && body.temperatureTime ? body.temperatureTime : null,
 		codifiedArrow : body.codifiedArrow || null,
+		codifiedBleedingBrown : !!body.codifiedBleedingBrown,
+		codifiedMucusObservation : (body.codifiedMucusObservation || []).slice(),
 		comment : body.comment || "",
 		lastWriteClientUtc : body.lastWriteClientUtc ? body.lastWriteClientUtc.replace(" ", "T").replace(/Z?$/, "Z") : null,
 		lastWriteDb : previous ? previous.lastWriteDb : null,
 	});
-	codified_fields.forEach(field => { day[field] = body[field] || null; });
+	codified_code_fields.forEach(field => { day[field] = body[field] === "" ? null : body[field] ?? null; });
 	return day;
 }
 
@@ -90,6 +95,9 @@ export function day_from_api(d, descriptions) {
 		temperature : d.temperature,
 		time_temp_taken : d.temperatureTime,
 		fc_score : fc_score_from_api(d),
+		fc_flow : d.codifiedBleedingObservation ?? null,
+		fc_sensation : d.codifiedMucusSensation ?? null,
+		fc_letters : d.codifiedMucusObservation || [],
 		fc_arrow : arrow_from_api[d.codifiedArrow] || "",
 		comment : d.comment,
 		description : of_day(d, descriptions),

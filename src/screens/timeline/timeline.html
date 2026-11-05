@@ -53,15 +53,16 @@
 			<div id="fc_score_holder">
 				<span data-i18n="timeline.fc_note_label" class="categorie pas_temp"></span> <span id="fc_msg"></span>
 				<input data-i18n-attr="placeholder:timeline.fc_note_placeholder" type="text" autocapitalize="characters" name="fc_score" id="form_fc" />
+				<input type="hidden" name="fc_saved_note" id="form_fc_saved" />
 			</div>
 			<span data-i18n="timeline.bleeding_title" class="categorie pas_temp"></span>
 			<div class="jf_chips jf_codes">
-				<input class="fc_form_note" type="checkbox" name="fc_regles" id="fc_h" value="H" /><label data-i18n="timeline.bleeding_h" for="fc_h"><b data-slot="b">H</b></label>
-				<input class="fc_form_note" type="checkbox" name="fc_regles" id="fc_m" value="M" /><label data-i18n="timeline.bleeding_m" for="fc_m"><b data-slot="b">M</b></label>
-				<input class="fc_form_note" type="checkbox" name="fc_regles" id="fc_rl" value="L" /><label data-i18n="timeline.bleeding_l" for="fc_rl"><b data-slot="b">L</b></label>
-				<input class="fc_form_note" type="checkbox" name="fc_regles" id="fc_vl" value="VL" /><label data-i18n="timeline.bleeding_vl" for="fc_vl"><b data-slot="b">VL</b></label>
-				<input class="fc_form_note" type="checkbox" name="fc_regles" id="fc_vh" value="VH" /><label data-i18n="timeline.bleeding_vh" for="fc_vh"><b data-slot="b">VH</b></label>
-				<input class="fc_form_note" type="checkbox" name="fc_regles" id="fc_b" value="B" /><label data-i18n="timeline.bleeding_b" for="fc_b"><b data-slot="b">B</b></label>
+				<input class="fc_form_note" type="checkbox" name="fc_bleeding" id="fc_h" value="H" /><label data-i18n="timeline.bleeding_h" for="fc_h"><b data-slot="b">H</b></label>
+				<input class="fc_form_note" type="checkbox" name="fc_bleeding" id="fc_m" value="M" /><label data-i18n="timeline.bleeding_m" for="fc_m"><b data-slot="b">M</b></label>
+				<input class="fc_form_note" type="checkbox" name="fc_bleeding" id="fc_flow_l" value="L" /><label data-i18n="timeline.bleeding_l" for="fc_flow_l"><b data-slot="b">L</b></label>
+				<input class="fc_form_note" type="checkbox" name="fc_bleeding" id="fc_vl" value="VL" /><label data-i18n="timeline.bleeding_vl" for="fc_vl"><b data-slot="b">VL</b></label>
+				<input class="fc_form_note" type="checkbox" name="fc_bleeding" id="fc_vh" value="VH" /><label data-i18n="timeline.bleeding_vh" for="fc_vh"><b data-slot="b">VH</b></label>
+				<input class="fc_form_note" type="checkbox" name="fc_bleeding" id="fc_b" value="B" /><label data-i18n="timeline.bleeding_b" for="fc_b"><b data-slot="b">B</b></label>
 			</div>
 			<span data-i18n="timeline.sensations_title" class="categorie pas_temp"></span>
 			<div class="jf_chips jf_codes">
@@ -88,16 +89,16 @@
 			</div>
 			<span data-i18n="timeline.recurrence_title" class="categorie pas_temp"></span>
 			<div class="jf_chips jf_codes">
-				<input class="fc_form_note" type="checkbox" name="fc_rec" id="fc_x1" value="X1" /><label data-i18n="timeline.recurrence_x1" for="fc_x1"><b data-slot="b">X1</b></label>
-				<input class="fc_form_note" type="checkbox" name="fc_rec" id="fc_x2" value="X2" /><label data-i18n="timeline.recurrence_x2" for="fc_x2"><b data-slot="b">X2</b></label>
-				<input class="fc_form_note" type="checkbox" name="fc_rec" id="fc_x3" value="X3" /><label data-i18n="timeline.recurrence_x3" for="fc_x3"><b data-slot="b">X3</b></label>
-				<input class="fc_form_note" type="checkbox" name="fc_rec" id="fc_ad" value="AD" /><label data-i18n="timeline.recurrence_ad" for="fc_ad"><b data-slot="b">AD</b></label>
+				<input class="fc_form_note" type="checkbox" name="fc_recurrence" id="fc_x1" value="X1" /><label data-i18n="timeline.recurrence_x1" for="fc_x1"><b data-slot="b">X1</b></label>
+				<input class="fc_form_note" type="checkbox" name="fc_recurrence" id="fc_x2" value="X2" /><label data-i18n="timeline.recurrence_x2" for="fc_x2"><b data-slot="b">X2</b></label>
+				<input class="fc_form_note" type="checkbox" name="fc_recurrence" id="fc_x3" value="X3" /><label data-i18n="timeline.recurrence_x3" for="fc_x3"><b data-slot="b">X3</b></label>
+				<input class="fc_form_note" type="checkbox" name="fc_recurrence" id="fc_ad" value="AD" /><label data-i18n="timeline.recurrence_ad" for="fc_ad"><b data-slot="b">AD</b></label>
 			</div>
 			<span data-i18n="timeline.pain_title" class="categorie pas_temp"></span>
 			<div class="jf_chips jf_codes">
-				<input class="fc_form_note" type="checkbox" name="fc_dou" id="fc_ap" value="AP" /><label data-i18n="timeline.pain_ap" for="fc_ap"><b data-slot="b">AP</b></label>
-				<input class="fc_form_note" type="checkbox" name="fc_dou" id="fc_rap" value="RAP" /><label data-i18n="timeline.pain_rap" for="fc_rap"><b data-slot="b">RAP</b></label>
-				<input class="fc_form_note" type="checkbox" name="fc_dou" id="fc_lap" value="LAP" /><label data-i18n="timeline.pain_lap" for="fc_lap"><b data-slot="b">LAP</b></label>
+				<input class="fc_form_note" type="checkbox" name="fc_pain" id="fc_ap" value="AP" /><label data-i18n="timeline.pain_ap" for="fc_ap"><b data-slot="b">AP</b></label>
+				<input class="fc_form_note" type="checkbox" name="fc_pain" id="fc_rap" value="RAP" /><label data-i18n="timeline.pain_rap" for="fc_rap"><b data-slot="b">RAP</b></label>
+				<input class="fc_form_note" type="checkbox" name="fc_pain" id="fc_lap" value="LAP" /><label data-i18n="timeline.pain_lap" for="fc_lap"><b data-slot="b">LAP</b></label>
 			</div>
 			<span data-i18n="timeline.arrow_title" class="categorie"></span>
 			<div class="jf_chips">

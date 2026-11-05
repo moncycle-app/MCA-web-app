@@ -161,7 +161,7 @@
 	"timeline.target_blank": "white",
 	"timeline.target_empty": "none",
 	"timeline.fc_syntax_valid": "valid syntax",
-	"timeline.fc_syntax_invalid": "invalid syntax",
+	"timeline.fc_syntax_invalid": "note not saved",
 	"timeline.sync_offline": "⚠️ Cannot connect: the data shown may be out of date.",
 	"timeline.sync_server_error": "⚠️ The server is not responding properly: retrying automatically.",
 	"timeline.sync_retry": "Retry",

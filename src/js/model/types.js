@@ -70,6 +70,12 @@
  * @property {string[]} freeOther
  * @property {number|null} temperature
  * @property {string|null} temperatureTime
+ * @property {"VH"|"H"|"M"|"L"|"VL"|null} codifiedBleedingObservation  the flow
+ * @property {boolean} codifiedBleedingBrown  brown or black bleeding, with a flow or without one
+ * @property {"0"|"2"|"2W"|"4"|"6"|"8"|"10"|"10DL"|"10SL"|"10WL"|null} codifiedMucusSensation
+ * @property {("B"|"C"|"G"|"K"|"P"|"Y"|"L")[]} codifiedMucusObservation  in that order, each once; [] when none
+ * @property {"X1"|"X2"|"X3"|"AD"|null} codifiedNumberObservations
+ * @property {"AP"|"RAP"|"LAP"|null} codifiedPainObservations
  * @property {"Up"|"Down"|"Right"|null} codifiedArrow
  * @property {string} comment
  * @property {string|null} lastWriteClientUtc

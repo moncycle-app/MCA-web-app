@@ -185,7 +185,7 @@ const DAY_KINDS = [
 	{kind: "Y", css: "stamp_jaune", key: "timeline.stats_kind_yellow"},
 	{kind: "BB", css: "stamp_baby", key: "timeline.stats_kind_baby"},
 	{kind: "none", css: "stamp_none", key: "timeline.stats_kind_none"},
-	{kind: "not_observed", css: "stamp_jcpas", key: "timeline.stats_kind_not_observed"},
+	{kind: "not_observed", css: "stamp_not_observed", key: "timeline.stats_kind_not_observed"},
 	{kind: "to_fill", css: "stamp_ar", key: "timeline.stats_kind_to_fill"},
 	{kind: "paused", css: "stamp_pause", key: "timeline.stats_kind_paused"},
 ];
@@ -354,9 +354,9 @@ export function day_timeline2timeline(j) {
 	}
 	else {
 		if (j.day_not_observed) {
-			day_timeline.append(el("span", {class: "g jcpas", text: t("timeline.not_observed_glyph")}));
-			pos.classList.add("j_jcpas");
-			tint("jcpas");
+			day_timeline.append(el("span", {class: "g not_observed", text: t("timeline.not_observed_glyph")}));
+			pos.classList.add("j_not_observed");
+			tint("not_observed");
 			tbd = false;
 		}
 		else {
@@ -441,11 +441,13 @@ function with_body(row) {
 	return row;
 }
 
-// A FertilityCare note for the page: its codes in colour, the rest as it is. The server only stores notes made of the notation's codes, but
+// A FertilityCare note for the page: its codes in colour, the rest as it is. The note is built from the codes of the API, but
 // the note is text all the same: it comes out as text nodes and <span>s, never as HTML. The first occurrence of each code gets a span, in
 // the order below, and a span made earlier can be inside a later one (the "AP" of an "RAP"), as it always was. Returns the nodes.
 export function fc_note2nodes(note) {
-	const should_be_red = ['VL', 'VH', 'H', 'M', 'B'];
+	const should_be_red = ['VL', 'VH', 'H', 'M'];
+	// brown is glued to the flow, or first in the note: any other B is a letter of the mucus
+	if (/^(VH|VL|H|M|L)?B/i.test(note)) should_be_red.push('B');
 	const less_important = ['RAP', 'LAP', 'AP', 'X1', 'X2', 'X3', 'AD',];
 	// one entry per character, with the spans it is inside, outermost first: {id, css}
 	const chars = [...note.toUpperCase()].map((character) => ({character: character, spans: []}));
@@ -462,8 +464,8 @@ export function fc_note2nodes(note) {
 		}
 	};
 	less_important.forEach((code) => mark(code, "note_not_imp"));
-	should_be_red.forEach((code) => mark(code, "note_rouge"));
-	if (chars.length && chars[0].character === "L" && chars[0].spans.length === 0) chars[0].spans.push({id: ++span_count, css: "note_rouge"});
+	should_be_red.forEach((code) => mark(code, "note_red"));
+	if (chars.length && chars[0].character === "L" && chars[0].spans.length === 0) chars[0].spans.push({id: ++span_count, css: "note_red"});
 
 	const root = document.createDocumentFragment();
 	let open = [];   // [{span, element}]
