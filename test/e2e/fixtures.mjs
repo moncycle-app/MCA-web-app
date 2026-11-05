@@ -57,7 +57,7 @@ export const test = base.extend({
 			try {
 				const answer = await route.fetch();
 				const body = await answer.json();
-				if (body.data) { delete body.data.newsUrl; delete body.data.termsOfServiceUrl; }
+				if (body.data) { delete body.data.newsUrl; delete body.data.termsOfServiceUrl; delete body.data.termsOfServiceUrls; }
 				await route.fulfill({ response: answer, json: body });
 			} catch { }   // the page went away (a redirect) before the answer came
 		});

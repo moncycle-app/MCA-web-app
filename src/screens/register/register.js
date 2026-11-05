@@ -20,6 +20,7 @@ import { field, checked, el } from "../../js/core/dom.js";
 import { t, t_map, attach_language_select } from "../../js/core/i18n.js";
 import { has_session } from "../../js/core/router.js";
 import { device } from "../../js/core/device.js";
+import { terms_url } from "../../js/core/terms.js";
 
 const by_id = (root, id) => root.querySelector("#" + id);
 
@@ -58,24 +59,25 @@ export const screen = {
 			root,
 			select: by_id(root, "i_language"),
 			signal: ctx.signal,
-			after: () => { fill_bands(); document.title = screen.title(); },
+			after: () => { fill_bands(); document.title = screen.title(); show_terms(); },
 		});
 
-		// the terms of service are a page of the server's choice (TERMS_OF_SERVICE_URL, told by server_info): shown here in a frame, and in a tab of
-		// their own from the link below it. None told: no frame and no link, the box stays.
+		// the terms of service are a page of the server's choice (TERMS_OF_SERVICE_URL and TERMS_OF_SERVICE_URLS, told by server_info): shown here in a
+		// frame, and in a tab of their own from the link below it. The page follows the language of the screen (a change of language swaps it).
+		// None told: no frame and no link, the box stays.
+		let server_info = null;
+		function show_terms() {
+			const url = terms_url(server_info);
+			for (const id of ["a_footer_terms", "f_terms", "a_terms"]) {
+				const node = by_id(root, id);
+				if (url) node.setAttribute(id === "f_terms" ? "src" : "href", url);
+				node.hidden = !url;
+			}
+		}
 		api("GET", "/server_info", undefined, {signal: ctx.signal}).then((ret) => {
-			const data = (ret || {}).data || {};
-			if (data.passwordPolicyRegex) for (const id of ["i_password", "i_password_conf"]) by_id(root, id).setAttribute("pattern", data.passwordPolicyRegex);
-			if (!/^https:\/\//i.test(data.termsOfServiceUrl || "")) return;
-			const footer_link = by_id(root, "a_footer_terms");
-			footer_link.setAttribute("href", data.termsOfServiceUrl);
-			footer_link.hidden = false;
-			const frame = by_id(root, "f_terms");
-			frame.setAttribute("src", data.termsOfServiceUrl);
-			frame.hidden = false;
-			const link = by_id(root, "a_terms");
-			link.setAttribute("href", data.termsOfServiceUrl);
-			link.hidden = false;
+			server_info = (ret || {}).data || {};
+			if (server_info.passwordPolicyRegex) for (const id of ["i_password", "i_password_conf"]) by_id(root, id).setAttribute("pattern", server_info.passwordPolicyRegex);
+			show_terms();
 		}, () => {
 			by_id(root, "terms_error_msg").textContent = t("register.terms_unavailable");
 		});

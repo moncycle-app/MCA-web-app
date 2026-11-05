@@ -12,15 +12,17 @@
 ** https://github.com/moncycle-app/backend-api-web-app
 */
 
-/* The footer of the screens of someone not signed in: its link to the terms of service is the server's (TERMS_OF_SERVICE_URL, told by server_info);
+/* The footer of the screens of someone not signed in: its link to the terms of service is the server's, in the language of the screen (TERMS_OF_SERVICE_URL and
+** TERMS_OF_SERVICE_URLS, told by server_info, see terms.js);
 ** none told, no link. */
 import { api } from "./api.js";
+import { terms_url } from "./terms.js";
 
 export function attach_terms_link(root, signal) {
 	api("GET", "/server_info", undefined, {signal}).then((ret) => {
-		const url = ((ret || {}).data || {}).termsOfServiceUrl;
+		const url = terms_url((ret || {}).data);
 		const link = root.querySelector("#a_footer_terms");
-		if (link && /^https:\/\//i.test(url || "")) {
+		if (link && url) {
 			link.setAttribute("href", url);
 			link.hidden = false;
 		}

@@ -14,6 +14,7 @@
 import { moncycle_config } from "../../../js/core/config.js";
 import { moncycle_store } from "../../../js/model/store.js";
 import { t } from "../../../js/core/i18n.js";
+import { terms_url } from "../../../js/core/terms.js";
 import { date_long } from "../../../js/model/format.js";
 import { by_id } from "../../../js/core/dom.js";
 import { settings_api, settings_say, settings_state } from "../common.js";
@@ -30,7 +31,7 @@ export function settings_fill_about(account) {
 	by_id("tech_info_insc").textContent = isNaN(since) ? "" : date_long(since);
 }
 
-// The version, and the terms of service: their page is a setting of the server (TERMS_OF_SERVICE_URL, told by server_info). None told: the
+// The version, and the terms of service: their page is a setting of the server (TERMS_OF_SERVICE_URL and TERMS_OF_SERVICE_URLS, told by server_info). None told: the
 // paragraph that sums them up is not shown.
 export function settings_load_server_info() {
 	moncycle_store.load_webapp().then(function (webapp) {
@@ -45,8 +46,9 @@ export function settings_load_server_info() {
 		if (info.passwordPolicyRegex) document.querySelectorAll("#i_pw1, #i_pw2").forEach(function (input) { input.setAttribute("pattern", info.passwordPolicyRegex); });
 		if (info.newsUrl) settings_load_news(info.newsUrl);
 		else console.info("news: server_info tells no newsUrl (NEWS_URL is empty or not https), no news entry");
-		if (!/^https:\/\//i.test(info.termsOfServiceUrl || "")) return;
-		by_id("a_terms").setAttribute("href", info.termsOfServiceUrl);
+		const terms = terms_url(info);
+		if (!terms) return;
+		by_id("a_terms").setAttribute("href", terms);
 		by_id("terms_about").hidden = false;
 	}, function () { });
 }
