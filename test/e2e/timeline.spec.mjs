@@ -3,7 +3,7 @@ import { test, expect, API, today, open_today } from "./fixtures.mjs";
 
 test("a day is saved, shown as text, and kept after a reload", async ({ page, signed_in, account }) => {
 	await open_today(signed_in);
-	await page.locator("#go_vert").check();
+	await page.locator("#go_green").check();
 	await page.locator("#from_com").fill("<b>x</b>");
 	await page.locator("#from_com").blur();
 	await expect(page.locator("#jour_form_saved")).toBeVisible();
@@ -19,7 +19,7 @@ test("a day is saved, shown as text, and kept after a reload", async ({ page, si
 test("a day that cannot be sent waits in the queue, then goes", async ({ page, signed_in }) => {
 	await open_today(signed_in);
 	await page.route("**/api/v3/day**", (route) => route.abort());
-	await page.locator("#go_jaune").check();
+	await page.locator("#go_yellow").check();
 	await expect(page.locator("#jour_form_unsent")).toBeVisible();
 	await page.unroute("**/api/v3/day**");
 	await page.locator("#sync_retry").click();

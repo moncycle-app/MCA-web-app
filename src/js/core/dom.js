@@ -91,10 +91,10 @@ export function checked(form, name) {
 const fades = new WeakMap();
 export function say(line, kind, text, fade = false) {
 	clearTimeout(fades.get(line));
-	line.classList.remove("vert", "rouge");
+	line.classList.remove("green", "red");
 	line.replaceChildren();
 	if (kind === "busy") line.textContent = text;
-	if (kind === "ok") { line.classList.add("vert"); line.textContent = text; }
-	if (kind === "error") { line.classList.add("rouge"); line.textContent = "❌ " + text; }
+	if (kind === "ok") { line.classList.add("green"); line.textContent = text; }
+	if (kind === "error") { line.classList.add("red"); line.textContent = "❌ " + text; }
 	if (kind === "ok" && fade) fades.set(line, setTimeout(() => line.replaceChildren(), 2500));
 }

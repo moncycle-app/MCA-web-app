@@ -93,7 +93,7 @@ export function trois_jours() {
 	each(".day .s", (cell) => cell.classList.remove("j_pic"));
 	let txt_sommet = t("timeline.peak_mucus");
 	if (state.constante.nfp_method==3 || state.constante.nfp_method==4) txt_sommet = t("timeline.peak_fc");
-	state.sommets.forEach(s => {
+	state.peaks.forEach(s => {
 		const peak_day = by_id(`o-${s}`);
 		let last = 3;
 		const siblings = [...peak_day.parentElement.children];
@@ -180,9 +180,9 @@ function stats_row(list, label, main, ...aside) {
 // The kinds of day (cycle_stats.js day_kind), the class of their colour (timeline.css) and their name. The order here is only the one of
 // kinds with as many days as each other.
 const DAY_KINDS = [
-	{kind: "R", css: "stamp_rouge", key: "timeline.stats_kind_red"},
-	{kind: "G", css: "stamp_vert", key: "timeline.stats_kind_green"},
-	{kind: "Y", css: "stamp_jaune", key: "timeline.stats_kind_yellow"},
+	{kind: "R", css: "stamp_red", key: "timeline.stats_kind_red"},
+	{kind: "G", css: "stamp_green", key: "timeline.stats_kind_green"},
+	{kind: "Y", css: "stamp_yellow", key: "timeline.stats_kind_yellow"},
 	{kind: "BB", css: "stamp_baby", key: "timeline.stats_kind_baby"},
 	{kind: "none", css: "stamp_none", key: "timeline.stats_kind_none"},
 	{kind: "not_observed", css: "stamp_not_observed", key: "timeline.stats_kind_not_observed"},

@@ -22,7 +22,7 @@ test("a signed-in user leaves /auth, a signed-out one leaves /settings", async (
 test("a session that ended on the server sends back to /auth with an empty storage", async ({ page, signed_in, account }) => {
 	await open_today(signed_in);
 	await sql(account.request, "DELETE FROM auth_token WHERE no_user_account = ?", [account.user_id]);
-	await page.locator("#go_vert").check();
+	await page.locator("#go_green").check();
 	await expect(page.locator("#i_login_email")).toBeVisible();   // the address changes just before the reload: wait for the screen that follows it
 	await expect.poll(() => page.evaluate(() => localStorage.length)).toBe(0);
 });

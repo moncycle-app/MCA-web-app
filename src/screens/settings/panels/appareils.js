@@ -28,7 +28,7 @@ export function settings_token_card(token) {
 	// the first characters of the token (null for an old one that started like another): what tells two connections of one app apart
 	if (token.prefix) head.append(el("code", {class: "token_prefix", title: t("settings.tokens_prefix_title"), text: token.prefix + "…"}));
 	head.append(el("span", {class: "label_info", text: " — " + t_map("settings.tokens_scope")[token.scope]}));
-	if (token.current) head.append(el("b", {class: "vert", text: " (" + t("settings.tokens_current") + ")"}));
+	if (token.current) head.append(el("b", {class: "green", text: " (" + t("settings.tokens_current") + ")"}));
 
 	// key / value rows: the date in bold, then the address, and the device's own words under it in small
 	const facts = el("dl", {class: "kv"});
@@ -47,7 +47,7 @@ export function settings_token_card(token) {
 	// this connection is the one in use: it ends with the logout button, not here
 	if (!token.current && token.prefix) {
 		const revoke = el("form", {class: "f_token_revoke", action: moncycle_config.api_url("/token/" + encodeURIComponent(token.prefix)), method: "delete"});
-		revoke.append(el("button", {type: "submit", class: "rouge", text: "🗑️ " + t("settings.tokens_revoke")}));
+		revoke.append(el("button", {type: "submit", class: "red", text: "🗑️ " + t("settings.tokens_revoke")}));
 		card.append(revoke);
 	}
 	return card;

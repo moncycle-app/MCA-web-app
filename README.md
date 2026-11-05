@@ -1,13 +1,13 @@
 # moncycle.app web app
 
-The static web client of [moncycle.app](https://www.moncycle.app): HTML, CSS and JavaScript (jQuery, Chart.js), no build step. It talks to
+The static web client of [moncycle.app](https://www.moncycle.app): HTML, CSS and JavaScript (plain JS modules, Chart.js), no build step in development. It talks to
 the moncycle.app API, whose contract is `moncycle_app_open_api.yaml` **in the backend repository** (this repository keeps no copy). The
 text of the pages is English by default, or French (`src/i18n/`; see `src/i18n/README.md` for how the language is chosen).
 
 ## Run it
 
 ```sh
-npm ci                      # installs jQuery and Chart.js and copies their dist files to src/vendor/ (postinstall)
+npm ci                      # installs Chart.js and copies its dist file to src/vendor/ (postinstall)
 npm run serve               # http://localhost:8080, routes are in the hash: http://localhost:8080/#/auth
 node scripts/serve.mjs 8193 --api-url http://localhost:8003/api/v3   # try another API without editing config.json
 npm test                    # node --test: compat rules and API address handling

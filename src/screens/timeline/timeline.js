@@ -158,11 +158,11 @@ export function show_header() {
 
 // Draws every cycle again from the copy (the cycles changed, or the way they are laid out).
 export function rebuild() {
-	state.page_a_recharger = false;
+	state.page_needs_reload = false;
 	Object.values(state.graphs).forEach(function (graph) { graph.destroy(); });
 	state.graphs = {};
 	state.graph_data = {};
-	state.sommets = [];
+	state.peaks = [];
 	state.counter_starts = {};
 	state.day_timeline = {};
 	state.cycle_curseur = 0;
@@ -184,13 +184,13 @@ export function store_changed(change) {
 		return;
 	}
 	if (change.account || change.source == "sync") {
-		state.page_a_recharger = structure_of(moncycle_store.account) !== state.structure;
-		if (state.page_a_recharger && state.menu_opened_date === null) {
+		state.page_needs_reload = structure_of(moncycle_store.account) !== state.structure;
+		if (state.page_needs_reload && state.menu_opened_date === null) {
 			rebuild();
 			return;
 		}
 		// the cycles stay as drawn: only the header (the nickname) can have changed
-		if (!state.page_a_recharger) show_header();
+		if (!state.page_needs_reload) show_header();
 	}
 	change.days.forEach(refresh_day);
 }
@@ -351,9 +351,9 @@ export function view_day(date, cycle, pos) {
 
 // the peak days and the counters the "+1 +2 +3" marks of the other days come from
 export function track_day(date, data) {
-	const known = state.sommets.indexOf(date);
-	if (data.is_peak && known<0) state.sommets.push(date);
-	else if (!data.is_peak && known>=0) state.sommets.splice(known, 1);
+	const known = state.peaks.indexOf(date);
+	if (data.is_peak && known<0) state.peaks.push(date);
+	else if (!data.is_peak && known>=0) state.peaks.splice(known, 1);
 	if (data.counter_start) state.counter_starts[date] = data.counter_start;
 	else if (date in state.counter_starts) delete state.counter_starts[date];
 }

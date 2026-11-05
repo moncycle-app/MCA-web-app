@@ -21,7 +21,7 @@ HTML, a `data-i18n="key"` element lists its inline children with `data-slot="nam
 
 `meta.locale` (`en-GB`, `fr-FR`) is the locale of numbers (`Intl.NumberFormat`). Dates are not formatted by `Intl`: the catalog holds the weekday names, the months (long and on 3 letters) and the layouts of the long date
 (`calendar.date_long_day_first`, `calendar.date_long_month_first`), and `js/model/format.js` builds the compact date (`M 3 NOV`) and the long one
-(`Mardi 3 novembre 2026`) in the order of the account's `dateOrder`, not the language's. No numeric date is shown (the API's `dateFormat` is deprecated and unused); a date field is the browser's own `type="date"`.
+(`Mardi 3 novembre 2026`) in the order of the account's `dateOrder`, not the language's. No numeric date is shown; a date field is the browser's own `type="date"`.
 
 Not language, so not here: CSS class names, element ids, form field names, FertilityCare codes (`VL`, `10KL`, `X1`).
 

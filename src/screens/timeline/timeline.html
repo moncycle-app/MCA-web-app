@@ -5,7 +5,7 @@
 	<button data-i18n="timeline.view_mini_button" id="but_mini_maxi" class="nav_button main_button"></button>
 	<a data-i18n="timeline.settings_button" class="nav_button main_button" href="#/settings"></a>
 	<!-- Not in src/i18n/: a browser without script cannot read the catalog. -->
-	<noscript><p class="rouge">Cette application a besoin de Javascript pour fonctionner.</p></noscript>
+	<noscript><p class="red">Cette application a besoin de Javascript pour fonctionner.</p></noscript>
 </header>
 <div class="actu" id="actu">
 	<span data-i18n="timeline.news_tag" class="tag"></span>
@@ -15,8 +15,8 @@
 	<button data-i18n="timeline.news_close" type="button" id="fermer_actu"></button>
 </div>
 <div class="sync_status" id="sync_status"></div>
-<div class="contennu macro" id="recap"></div>
-<div class="contennu micro" id="timeline"></div>
+<div class="content macro" id="recap"></div>
+<div class="content micro" id="timeline"></div>
 <div id="jour_form" class="popup">
 	<div id="jour_form_header">
 		<div class="jf_bar">
@@ -40,9 +40,9 @@
 		<section class="jf_section">
 			<span data-i18n="timeline.stamps_title" class="categorie"></span>
 			<div class="jf_stamps">
-				<label data-i18n="timeline.stamp_red" for="go_rouge" class="go_color go_color_red"><input data-slot="input" type="radio" name="stamp" id="go_rouge" value="R" /></label>
-				<label data-i18n="timeline.stamp_green" for="go_vert" class="go_color go_color_green"><input data-slot="input" type="radio" name="stamp" id="go_vert" value="G" /></label>
-				<label data-i18n="timeline.stamp_yellow" for="go_jaune" class="go_color go_color_yellow"><input data-slot="input" type="radio" name="stamp" id="go_jaune" value="Y" /></label>
+				<label data-i18n="timeline.stamp_red" for="go_red" class="go_color go_color_red"><input data-slot="input" type="radio" name="stamp" id="go_red" value="R" /></label>
+				<label data-i18n="timeline.stamp_green" for="go_green" class="go_color go_color_green"><input data-slot="input" type="radio" name="stamp" id="go_green" value="G" /></label>
+				<label data-i18n="timeline.stamp_yellow" for="go_yellow" class="go_color go_color_yellow"><input data-slot="input" type="radio" name="stamp" id="go_yellow" value="Y" /></label>
 				<label for="go_vide" class="go_color go_color_empty"><input type="radio" name="stamp" id="go_vide" value="" checked /><span data-i18n="timeline.stamp_empty" id="blank_or_empty"></span></label>
 			</div>
 			<div class="jf_chips">
@@ -169,15 +169,15 @@
 		</section>
 		<div id="jour_form_suppr_holder">
 			<span id="jour_form_last_write"></span>
-			<button data-i18n="timeline.delete_day" id="jour_form_suppr" type="button" class="rouge"></button>
+			<button data-i18n="timeline.delete_day" id="jour_form_suppr" type="button" class="red"></button>
 		</div>
 		<div id="form_err" class="err"></div>
 	</form>
 	<!-- how the save of the day went: a toast at the bottom of the screen ("saved" fades by itself) -->
 	<div class="jf_status" role="status">
-		<span data-i18n="timeline.form_saving" class="popup_enregistratement_status" id="jour_form_saving"></span>
-		<span data-i18n="timeline.form_saved" class="popup_enregistratement_status vert" id="jour_form_saved"></span>
-		<span data-i18n="timeline.form_unsent" class="popup_enregistratement_status rouge" id="jour_form_unsent"></span>
+		<span data-i18n="timeline.form_saving" class="popup_save_status" id="jour_form_saving"></span>
+		<span data-i18n="timeline.form_saved" class="popup_save_status green" id="jour_form_saved"></span>
+		<span data-i18n="timeline.form_unsent" class="popup_save_status red" id="jour_form_unsent"></span>
 	</div>
 </div>
 

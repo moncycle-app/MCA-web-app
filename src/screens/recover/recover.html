@@ -3,9 +3,9 @@
 	<a data-i18n="recover.back_to_signin" class="nav_button" href="#/auth"></a>
 	<a data-i18n="auth.create_account" class="nav_button" href="#/register"></a>
 </header>
-<div class="contennu" id="recover">
+<div class="content" id="recover">
 	<h2 data-i18n="recover.title"></h2>
-	<span id="password_reseted_msg" class="vert"></span>
+	<span id="password_reseted_msg" class="green"></span>
 	<form method="post" action="api/v3/recover_password" id="reset_form"><br />
 		<span data-i18n="recover.intro"></span><br />
 		<br />
@@ -18,7 +18,7 @@
 		<input type="hidden" name="captchaToken" id="rc_captcha_token" value="" /><br />
 		<span data-i18n="recover.captcha_hint" class="label_info"></span><br />
 		<br />
-		<span class="rouge" id="reset_error_msg"></span><br />
+		<span class="red" id="reset_error_msg"></span><br />
 		<input data-i18n-attr="value:recover.but" type="submit" id="reset_but" />
 	</form>
 </div>

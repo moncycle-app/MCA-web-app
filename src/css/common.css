@@ -53,7 +53,7 @@ label {
 	display: none !important;
 }
 
-.contennu {
+.content {
 	max-width: 600px;
 	margin: 0 auto;
 	padding-bottom: 60px;
@@ -132,7 +132,7 @@ h1.logo {
 }
 
 /* --- Buttons -------------------------------------------------------------------------------------------------------------------
-** one family: a grey button with green text (the default), .primary or a submit input (the action of a form: green), .rouge (what
+** one family: a grey button with green text (the default), .primary or a submit input (the action of a form: green), .red (what
 ** deletes or leaves: red outline), .nav_button (the header's links to the other screens: green text, a pill under the pointer),
 ** .link_button (reads as a link, inside a sentence or under a control). A link that goes to another screen is an <a>, styled, never a <button> in an <a>. */
 
@@ -195,17 +195,17 @@ a.nav_button {
 	background-color: var(--green-strong);
 }
 
-:is(button, input[type=button], input[type=submit], a.button).rouge {
+:is(button, input[type=button], input[type=submit], a.button).red {
 	border-color: color-mix(in srgb, var(--red-ink) 45%, transparent);
 	background-color: transparent;
 	color: var(--red-ink);
 }
 
-:is(button, input[type=button], input[type=submit], a.button).rouge:hover {
+:is(button, input[type=button], input[type=submit], a.button).red:hover {
 	background-color: var(--red-soft);
 }
 
-:is(button, a).nav_button.rouge {
+:is(button, a).nav_button.red {
 	border-color: transparent;
 }
 
@@ -292,11 +292,11 @@ input[type=time] {
 	box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
-:is(input, select, textarea).rouge {
+:is(input, select, textarea).red {
 	color: var(--red-ink);
 }
 
-:is(input, select, textarea).rouge:focus {
+:is(input, select, textarea).red:focus {
 	border-color: var(--red);
 }
 
@@ -339,18 +339,18 @@ input[type=radio] {
 	display: none;
 }
 
-:is(.form_msg, .msg):is(.rouge, .vert):not(:empty) {
+:is(.form_msg, .msg):is(.red, .green):not(:empty) {
 	display: block;
 	padding: 9px 12px;
 	border-radius: var(--radius-s);
 	font-size: .9em;
 }
 
-:is(.form_msg, .msg).rouge:not(:empty) {
+:is(.form_msg, .msg).red:not(:empty) {
 	background-color: var(--red-soft);
 }
 
-:is(.form_msg, .msg).vert:not(:empty) {
+:is(.form_msg, .msg).green:not(:empty) {
 	background-color: var(--green-soft);
 }
 
@@ -520,11 +520,11 @@ input[type=radio] {
 
 /* --- Small things ------------------------------------------------------------------------------------------------------------- */
 
-.rouge {
+.red {
 	color: var(--red-ink);
 }
 
-.vert {
+.green {
 	color: var(--green-ink);
 }
 

@@ -5,30 +5,23 @@ Working notes for coding agents (and for people) changing the moncycle.app web a
 are built with `moncycle_config.api_url(path)` from `src/config.json`; every path must be a path of that contract. Text a user reads
 comes from the catalogs of `src/i18n/` (English, the default, and French), code and comments are English. The app is a **wellbeing** application: no "health" wording, no identity.
 
-## jQuery is deprecated
+## No jQuery
 
-jQuery (`src/vendor/jquery.min.js`) stays in the project only until the existing code is migrated; it is **deprecated**.
-
-- **Do not use jQuery in any new code**: no `$(...)`, no `$.ajax`/`$.get`, no jQuery plugin. Use plain JS: `document.querySelector`,
-  `addEventListener`, `classList`, `hidden`, `textContent`, `append()`, `fetch` (through `moncycle_config.fetch`), `Array.prototype.map`.
-- **When a change touches code that uses jQuery, migrate that code to plain JS in the same change**, within the scope of the task: the
-  function, handler or block you edit, not the whole file. Do not leave a mix of both in one function. Keep the behaviour the same
-  (the rules below still hold: user text through `textContent` or text nodes, never as HTML).
-- Do not start a repository-wide rewrite on your own, and do not add jQuery back to a page that no longer loads it. When the last
-  use is gone, the `jquery` dependency and its `<script>` tags can be removed.
+jQuery has been removed from the project (no dependency, no `<script>`, no `src/vendor/jquery.min.js`). Do not add it back. Use plain JS:
+`document.querySelector`, `addEventListener`, `classList`, `hidden`, `textContent`, `append()`, `fetch` (through `moncycle_config.fetch`),
+`Array.prototype.map`. The rules below still hold: user text goes in through `textContent` or text nodes, never as HTML.
 
 ## The web client
 
 `src/js/`. The Content-Security-Policy is `script-src 'self'`:
 
-- **No inline script and no inline handler anywhere.** Every page loads its own file with `defer` (`js/auth.js`, `js/register.js`,
-  `js/settings.js`, `js/tableau.js`, `js/swagger-init.js`).
-- **Nothing a user can store goes into the page as HTML.** Names, comments and labels go through `.text()`, `.val()` or text nodes
-  (`settings_say()` for a server message). jQuery's `append(string)` reads a `<` or an entity in a string as HTML, so a text
-  is `document.createTextNode()`. The terms of service (`TERMS_OF_SERVICE_URL`, `termsOfServiceUrl`) come from outside and are never read by
+- **No inline script and no inline handler anywhere.** The app is one module entry (`js/main.js`, `<script type="module">`) that imports each screen (`screens/*/`).
+- **Nothing a user can store goes into the page as HTML.** Names, comments and labels go through `textContent`, `.value` or text nodes
+  (`settings_say()` for a server message). `innerHTML` and `insertAdjacentHTML` read a `<` or an entity as HTML, so a text
+  is `textContent` or `document.createTextNode()`. The terms of service (`TERMS_OF_SERVICE_URL`, `termsOfServiceUrl`) come from outside and are never read by
   the page: a sandboxed iframe (`sandbox` without `allow-scripts`, `referrerpolicy="no-referrer"`), and the CSP's `frame-src` names its
   origin. The news banner is a JSON file (`NEWS_URL`, the `newsUrl` of `GET /api/v3/server_info`): `js/news.js` (`moncycle_news.load`) fetches it
-  (no cookie, no referrer), checks type, size, shape and the https link, and gives the item of the interface's language (the French one when the file has none), drawn with `.text()` only, by the
+  (no cookie, no referrer), checks type, size, shape and the https link, and gives the item of the interface's language (the French one when the file has none), drawn with `textContent` only, by the
   timeline's banner and the settings' "Tech 4 Fertility actualités" panel; on any problem there is no item and the details go to the console. "OK merci" hides the article (its link) it was clicked on.
 - **Forms carry the data, the script only submits it.** Every value sent to the remote API lives in an HTML `<form>` of the page: a
   visible field for what the user fills in, a hidden one (`<input type="hidden">`) for what the user need not know. The script catches
@@ -48,7 +41,7 @@ jQuery (`src/vendor/jquery.min.js`) stays in the project only until the existing
   - A day refused as late (409 `stale_write`) is dropped from the queue and downloaded again, like any refusal.
   - A description made in the day form is shown at once from `moncycle_store.all_descriptions()` (the server's list plus the unsent
     ones, which have no id); a chip stands for a description by its **name**, which is what a day carries it by.
-  - It holds no text and draws nothing: `tableau.js` (the timeline) listens to its events (`changed`, `status`, `sent`, `failed`).
+  - It holds no text and draws nothing: `screens/timeline/timeline.js` (the timeline) listens to its events (`changed`, `status`, `sent`, `failed`).
     `settings.js` only loads it, so that a 401 ends the session there too, and asks for a sync after a change.
   - Bump `moncycle_store.schema` when what is stored changes shape: copies of another schema are dropped. An update of the app
     (`moncycle_store.schema`, or the `appVersion` of `server_info`, changes) drops the copy and reloads the page. Neither a build nor a
@@ -58,15 +51,15 @@ jQuery (`src/vendor/jquery.min.js`) stays in the project only until the existing
   in another stylesheet, not in the script (read a variable, or set one the CSS mixes, like `--heat`). `css/common.css` holds what
   the screens share (header, buttons, fields, cards, choice cards, messages); `css/public.css` the layout of the screens of someone
   not signed in (`.public_screen`, set by the router); a screen's own CSS only what is its own. The timeline and the day form set the
-  look. Buttons: the default (grey), `.primary` or a submit input (the action of a form), `.rouge` (delete, leave), `.nav_button`
+  look. Buttons: the default (grey), `.primary` or a submit input (the action of a form), `.red` (delete, leave), `.nav_button`
   (the header), `.link_button`.
 - **The FertilityCare note is one typed text and six fields of the API** (`js/model/fc_notation.js`): `fc_score_to_codified` reads the text, `fc_score_from_api` writes it, and the
   text never reaches the API. `0` is a code: never test a field for truthiness. The notation has one B (brown): a letter only beside a discharge (`6BC`), else `codifiedBleedingBrown`. It has two L: at the start the light flow, elsewhere the lubricative letter, alone with a leading space (` L`). The boxes of the day form go through the same functions (`fc_note_from_boxes`, `fc_boxes_from_note`). A note that fails `fc_note_regex` is not sent: the form's hidden `fc_saved_note` is.
 - **What a person reads follows the account's settings.** `GET /account` gives `settings` (each `{value, isSet, default}`) and `customSettings`
   (third-party apps: never read, never sent). `moncycle_store.setting(name)` is the value; `set_setting(name, value)` changes the copy at once
   (`null`: back to the default) and `restore_setting` undoes it when the server refuses; `account_saved(data)` takes the answer of a `POST /account`.
-  `js/model/format.js` writes and reads **every date** (`format_date`, `parse_date`, `date_row`, `date_long`: the seven `dateFormat`s, the year on two
-  digits) and **every temperature** (`format_temperature`, `parse_temperature`: `temperatureUnit` C or F). Display only: the API and the copy carry ISO
+  `js/model/format.js` writes and reads **every date** (`format_date`, `parse_date`, `date_row`, `date_long`: the compact and the long date, in the account's
+  `dateOrder`) and **every temperature** (`format_temperature`, `parse_temperature`: `temperatureUnit` C or F). Display only: the API and the copy carry ISO
   dates and **Celsius** (`day_to_api` takes the unit the form was typed in and sends Celsius). `dayBackgroundColor: false` puts `no_day_color` on `<html>`.
   The optional settings of the settings screen are forms of `form.setting_form` (`panels/affichage.js`), one key each, a reset sends `null`.
 - **Public device** (`js/core/device.js`, the "This is not my device" box of the sign-in): the token is asked with `expiresInDays: 1` (the API's least), no cookie, and
@@ -78,7 +71,7 @@ jQuery (`src/vendor/jquery.min.js`) stays in the project only until the existing
 - **A request to the API carries no cache-buster** (`cache: false` adds `_=...`, an unknown query parameter, which is refused).
 
 
-- **`config.js` and `compat.js`** (added by the split): `config.js` reads `config.json` before the page's code runs (jQuery's ready is held),
+- **`config.js` and `compat.js`** (added by the split): `config.js` reads `config.json` before the page's code runs (the app starts once it is read),
   builds the API addresses, and in remote mode (the API on another origin) keeps the token (`auth_token`, outside the `data_*` copy) and
   sends it as `Authorization: Bearer`. `compat.js` compares the API's `appVersion` with the range of `version.json`; out of it, `store.js`
   sends nothing and keeps the queue and the copy.

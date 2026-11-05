@@ -111,7 +111,7 @@ export function settings_import_notes(source) {
 // An accepted file, dry run or real: the same report either way, with the verbs put in the future tense on a dry run.
 export function settings_import_report(report) {
 	const dry = !!report.dryRun;
-	const nodes = [settings_import_line(dry ? t("settings.import_head_check") : t("settings.import_head_done"), dry ? "import_head" : "import_head vert")];
+	const nodes = [settings_import_line(dry ? t("settings.import_head_check") : t("settings.import_head_done"), dry ? "import_head" : "import_head green")];
 	nodes.push(settings_import_line(settings_text.import_source(report.schemaVersion, report.sourceApp), "label_info"));
 	nodes.push(settings_import_line(settings_text.import_read(report.cyclesRead, report.daysRead), "label_info"));
 	if (report.daysToWrite == 0) nodes.push(settings_import_line(t("settings.import_nothing_to_write")));
@@ -130,14 +130,14 @@ export function settings_import_report(report) {
 export function settings_import_refusal(failure) {
 	const error = (failure.responseJSON || {}).error || {};
 	const details = error.details || {};
-	const nodes = [settings_import_line(t("settings.import_head_refused"), "import_head rouge")];
+	const nodes = [settings_import_line(t("settings.import_head_refused"), "import_head red")];
 	// the API's own wording for the refusal, shown as it comes
 	nodes.push(settings_import_line(error.message || settings_error(failure), "label_info"));
 
 	// Dates the file itself carries twice. They are among the issues below as well, but a list of its own is what makes the file fixable.
 	const duplicated = details.duplicatedDaysInFile || [];
 	if (duplicated.length > 0) {
-		nodes.push(settings_import_line(settings_text.import_duplicates(duplicated.length), "rouge"));
+		nodes.push(settings_import_line(settings_text.import_duplicates(duplicated.length), "red"));
 		nodes.push(...settings_import_list(settings_text.import_duplicates_list(duplicated.length), duplicated, 40));
 	}
 	const issues = details.issues || [];

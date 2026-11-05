@@ -249,7 +249,7 @@ export function close_menu(e) {
 	display(by_id("jour_form"), false);
 	state.menu_opened_date = null;
 	// the cycles moved while the form was open: draw them again from the copy
-	if (state.page_a_recharger) rebuild();
+	if (state.page_needs_reload) rebuild();
 }
 
 // The fields of the day form as {name, value}: what is ticked, filled or chosen, as a form sends them (a line break of a comment is CRLF)
@@ -337,13 +337,13 @@ export function fc_test_note() {
 	}
 	else if (fc_note_regex.test(note.toUpperCase())) {
 		message.textContent = t("timeline.fc_syntax_valid");
-		message.classList.add("vert");
-		message.classList.remove("rouge");
+		message.classList.add("green");
+		message.classList.remove("red");
 	}
 	else {
 		message.textContent = t("timeline.fc_syntax_invalid");
-		message.classList.add("rouge");
-		message.classList.remove("vert");
+		message.classList.add("red");
+		message.classList.remove("green");
 	}
 }
 

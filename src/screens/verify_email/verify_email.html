@@ -4,7 +4,7 @@
 </header>
 
 <!-- The link of a mail (js/verify_email.js): the purpose and the token are in the fragment of the address. The form below carries them to the API. -->
-<div class="contennu" id="et_form_box" hidden>
+<div class="content" id="et_form_box" hidden>
 	<h2 id="et_title"></h2>
 	<form action="api/v3/verify_email" method="post" id="f_verify_email"><br />
 		<input type="hidden" name="purpose" id="i_purpose" value="" />
@@ -20,11 +20,11 @@
 			<input data-i18n-attr="placeholder:verify_email.new_password_confirm_placeholder" name="new_password_conf" id="i_new_password_conf" type="password" autocomplete="new-password" /><br />
 			<br />
 		</div>
-		<span class="rouge" id="et_error_msg"></span><br />
+		<span class="red" id="et_error_msg"></span><br />
 		<input type="submit" id="but_et" value="" />
 	</form>
 </div>
-<div class="contennu vert" id="et_done" hidden>
+<div class="content green" id="et_done" hidden>
 	<center>
 		<br /><br />
 		<b id="et_done_text"></b><br />
@@ -32,8 +32,8 @@
 		<a data-i18n="verify_email.sign_in" class="nav_button primary" id="et_login_link" href="#/auth"></a>
 	</center>
 </div>
-<div class="contennu" id="et_invalid" hidden>
-	<center data-i18n="verify_email.invalid_text"><br data-slot="br" /><br data-slot="br2" /><span data-i18n="verify_email.invalid_title" data-slot="span" class="rouge"></span><br data-slot="br3" /><br data-slot="br4" /></center>
+<div class="content" id="et_invalid" hidden>
+	<center data-i18n="verify_email.invalid_text"><br data-slot="br" /><br data-slot="br2" /><span data-i18n="verify_email.invalid_title" data-slot="span" class="red"></span><br data-slot="br3" /><br data-slot="br4" /></center>
 </div>
 
 <footer class="app_footer">

@@ -2,11 +2,11 @@
 	<h1 class="logo"><img class="logo_mark" src="img/logo.svg" alt="" width="32" height="32" /><span data-i18n="settings.settings" id="name"></span></h1>
 	<div class="logo_sub" data-i18n="common.on_app"><span data-slot="app">mon<span class="logo_cycle">cycle</span>.app</span></div>
 	<a data-i18n="settings.back_to_cycles" class="nav_button" href="#/"></a>
-	<form id="f_logout" action="api/v3/token" method="delete"><button data-i18n="settings.logout" type="submit" id="but_logout" class="nav_button rouge"></button></form>
+	<form id="f_logout" action="api/v3/token" method="delete"><button data-i18n="settings.logout" type="submit" id="but_logout" class="nav_button red"></button></form>
 	<p data-i18n="settings.demo_notice" id="warning_demo" hidden><br data-slot="br" /><br data-slot="br2" /><a data-slot="a" data-i18n="settings.create_account" class="nav_button primary" href="#/register"></a></p>
 </header>
 
-<div class="contennu settings">
+<div class="content settings">
 	<p class="form_msg" id="page_msg" role="status"></p>
 
 	<!-- ===== The menu: one entry per panel below. A panel opens with the address #name (settings#securite). ===== -->
@@ -419,7 +419,7 @@
 					<ul class="totp_ways">
 						<li><b data-i18n="settings.totp_on_phone"></b> <a data-i18n="settings.totp_auto_setup" id="totp_auto_conf" class="button"></a></li>
 						<li><b data-i18n="settings.totp_on_computer"></b> <span data-i18n="settings.totp_qr_alt"></span><div id="totp_qrcode"></div></li>
-						<li data-i18n="settings.totp_step_copy"><b data-i18n="settings.totp_otherwise" data-slot="b"></b><button data-i18n="settings.totp_copy" data-slot="button" id="totp_copy_secret" type="button"></button><span data-slot="span" class="vert" id="totp_copy_secret_ok"></span></li>
+						<li data-i18n="settings.totp_step_copy"><b data-i18n="settings.totp_otherwise" data-slot="b"></b><button data-i18n="settings.totp_copy" data-slot="button" id="totp_copy_secret" type="button"></button><span data-slot="span" class="green" id="totp_copy_secret_ok"></span></li>
 					</ul>
 					<p data-i18n="settings.totp_step_confirm"><b data-slot="b">2.</b></p>
 					<div class="field">
@@ -435,7 +435,7 @@
 			</div>
 
 			<div id="totp_state" hidden>
-				<p data-i18n="settings.totp_active" class="vert"></p>
+				<p data-i18n="settings.totp_active" class="green"></p>
 				<details>
 					<summary data-i18n="settings.totp_disable_title"></summary>
 					<form id="f_totp_desac" action="api/v3/totp/disable" method="post">
@@ -443,7 +443,7 @@
 							<label data-i18n="settings.totp_disable_code_label" for="i_totp_off_code"></label>
 							<input type="number" id="i_totp_off_code" name="tmp_code" class="input_user_account_totp" inputmode="numeric" autocomplete="one-time-code" required />
 						</div>
-						<button data-i18n="settings.totp_disable" type="submit" class="rouge"></button>
+						<button data-i18n="settings.totp_disable" type="submit" class="red"></button>
 					</form>
 				</details>
 			</div>
@@ -462,7 +462,7 @@
 		<div id="tokens_container"><center data-i18n="settings.icon_loading"></center></div>
 		<p class="form_msg" id="tokens_msg" role="status"></p>
 		<form id="f_tokens_revoke_all" action="api/v3/token?others=true" method="delete">
-			<button data-i18n="settings.revoke_all_button" type="submit" class="rouge" id="but_tokens_revoke_all"></button>
+			<button data-i18n="settings.revoke_all_button" type="submit" class="red" id="but_tokens_revoke_all"></button>
 		</form>
 
 		<h3 data-i18n="settings.tokens_title"></h3>
@@ -511,12 +511,12 @@
 				<p class="form_msg" id="token_new_err" role="status"></p>
 			</form>
 			<div id="token_new_result" hidden>
-				<p data-i18n="settings.token_created_notice" class="vert"></p>
+				<p data-i18n="settings.token_created_notice" class="green"></p>
 				<div class="token_copy">
 					<input data-i18n-attr="aria-label:settings.token_label" type="text" id="i_token_new_value" readonly />
 					<button data-i18n="settings.totp_copy" type="button" id="but_token_copy"></button>
 				</div>
-				<p class="vert" id="token_copy_ok"></p>
+				<p class="green" id="token_copy_ok"></p>
 			</div>
 		</details>
 	</section>
@@ -581,18 +581,18 @@
 	<!-- ===== Supprimer mon compte ===== -->
 	<section class="panel" id="panel_suppression" hidden>
 		<a data-i18n="settings.back_to_menu" class="nav_button back" href="#/settings"></a>
-		<h2 data-i18n="settings.deletion_title" class="rouge"></h2>
-		<p data-i18n="settings.deletion_text" class="rouge"></p>
+		<h2 data-i18n="settings.deletion_title" class="red"></h2>
+		<p data-i18n="settings.deletion_text" class="red"></p>
 		<form method="post" action="api/v3/account/deletion" id="f_suppr_user_account">
 			<div class="field">
-				<label data-i18n="settings.password_to_confirm" class="rouge" for="pw_before_deletion"></label>
-				<input class="rouge" id="pw_before_deletion" name="pw_before_deletion" type="password" autocomplete="current-password" required />
+				<label data-i18n="settings.password_to_confirm" class="red" for="pw_before_deletion"></label>
+				<input class="red" id="pw_before_deletion" name="pw_before_deletion" type="password" autocomplete="current-password" required />
 			</div>
 			<div class="field" id="deletion_code_field" hidden>
-				<label data-i18n="settings.totp_code_label" class="rouge" for="i_deletion_code"></label>
-				<input class="rouge" type="number" id="i_deletion_code" name="code" inputmode="numeric" autocomplete="one-time-code" />
+				<label data-i18n="settings.totp_code_label" class="red" for="i_deletion_code"></label>
+				<input class="red" type="number" id="i_deletion_code" name="code" inputmode="numeric" autocomplete="one-time-code" />
 			</div>
-			<button data-i18n="settings.deletion_button" type="submit" class="rouge"></button>
+			<button data-i18n="settings.deletion_button" type="submit" class="red"></button>
 		</form>
 	</section>
 

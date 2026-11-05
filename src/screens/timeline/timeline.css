@@ -18,19 +18,19 @@
    mini view a cycle is one line of squares (--cycle-cols of them, js cycle_line_length), aligned by day of cycle. The colours are
    those of css/theme.css. */
 /* the colour of each stamp: --stamp fills the square, --stamp-ink is its text (day number, marks), --wash tints the row */
-:is(.stamp_rouge, .g.rouge) {
+:is(.stamp_red, .g.red) {
 	--stamp: var(--red);
 	--stamp-ink: var(--red-ink);
 	--edge: var(--red-edge);
 }
 
-:is(.stamp_vert, .g.vert) {
+:is(.stamp_green, .g.green) {
 	--stamp: var(--green);
 	--stamp-ink: var(--green-ink);
 	--edge: var(--green-edge);
 }
 
-:is(.stamp_jaune, .g.jaune) {
+:is(.stamp_yellow, .g.yellow) {
 	--stamp: var(--yellow);
 	--stamp-ink: var(--yellow-ink);
 	--edge: var(--yellow-edge);
@@ -619,11 +619,11 @@
 }
 
 /* the FertilityCare bleeding (H, M, L) on a coloured square */
-.cycle_recap .obs span.g:is(.rouge, .vert) {
+.cycle_recap .obs span.g:is(.red, .green) {
 	color: var(--on-color);
 }
 
-.cycle_recap .obs span.g.jaune {
+.cycle_recap .obs span.g.yellow {
 	color: var(--on-yellow);
 }
 
@@ -697,7 +697,7 @@
 
 @media (prefers-color-scheme: dark) {
 
-	:is(.stamp_jaune, .g.jaune) {
+	:is(.stamp_yellow, .g.yellow) {
 		--tint-boost: -4%;
 	}
 
@@ -812,7 +812,7 @@
 }
 
 /* no display here: the script shows and hides them (see the end of this file); each showing plays the animation again */
-.jf_status .popup_enregistratement_status {
+.jf_status .popup_save_status {
 	padding: 6px 14px;
 	border: 1px solid var(--line);
 	border-radius: 999px;
@@ -971,19 +971,19 @@
 	--jf-ink: var(--ink);
 }
 
-#jour_form:has(#go_rouge:checked) {
+#jour_form:has(#go_red:checked) {
 	--jf-accent: var(--red);
 	--jf-accent-fg: var(--on-color);
 	--jf-ink: var(--red-ink);
 }
 
-#jour_form:has(#go_vert:checked) {
+#jour_form:has(#go_green:checked) {
 	--jf-accent: var(--green);
 	--jf-accent-fg: var(--on-color);
 	--jf-ink: var(--green-ink);
 }
 
-#jour_form:has(#go_jaune:checked) {
+#jour_form:has(#go_yellow:checked) {
 	--jf-accent: var(--yellow);
 	--jf-accent-fg: var(--on-yellow);
 	--jf-ink: var(--yellow-ink);
@@ -1270,7 +1270,7 @@
 	flex: none;
 }
 
-/* a .rouge button of common.css, in red whatever the stamp */
+/* a .red button of common.css, in red whatever the stamp */
 #jour_form #jour_form_suppr {
 	flex: none;
 	color: var(--red-ink);

@@ -2,11 +2,11 @@
 	<h1 class="logo"><img class="logo_mark" src="img/logo.svg" alt="" width="32" height="32" /><span>mon<span class="logo_cycle">cycle</span>.app</span></h1>
 	<a data-i18n="register.sign_in" class="nav_button" href="#/auth"></a>
 	<a data-i18n="register.discover_app" class="nav_button" href="https://www.moncycle.app" target="_blank" rel="noopener noreferrer"></a>
-	<span class="vert"></span>
-	<span class="rouge"></span>
+	<span class="green"></span>
+	<span class="red"></span>
 </header>
 
-<div class="contennu welcome" id="register_ok" hidden>
+<div class="content welcome" id="register_ok" hidden>
 	<div class="welcome_icon" aria-hidden="true">💌</div>
 	<h2 data-i18n="register.almost_done"></h2>
 	<p data-i18n="register.sent_intro" class="welcome_lead"></p>
@@ -18,7 +18,7 @@
 	</ol>
 	<p data-i18n="register.no_message_hint" class="label_info welcome_hint"></p>
 </div>
-<div class="contennu" id="register_form">
+<div class="content" id="register_form">
 	<h2 data-i18n="register.form_title"></h2>
 	<form action="api/v3/register" method="post" id="f_registration"><br />
 	<label data-i18n="register.language_label" for="i_language"></label><br />
@@ -92,12 +92,12 @@
 	<span data-i18n="register.terms_label" class="terms_title"></span><br />
 	<iframe data-i18n-attr="title:register.terms_frame_title" id="f_terms" class="terms_frame" sandbox="allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer" loading="lazy" hidden></iframe>
 	<a data-i18n="register.terms_open_link" id="a_terms" target="_blank" rel="noopener noreferrer" hidden></a>
-	<span class="rouge" id="terms_error_msg"></span>
+	<span class="red" id="terms_error_msg"></span>
 	<p><input type="checkbox" required id="i_terms" name="terms_accepted" value="1" /> <label data-i18n="register.terms_accept" for="i_terms"></label></p>
 	<br />
 	<input data-i18n-attr="value:register.but_submit" type="submit" id="but_register" /></form>
 	<br /><br />
-	<span class="rouge" id="register_error_msg" ></span>
+	<span class="red" id="register_error_msg" ></span>
 	<br /><br /><br /><br />
 </div>
 

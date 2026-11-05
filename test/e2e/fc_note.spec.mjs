@@ -44,7 +44,7 @@ test("a note typed in the form is saved, ticks its boxes, and another change of 
 
 	await note.fill("6BC X1");
 	await note.blur();
-	await expect(page.locator("#fc_msg")).toHaveClass(/vert/);
+	await expect(page.locator("#fc_msg")).toHaveClass(/green/);
 	await expect(page.locator("#jour_form_saved")).toBeVisible();
 	await expect(page.locator("#fc_6")).toBeChecked();
 	await expect(page.locator("#fc_c")).toBeChecked();
@@ -129,7 +129,7 @@ test("a note that is not valid is not saved, and the rest of the form is", async
 	await expect.poll(async () => (await stored()).codifiedBleedingObservation).toBe("H");
 	await note.fill("HM 6C");
 	await note.blur();
-	await expect(page.locator("#fc_msg")).toHaveClass(/rouge/);
+	await expect(page.locator("#fc_msg")).toHaveClass(/red/);
 	await page.locator("#from_com").fill("kept");
 	await page.locator("#from_com").blur();
 	await expect.poll(async () => (await stored()).comment).toBe("kept");
@@ -155,7 +155,7 @@ test("in the boxes a part holds one code, brown and the letters several", async 
 	await page.locator("label[for=fc_c]").click();
 	await page.locator("label[for=fc_k]").click();
 	await expect(page.locator("#form_fc")).toHaveValue("MB 10DLCK AD LAP");
-	await expect(page.locator("#fc_msg")).toHaveClass(/vert/);
+	await expect(page.locator("#fc_msg")).toHaveClass(/green/);
 	const day = async () => (await (await account.request.get(`${API}/api/v3/day/${today()}`, { headers: account.auth })).json()).data;
 	await expect.poll(async () => (await day()).codifiedPainObservations).toBe("LAP");
 	expect((await day()).codifiedMucusObservation).toEqual(["C", "K"]);
@@ -184,7 +184,7 @@ test("every box, ticked then unticked by a click, reaches the server and goes aw
 	for (const [box, shown] of Object.entries(EVERY_BOX)) {
 		await page.locator(`label[for=${box}]`).click();
 		await expect(page.locator("#form_fc"), box).toHaveValue(shown);
-		await expect(page.locator("#fc_msg"), box).toHaveClass(/vert/);
+		await expect(page.locator("#fc_msg"), box).toHaveClass(/green/);
 		await expect.poll(note_of, { message: box }).toBe(shown);
 		await page.locator(`label[for=${box}]`).click();
 		await expect(page.locator("#form_fc"), box).toHaveValue("");
@@ -247,10 +247,10 @@ for (const width of [375, 320]) {
 				// the whole message is readable: nothing is cut off
 				expect(await message.evaluate((box) => box.scrollWidth <= box.clientWidth)).toBe(true);
 			};
-			await check_state("B 2", /vert/, "syntaxe valide");
-			await check_state("B 2XXXX", /rouge/, "note non enregistrée");
+			await check_state("B 2", /green/, "syntaxe valide");
+			await check_state("B 2XXXX", /red/, "note non enregistrée");
 			await page.screenshot({ path: `test-results/fc_msg_${width}.png` });
-			await check_state("6C", /vert/, "syntaxe valide");
+			await check_state("6C", /green/, "syntaxe valide");
 		});
 	});
 }

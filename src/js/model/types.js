@@ -46,7 +46,6 @@
  * @property {Setting} timelineAscending
  * @property {Setting} autoMailExport
  * @property {Setting} dayBackgroundColor
- * @property {Setting} [dateFormat]  deprecated by the API, no effect, not used here
  * @property {Setting} dateOrder  DAY_FIRST or MONTH_FIRST (the compact and the long date)
  * @property {Setting} temperatureUnit  "C" or "F" (the API always carries Celsius)
  * @property {Setting} notificationEmails

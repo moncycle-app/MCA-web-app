@@ -3,9 +3,9 @@
 	<a data-i18n="auth.create_account" class="nav_button" href="#/register"></a>
 	<a data-i18n="auth.discover_app" class="nav_button" href="https://www.moncycle.app" target="_blank" rel="noopener noreferrer"><b data-slot="b">CYCLE</b></a>
 </header>
-<div class="contennu" id="timeline">
+<div class="content" id="timeline">
 	<h2 data-i18n="auth.signin_title"></h2>
-	<span class="rouge" id="message_err"></span>
+	<span class="red" id="message_err"></span>
 	<form method="post" action="api/v3/token" id="connexion_form"><br />
 		<!-- what the server is told about this sign-in: the name of the session (js/auth.js writes the domain in it) and that the browser keeps it in a cookie -->
 		<input type="hidden" name="name" id="i_token_name" value="WEB-APP" />

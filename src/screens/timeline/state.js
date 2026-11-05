@@ -20,9 +20,9 @@ export function reset_state() {
 	for (const key of Object.keys(state)) delete state[key];
 	Object.assign(state, {
 	stamp_class : {
-		"R"  : "rouge",
-		"G"  : "vert",
-		"Y"  : "jaune",
+		"R"  : "red",
+		"G"  : "green",
+		"Y"  : "yellow",
 		"BB" : "baby",
 	},
 	arrow_id : {
@@ -33,9 +33,9 @@ export function reset_state() {
 		""  : ""
 	},
 
-	sommets : [],
+	peaks : [],
 	counter_starts : {},
-	page_a_recharger: false,
+	page_needs_reload: false,
 	graph_data : {},
 	graphs : {},
 	cycle_curseur : 0,
