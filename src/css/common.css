@@ -555,3 +555,34 @@ input[type=radio] {
 	color: var(--ink);
 	font-weight: bold;
 }
+
+/* the "Important information" box: the server's own message (maintenance, update, incident), plain text; colour --notice of theme.css */
+.important_info {
+	box-sizing: border-box;
+	width: calc(100% - 16px);
+	max-width: 584px;
+	margin: 10px auto 0;
+	padding: 10px 12px;
+	border: 1px solid var(--notice);
+	border-left-width: 6px;
+	border-radius: var(--radius);
+	background-color: var(--notice-bg);
+	color: var(--ink);
+	font-size: 14px;
+	line-height: 1.4;
+}
+
+.important_info .important_info_title {
+	display: block;
+	margin-bottom: 2px;
+}
+
+.important_info .important_info_text {
+	margin: 0;
+	white-space: pre-line;
+	overflow-wrap: anywhere;
+}
+
+.important_info .important_info_close {
+	margin: 8px 0 0;
+}

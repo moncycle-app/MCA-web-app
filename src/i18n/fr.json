@@ -16,6 +16,8 @@
 	"calendar.date_long_month_first": "{weekday} {month} {day}, {year}",
 	"calendar.clock": "{hh}:{mm}",
 	"common.error_unknown": "erreur inconnue",
+	"common.important_info_title": "Informations importantes",
+	"common.important_info_close": "OK merci 👍",
 	"common.on_app": "{app}",
 	"common.language_label": "Langue:",
 	"common.footer_by": "Un projet de {a}",

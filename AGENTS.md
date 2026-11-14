@@ -68,6 +68,9 @@ jQuery has been removed from the project (no dependency, no `<script>`, no `src/
 - **Dev serves `src/`, production `dist/`** (`npm run build`, `scripts/build.mjs`: bundled, minified, hashed names). A new module needs no
   registration as long as it is imported (a static or a dynamic `import`); a file the app fetches by its name at run time (markup, JSON, image)
   must be copied by `build.mjs`, whose checks fail on a missing one only when a page names it.
+- **The "Important information" box** (`js/core/important_info.js`): the operator's message (maintenance, update, incident; not the Tech 4 Fertility news) is `importantMessages` of `GET /api/v3/server_info`,
+  a text per language, the language of the interface, else English, else no box. The router adds it to every screen, drawn with `textContent`. Only the timeline lets it be dismissed: the hash of the text goes in `device.keep`
+  (`important_info_dismissed`, which `device.clear` keeps across a sign-out), so a changed text shows again. Its colour is `--notice` of `css/theme.css`.
 - **A request to the API carries no cache-buster** (`cache: false` adds `_=...`, an unknown query parameter, which is refused).
 
 

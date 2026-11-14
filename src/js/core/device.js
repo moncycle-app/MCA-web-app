@@ -21,6 +21,7 @@
 **  - the session lasts `limit_ms` (the API cannot make a token shorter than a day, see `expiresInDays`): `watch()` ends it at the deadline.
 */
 const FLAG = "public_device_until";
+const DISMISSED_KEY = "important_info_dismissed";   // same as important_info.js (which imports this file)
 
 // Storage in memory, with the part of the Storage interface the app uses
 class MemoryStorage {
@@ -59,7 +60,11 @@ export const device = {
 	},
 	// every trace of the session, wherever it is kept
 	clear : function () {
+		// the dismissed server message (important_info.js) is no account data: it stays, or it would be shown again at every sign-in
+		let dismissed = null;
+		try { dismissed = localStorage.getItem(DISMISSED_KEY); } catch (e) { }
 		try { localStorage.clear(); } catch (e) { }
+		try { if (dismissed !== null) localStorage.setItem(DISMISSED_KEY, dismissed); } catch (e) { }
 		try { sessionStorage.clear(); } catch (e) { }
 		memory.clear();
 	},

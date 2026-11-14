@@ -46,6 +46,8 @@
 	--green-ink: #1e824c;
 	--green-edge: #0f4a2a;
 	--green-strong: #166339;   /* a green button under the pointer */
+	--notice: #efc21a;   /* the "Important information" box (server message) */
+	--notice-bg: color-mix(in srgb, var(--notice) 26%, var(--bg));
 	--yellow: #fbca0b;
 	--yellow-ink: #8f7000;
 	--yellow-edge: #a67c00;
@@ -91,6 +93,7 @@
 		--hairline: rgba(255, 255, 255, .08);
 		--shadow: rgba(255, 255, 255, .18);
 
+		--notice-bg: color-mix(in srgb, var(--notice) 16%, var(--bg));
 		--red: #c7303f;
 		--red-ink: #f0707c;
 		--red-edge: #ff8a98;

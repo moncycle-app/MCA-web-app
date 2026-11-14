@@ -25,6 +25,7 @@
 import { moncycle_config } from "./config.js";
 import { device } from "./device.js";
 import { apply } from "./i18n.js";
+import { attach_important_info } from "./important_info.js";
 
 const routes = {
 	"/": () => import("../../screens/timeline/timeline.js"),
@@ -110,6 +111,7 @@ async function show() {
 	document.title = screen.title ? screen.title() : document.title;
 	const controller = new AbortController();
 	current = {screen, controller, path: route.path};
+	attach_important_info(root, controller.signal, {dismissible: route.path === "/"});   // the server's important information: on every screen, dismissible on the timeline only
 	await screen.mount(root, {signal: controller.signal, sub: route.sub, query: route.query, navigate: go});
 	window.scrollTo(0, 0);
 }
