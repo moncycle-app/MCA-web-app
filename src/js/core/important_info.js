@@ -16,6 +16,21 @@ import { device } from "./device.js";
 import { el } from "./dom.js";
 import { requested_language, t } from "./i18n.js";
 
+const SVG = "http://www.w3.org/2000/svg";
+// A round badge with an exclamation mark, made node by node (no markup string, no inline style).
+function icon() {
+	const svg = document.createElementNS(SVG, "svg");
+	svg.setAttribute("viewBox", "0 0 24 24");
+	svg.setAttribute("class", "important_info_icon");
+	svg.setAttribute("aria-hidden", "true");
+	const bar = document.createElementNS(SVG, "path");
+	bar.setAttribute("d", "M12 6.5v7");
+	const dot = document.createElementNS(SVG, "path");
+	dot.setAttribute("d", "M12 17.4v.1");
+	svg.append(bar, dot);
+	return svg;
+}
+
 export const DISMISSED_KEY = "important_info_dismissed";
 const MAX_CHARS = 500;   // the server's limit (SERVER_MESSAGE_MAX_CHARS): a longer text is cut
 
@@ -63,15 +78,17 @@ export function attach_important_info(root, signal, {dismissible = false} = {}) 
 		const text = important_text(info);
 		if (!text || (dismissible && is_dismissed(text))) return;
 		const box = el("section", {class: "important_info", role: "note", "aria-label": t("common.important_info_title")},
-			el("strong", {class: "important_info_title"}, t("common.important_info_title")),
-			el("p", {class: "important_info_text"}, text));
+			el("span", {class: "important_info_badge"}, icon()),
+			el("div", {class: "important_info_body"},
+				el("strong", {class: "important_info_title"}, t("common.important_info_title")),
+				el("p", {class: "important_info_text"}, text)));
 		if (dismissible) {
 			const close = el("button", {type: "button", class: "important_info_close"}, t("common.important_info_close"));
 			close.addEventListener("click", () => {
 				try { device.keep.setItem(DISMISSED_KEY, text_hash(text)); } catch (e) { }
 				box.remove();
 			});
-			box.append(close);
+			box.querySelector(".important_info_body").append(close);
 		}
 		const header = root.querySelector(":scope > .app_header");
 		if (header) header.after(box); else root.prepend(box);

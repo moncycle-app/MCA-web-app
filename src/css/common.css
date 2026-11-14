@@ -556,25 +556,58 @@ input[type=radio] {
 	font-weight: bold;
 }
 
-/* the "Important information" box: the server's own message (maintenance, update, incident), plain text; colour --notice of theme.css */
+/* the "Important information" box: the server's own message (maintenance, update, incident), plain text; colour --notice of theme.css.
+** A soft tinted panel with a round badge, as wide as the card of the screen it is on. */
 .important_info {
 	box-sizing: border-box;
-	width: calc(100% - 16px);
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+	width: calc(100% - 24px);
 	max-width: 584px;
-	margin: 10px auto 0;
-	padding: 10px 12px;
-	border: 1px solid var(--notice);
-	border-left-width: 6px;
+	margin: 12px auto 0;
+	padding: 14px 16px;
+	border: 1px solid color-mix(in srgb, var(--notice) 55%, transparent);
 	border-radius: var(--radius);
 	background-color: var(--notice-bg);
+	box-shadow: 0 1px 2px var(--hairline);
 	color: var(--ink);
 	font-size: 14px;
-	line-height: 1.4;
+	line-height: 1.45;
+}
+
+.important_info .important_info_badge {
+	flex: none;
+	display: grid;
+	place-items: center;
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	background-color: var(--notice);
+	color: var(--on-yellow);
+}
+
+.important_info .important_info_icon {
+	width: 18px;
+	height: 18px;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 2.6;
+	stroke-linecap: round;
+}
+
+.important_info .important_info_body {
+	flex: 1;
+	min-width: 0;
 }
 
 .important_info .important_info_title {
 	display: block;
-	margin-bottom: 2px;
+	margin: 3px 0 4px;
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: .06em;
+	text-transform: uppercase;
 }
 
 .important_info .important_info_text {
@@ -584,5 +617,12 @@ input[type=radio] {
 }
 
 .important_info .important_info_close {
-	margin: 8px 0 0;
+	margin: 10px 0 0;
+	padding: 5px 12px;
+	font-size: 13px;
+}
+
+/* on the screens of someone not signed in, the box has the width of the form card under it */
+.public_screen .important_info {
+	max-width: 440px;
 }
