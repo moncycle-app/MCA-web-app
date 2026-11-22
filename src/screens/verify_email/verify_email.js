@@ -92,7 +92,7 @@ export const screen = {
 				by_id(root, "et_form_box").hidden = true;
 				by_id(root, "et_done_text").textContent = text_of(purpose, "done");
 				// the address to sign in with, as the server knows it now
-				by_id(root, "et_login_link").setAttribute("href", "/auth?login_email=" + encodeURIComponent(ret.data.loginEmail));
+				by_id(root, "et_login_link").setAttribute("href", "#/auth?login_email=" + encodeURIComponent(ret.data.loginEmail));
 				by_id(root, "et_done").hidden = false;
 			}
 			catch (failure) {

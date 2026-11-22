@@ -14,7 +14,7 @@
 
 /* A few small helpers for the screens. Nothing a person reads is made here, and nothing is ever parsed as HTML: text goes in with textContent. */
 
-// el("a", {href: "/auth", class: "button", text: "..."}, child, "text"): an element. `text` is its text; the other attributes are set as they are.
+// el("a", {href: "#/auth", class: "button", text: "..."}, child, "text"): an element. `text` is its text; the other attributes are set as they are.
 export function el(tag, attrs = {}, ...children) {
 	const element = document.createElement(tag);
 	for (const [name, value] of Object.entries(attrs)) {

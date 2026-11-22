@@ -123,7 +123,7 @@ export function settings_import_report(report) {
 	if (report.descriptionsCreated > 0) nodes.push(settings_import_line(settings_text.import_descriptions(report.descriptionsCreated, dry), "label_info"));
 
 	nodes.push(...settings_import_notes(report));
-	if (!dry && report.daysWritten > 0) nodes.push(el("p", {class: "import_line"}, el("a", {href: "/", text: t("settings.import_back_to_timeline")})));
+	if (!dry && report.daysWritten > 0) nodes.push(el("p", {class: "import_line"}, el("a", {href: "#/", text: t("settings.import_back_to_timeline")})));
 	return nodes;
 }
 
