@@ -1,6 +1,5 @@
 {
   "name": "moncycle-webapp",
-  "version": "1.0.0-dev",
   "description": "The moncycle.app web client: static HTML, CSS and JS that talk to the moncycle.app API",
   "private": true,
   "license": "CC-BY-NC-SA-4.0",

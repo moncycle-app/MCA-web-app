@@ -131,7 +131,7 @@ test("the body of a day read keeps the note's boolean and list", () => {
 });
 
 test("a copy of schema 8 is dropped, its queue kept with the note of the API", () => {
-	localStorage.setItem("data_version", "8/16dev/1.0.0");
+	localStorage.setItem("data_version", "8/16dev/test-webapp");
 	localStorage.setItem("data_account", JSON.stringify(ACCOUNT));
 	localStorage.setItem("data_last_sync", JSON.stringify("2026-03-10T00:00:00Z"));
 	localStorage.setItem("data_day_" + DAY, JSON.stringify({ date: DAY, codifiedBleedingObservation: "VLB", codifiedMucusObservation: "KL" }));
@@ -151,7 +151,7 @@ test("a copy of schema 8 is dropped, its queue kept with the note of the API", (
 });
 
 test("a copy of another schema is dropped, with its queue", () => {
-	localStorage.setItem("data_version", "7/16dev/1.0.0");
+	localStorage.setItem("data_version", "7/16dev/test-webapp");
 	localStorage.setItem("data_account", JSON.stringify(ACCOUNT));
 	localStorage.setItem("data_last_sync", JSON.stringify("2026-03-10T00:00:00Z"));
 	localStorage.setItem("data_day_" + DAY, JSON.stringify({ date: DAY, comment: "old" }));
@@ -166,7 +166,7 @@ test("a copy of another schema is dropped, with its queue", () => {
 });
 
 test("a copy of the same schema is read back, queue included", () => {
-	localStorage.setItem("data_version", `${store.schema}/16dev/1.0.0`);
+	localStorage.setItem("data_version", `${store.schema}/16dev/test-webapp`);
 	localStorage.setItem("data_account", JSON.stringify({ ...ACCOUNT, allCyclesFirstDay: [DAY], allObservationPausedDates: [] }));
 	localStorage.setItem("data_last_sync", JSON.stringify("2026-03-10T00:00:00Z"));
 	localStorage.setItem("data_day_" + DAY, JSON.stringify({ date: DAY, comment: "kept" }));
@@ -178,8 +178,8 @@ test("a copy of the same schema is read back, queue included", () => {
 
 test("an update of the API drops the copy, keeps the queue and reloads the page", async () => {
 	store.checked_version = false;
-	store.webapp_version = { version: "1.0.0" };
-	localStorage.setItem("data_version", `${store.schema}/15/1.0.0`);
+	store.webapp_version = { version: "test-webapp" };
+	localStorage.setItem("data_version", `${store.schema}/15/test-webapp`);
 	localStorage.setItem("data_day_" + DAY, JSON.stringify({ date: DAY, comment: "old" }));
 	server.handler = (request) => (request.method === "POST" ? { status: 0 } : answer_for(request));   // the write waits in the queue
 	store.queue_day(body());
@@ -189,7 +189,7 @@ test("an update of the API drops the copy, keeps the queue and reloads the page"
 	await new Promise((resolve) => setTimeout(resolve, 20));
 	assert.deepEqual(location_calls, ["reload"]);
 	assert.equal(store.pending_count(), 1);
-	assert.equal(localStorage.getItem("data_version"), `${store.schema}/16dev/1.0.0`);
+	assert.equal(localStorage.getItem("data_version"), `${store.schema}/16dev/test-webapp`);
 });
 
 test("a description made offline shows at once, is sent, then lives in the server's list", async () => {

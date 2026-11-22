@@ -52,7 +52,7 @@ The Content-Security-Policy of the image is a good start; for a remote API it ne
 
 ## Versions
 
-`src/version.json` holds the web app's version (SemVer, `1.0.0dev`) and `api: {min, max}`, the range of API generations it was tested
+`src/version.json` holds the web app's version (kept equal to the API's `appVersion`; the one place the number is written) and `api: {min, max}`, the range of API generations it was tested
 with. The API tells its generation as `appVersion` in `GET /server_info` (`16`, `16dev`, `v16`; anything else, like a git describe form,
 is "unknown" and never blocks).
 

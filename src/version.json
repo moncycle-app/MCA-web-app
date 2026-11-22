@@ -1,6 +1,6 @@
 {
 	"app": "moncycle.app webapp",
-	"version": "1.0.0dev",
+	"version": "16dev",
 	"build": "dev",
 	"commit": "dev",
 	"api": {"min": 16, "max": 16}
