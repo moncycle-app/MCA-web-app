@@ -579,7 +579,7 @@
 	"settings.menu_icon_deletion": "🗑️",
 	"settings.menu_deletion": "Delete my account",
 	"settings.menu_deletion_hint": "Permanently erase all your data",
-	"settings.back_to_menu": "‹ Settings",
+	"settings.back_to_menu": "👈 Back to settings",
 	"settings.follow_title": "🌿 My charting",
 	"settings.autosave_hint": "Every change is saved as soon as you make it.",
 	"settings.nickname_label": "Nickname",

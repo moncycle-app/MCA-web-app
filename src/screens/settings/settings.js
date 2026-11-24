@@ -89,6 +89,12 @@ export function settings_show_panel() {
 		by_id("panel_" + name).hidden = false;
 		if (settings_on_open[name] && settings_state.account.userId !== undefined) settings_on_open[name]();
 	}
+	// the header's back button leads one level up: to the menu from a panel, to the cycles from the menu
+	const back = by_id("nav_back");
+	const back_key = name !== "" ? "settings.back_to_menu" : "settings.back_to_cycles";
+	back.href = name !== "" ? "#/settings" : "#/";
+	back.dataset.i18n = back_key;
+	back.textContent = t(back_key);
 	window.scrollTo(0, 0);
 }
 

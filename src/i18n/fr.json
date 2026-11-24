@@ -579,7 +579,7 @@
 	"settings.menu_icon_deletion": "🗑️",
 	"settings.menu_deletion": "Supprimer mon compte",
 	"settings.menu_deletion_hint": "Effacer définitivement toutes vos données",
-	"settings.back_to_menu": "‹ Réglages",
+	"settings.back_to_menu": "👈 Revenir aux réglages",
 	"settings.follow_title": "🌿 Mon suivi",
 	"settings.autosave_hint": "Chaque changement est enregistré dès que vous le faites.",
 	"settings.nickname_label": "Pseudo",
